@@ -2,23 +2,26 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main" ] # Löse den Build bei Push auf main aus
-  workflow_dispatch: # Erlaube manuelles Auslösen
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
+
     - name: Build with Gradle
-      run: ./gradlew assembleDebug # Kompiliere das Debug-Paket
+      run: ./gradlew assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
