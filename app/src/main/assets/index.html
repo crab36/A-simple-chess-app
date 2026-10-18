@@ -1,1676 +1,2972 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chess - Play vs AI or Human</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header */
-        .header {
-            text-align: center;
-            padding: 20px;
-            background: rgba(15, 23, 42, 0.8);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 8px;
-        }
-
-        .header p {
-            color: #94a3b8;
-            font-size: 0.95rem;
-        }
-
-        .mode-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 12px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .mode-indicator.pvp {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-
-        .mode-indicator.pve {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-        }
-
-        .elo-badge {
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.2);
-        }
-
-        /* Main Container */
-        .main-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            gap: 20px;
-        }
-
-        /* Game Layout */
-        .game-layout {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            justify-content: center;
-            width: 100%;
-            max-width: 900px;
-        }
-
-        /* Captured Pieces */
-        .captured-section {
-            background: rgba(30, 41, 59, 0.8);
-            border-radius: 16px;
-            padding: 16px;
-            min-width: 180px;
-            border: 1px solid rgba(148, 163, 184, 0.15);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .captured-title {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .captured-title .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        .captured-title.white .dot {
-            background: #f1f5f9;
-            border: 1px solid #64748b;
-        }
-
-        .captured-title.black .dot {
-            background: #1e293b;
-            border: 1px solid #64748b;
-        }
-
-        .captured-pieces {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            min-height: 36px;
-        }
-
-        .captured-piece {
-            font-size: 24px;
-            opacity: 0.9;
-        }
-
-        .captured-value {
-            margin-top: 8px;
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-
-        .captured-value .advantage {
-            color: #10b981;
-            font-weight: 600;
-        }
-
-        .captured-value .disadvantage {
-            color: #ef4444;
-            font-weight: 600;
-        }
-
-        /* Board Container */
-        .board-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .board-container {
-            display: flex;
-            align-items: center;
-            background: rgba(30, 41, 59, 0.6);
-            padding: 12px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(148, 163, 184, 0.15);
-        }
-
-        .ranks {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 400px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #64748b;
-            user-select: none;
-            width: 24px;
-        }
-
-        .ranks div {
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .ranks-left {
-            margin-right: 8px;
-        }
-
-        .ranks-right {
-            margin-left: 8px;
-        }
-
-        .chessboard {
-            display: grid;
-            grid-template-columns: repeat(8, 50px);
-            grid-template-rows: repeat(8, 50px);
-            border: 3px solid #475569;
-            border-radius: 4px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .files {
-            display: flex;
-            justify-content: space-between;
-            width: 400px;
-            margin-top: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #64748b;
-            user-select: none;
-            padding: 0 12px;
-        }
-
-        .files div {
-            width: 50px;
-            text-align: center;
-        }
-
-        .square {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.15s ease;
-            position: relative;
-        }
-
-        .square.white-square {
-            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-        }
-
-        .square.black-square {
-            background: linear-gradient(135deg, #b45309, #92400e);
-        }
-
-        .square.selected {
-            background: rgba(59, 130, 246, 0.5) !important;
-            box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.6);
-            transform: scale(0.97);
-        }
-
-        .square.highlight {
-            background: rgba(250, 204, 21, 0.4) !important;
-            box-shadow: inset 0 0 10px rgba(250, 204, 21, 0.5);
-        }
-
-        .square.hint-from {
-            background: rgba(16, 185, 129, 0.4) !important;
-            box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.6);
-        }
-
-        .square.hint-to {
-            background: rgba(16, 185, 129, 0.5) !important;
-            box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.7);
-        }
-
-        .square.check {
-            background: rgba(239, 68, 68, 0.5) !important;
-            animation: check-pulse 1s ease-in-out infinite;
-        }
-
-        @keyframes check-pulse {
-            0%, 100% { box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.4); }
-            50% { box-shadow: inset 0 0 25px rgba(239, 68, 68, 0.8); }
-        }
-
-        .square.last-move {
-            background: rgba(251, 191, 36, 0.25) !important;
-        }
-
-        .piece-white {
-            color: #1e293b;
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
-            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
-        }
-
-        .piece-black {
-            color: #f8fafc;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
-        }
-
-        /* Status Bar */
-        .status-bar {
-            background: rgba(30, 41, 59, 0.9);
-            padding: 12px 20px;
-            border-radius: 12px;
-            text-align: center;
-            min-width: 300px;
-            border: 1px solid rgba(148, 163, 184, 0.15);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .status-text {
-            font-size: 1.1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .status-text.thinking {
-            color: #fbbf24;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        .status-text.check {
-            color: #ef4444;
-        }
-
-        .status-text.checkmate {
-            color: #10b981;
-            font-size: 1.3rem;
-        }
-
-        .status-text.stalemate {
-            color: #f59e0b;
-            font-size: 1.3rem;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #60a5fa, #3b82f6);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: linear-gradient(135deg, #34d399, #10b981);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #f87171, #ef4444);
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-        }
-
-        /* Modals */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(8px);
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            max-width: 90%;
-            animation: modal-in 0.3s ease;
-        }
-
-        @keyframes modal-in {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        .modal h2 {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .modal p {
-            color: #94a3b8;
-            margin-bottom: 24px;
-        }
-
-        /* Mode Selection */
-        .mode-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .mode-btn {
-            padding: 16px 24px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .mode-btn.pvp {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-
-        .mode-btn.pvp:hover {
-            border-color: #34d399;
-            transform: translateY(-2px);
-        }
-
-        .mode-btn.pve {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-        }
-
-        .mode-btn.pve:hover {
-            border-color: #a78bfa;
-            transform: translateY(-2px);
-        }
-
-        .mode-btn .subtitle {
-            font-size: 0.8rem;
-            opacity: 0.8;
-            font-weight: normal;
-        }
-
-        /* Difficulty Buttons */
-        .difficulty-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .difficulty-btn {
-            padding: 14px 20px;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .difficulty-btn:hover {
-            transform: translateX(5px);
-        }
-
-        .difficulty-btn.elo-600 {
-            background: linear-gradient(135deg, #fef2f2, #fee2e2);
-            color: #991b1b;
-            border-color: #fca5a5;
-        }
-
-        .difficulty-btn.elo-1200 {
-            background: linear-gradient(135deg, #fffbeb, #fef3c7);
-            color: #92400e;
-            border-color: #fcd34d;
-        }
-
-        .difficulty-btn.elo-1800 {
-            background: linear-gradient(135deg, #eff6ff, #dbeafe);
-            color: #1e40af;
-            border-color: #93c5fd;
-        }
-
-        .difficulty-btn.elo-2400 {
-            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
-            color: #5b21b6;
-            border-color: #c4b5fd;
-        }
-
-        .difficulty-btn .elo-label {
-            font-weight: bold;
-        }
-
-        .difficulty-btn .elo-desc {
-            font-size: 0.8rem;
-            opacity: 0.7;
-            font-weight: normal;
-        }
-
-        /* Promotion Modal */
-        .promotion-pieces {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .promotion-piece {
-            width: 70px;
-            height: 70px;
-            font-size: 48px;
-            cursor: pointer;
-            border-radius: 14px;
-            transition: all 0.2s ease;
-            background: rgba(51, 65, 85, 0.8);
-            border: 2px solid rgba(148, 163, 184, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .promotion-piece:hover {
-            transform: scale(1.15) translateY(-5px);
-            border-color: #fbbf24;
-            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 16px;
-            color: #64748b;
-            font-size: 0.85rem;
-            border-top: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.6rem;
-            }
-
-            .game-layout {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .captured-section {
-                width: 100%;
-                max-width: 400px;
-            }
-
-            .captured-pieces-wrapper {
-                display: flex;
-                gap: 16px;
-            }
-
-            .captured-section > div {
-                flex: 1;
-            }
-
-            .chessboard {
-                grid-template-columns: repeat(8, 40px);
-                grid-template-rows: repeat(8, 40px);
-            }
-
-            .square {
-                font-size: 28px;
-            }
-
-            .ranks {
-                height: 320px;
-                font-size: 12px;
-                width: 20px;
-            }
-
-            .ranks div {
-                height: 40px;
-            }
-
-            .files {
-                width: 320px;
-                font-size: 12px;
-                margin-top: 6px;
-            }
-
-            .files div {
-                width: 40px;
-            }
-
-            .btn {
-                padding: 10px 18px;
-                font-size: 0.9rem;
-            }
-
-            .status-bar {
-                min-width: 280px;
-            }
-
-            .modal {
-                padding: 24px;
-            }
-
-            .modal h2 {
-                font-size: 1.5rem;
-            }
-
-            .promotion-piece {
-                width: 60px;
-                height: 60px;
-                font-size: 40px;
-            }
-        }
-
-        @media (max-width: 360px) {
-            .chessboard {
-                grid-template-columns: repeat(8, 36px);
-                grid-template-rows: repeat(8, 36px);
-            }
-
-            .square {
-                font-size: 24px;
-            }
-
-            .ranks {
-                height: 288px;
-            }
-
-            .ranks div {
-                height: 36px;
-            }
-
-            .files {
-                width: 288px;
-            }
-
-            .files div {
-                width: 36px;
-            }
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Schach – Du gegen die Engine</title>
+<style>
+  /* ============================================================
+     Design Tokens
+     ============================================================ */
+  :root{
+    --bg-0:#0a0e16;
+    --bg-1:#10151f;
+    --bg-2:#161d2a;
+    --bg-3:#1f2837;
+    --panel:#171e2b;
+    --panel-2:#1d2533;
+    --border:rgba(255,255,255,.07);
+    --border-strong:rgba(255,255,255,.14);
+    --text:#e7ecf3;
+    --text-dim:#9aa8bd;
+    --text-mute:#6c7a91;
+    --accent:#4f9dff;
+    --accent-2:#7cc4ff;
+    --success:#5fcf80;
+    --danger:#ff6b6b;
+    --warn:#f0c050;
+    --light-sq:#ead9b8;
+    --dark-sq:#a87b54;
+    --sel:rgba(80,170,255,.55);
+    --last:rgba(255,221,87,.45);
+    --check:rgba(255,80,80,.65);
+    --hint:rgba(20,40,20,.30);
+    --hint-cap:rgba(20,40,20,.45);
+    --radius:14px;
+    --radius-sm:9px;
+    --shadow:0 18px 50px rgba(0,0,0,.55);
+    --font:"Inter","Segoe UI",-apple-system,system-ui,Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:var(--font);
+    color:var(--text);
+    background:
+      radial-gradient(1100px 700px at 18% -10%, #203049 0%, transparent 60%),
+      radial-gradient(900px 600px at 110% 110%, #1a2740 0%, transparent 55%),
+      linear-gradient(180deg,#0b1018,#070a10);
+    min-height:100%;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* ============================================================
+     Layout
+     ============================================================ */
+  .app{
+    max-width:1180px;
+    margin:0 auto;
+    padding:18px 18px 28px;
+  }
+  .app-header{
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:12px;margin-bottom:18px;
+  }
+  .app-title{display:flex;align-items:center;gap:12px;font-size:1.25rem;font-weight:700;letter-spacing:.3px}
+  .app-title .logo{
+    width:34px;height:34px;border-radius:9px;
+    background:linear-gradient(145deg,#4f9dff,#2a6ad4);
+    display:grid;place-items:center;font-size:20px;
+    box-shadow:0 6px 16px rgba(79,157,255,.35);
+  }
+  .top-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+  main{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 340px;
+    gap:22px;
+    align-items:start;
+  }
+  @media(max-width:920px){
+    main{grid-template-columns:1fr}
+  }
+
+  /* ============================================================
+     Board area
+     ============================================================ */
+  .board-area{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+  }
+  .captured-row{
+    width:var(--board-size,min(78vh,640px));
+    max-width:100%;
+    min-height:42px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;
+    padding:6px 12px;
+    background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    font-size:22px;line-height:1;
+  }
+  .captured-row .side{
+    display:flex;align-items:center;gap:1px;flex:1;min-width:0;
+    font-family:"Segoe UI Symbol","Apple Symbols","Noto Sans Symbols 2",sans-serif;
+  }
+  .captured-row .side.empty{opacity:.35}
+  .captured-row .piece-glyph{pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+  .captured-row .piece-glyph.w{color:#fbfbfb}
+  .captured-row .piece-glyph.b{color:#1a1a1a;text-shadow:0 0 1px #000,0 1px 2px rgba(255,255,255,.15)}
+  .captured-row .advantage{
+    font-family:var(--mono);font-size:.82rem;font-weight:600;
+    padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.06);
+    color:var(--text);white-space:nowrap;
+  }
+  .captured-row .advantage.pos{color:var(--success)}
+  .captured-row .advantage.neg{color:var(--danger)}
+
+  .board-wrap{
+    padding:14px;
+    border-radius:var(--radius);
+    background:linear-gradient(160deg,#3a2f26,#1d1612);
+    box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,.05) inset;
+  }
+  .board{
+    --size:min(78vh,640px,92vw);
+    width:var(--size);height:var(--size);
+    display:grid;
+    grid-template-columns:repeat(8,1fr);
+    grid-template-rows:repeat(8,1fr);
+    border-radius:8px;overflow:hidden;
+    user-select:none;-webkit-user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    font-size:calc(var(--size)/8);
+    line-height:1;
+    position:relative;
+    touch-action:none;
+  }
+  .square{
+    position:relative;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;min-width:0;min-height:0;overflow:hidden;
+    line-height:1;
+  }
+  .square.light{background:var(--light-sq)}
+  .square.dark{background:var(--dark-sq)}
+  .square::after{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+    opacity:0;transition:opacity .12s ease;
+  }
+  .square.last::after{background:var(--last);opacity:1}
+  .square.sel::after{background:var(--sel);opacity:1}
+  .square.check::after{background:radial-gradient(circle at center,var(--check) 0%,transparent 70%);opacity:1}
+  .piece{
+    position:relative;z-index:3;
+    font-size:.86em;line-height:1;
+    font-family:"Segoe UI Symbol","Apple Symbols","Noto Sans Symbols 2",sans-serif;
+    pointer-events:none;
+    transition:transform .08s ease;
+  }
+  .piece.w{color:#fbfbfb;text-shadow:1px 1px 0 #2b2b2b,-1px -1px 0 #2b2b2b,1px -1px 0 #2b2b2b,-1px 1px 0 #2b2b2b,0 3px 6px rgba(0,0,0,.45)}
+  .piece.b{color:#1a1a1a;text-shadow:0 0 1px #000,1px 1px 0 rgba(255,255,255,.18),0 3px 6px rgba(0,0,0,.35)}
+  .piece.dragging{opacity:.4}
+  .hint{position:absolute;z-index:2;width:30%;height:30%;border-radius:50%;background:var(--hint);pointer-events:none}
+  .hint.capture{width:88%;height:88%;background:transparent;border:.05em solid var(--hint-cap)}
+  .coord{
+    position:absolute;z-index:2;
+    font-size:.15em;font-weight:700;opacity:.7;
+    pointer-events:none;font-family:var(--font);line-height:1;
+  }
+  .coord.rank{top:.18em;left:.22em}
+  .coord.file{bottom:.12em;right:.26em}
+  .square.dark .coord{color:#f3e6cf}
+  .square.light .coord{color:#7a5c3e}
+
+  /* ============================================================
+     Side panel
+     ============================================================ */
+  .panel{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px;
+    box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:14px;
+    position:sticky;top:18px;
+  }
+  @media(max-width:920px){
+    .panel{position:static}
+  }
+  .panel-section{display:flex;flex-direction:column;gap:7px}
+  .panel label{
+    font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--text-mute);font-weight:600;
+  }
+
+  .status{
+    min-height:46px;
+    display:flex;align-items:center;gap:10px;
+    padding:11px 13px;border-radius:var(--radius-sm);
+    background:rgba(255,255,255,.045);
+    border:1px solid var(--border);
+    font-size:.92rem;line-height:1.3;
+  }
+  .status.win{color:var(--success);border-color:rgba(95,207,128,.35);background:rgba(95,207,128,.08)}
+  .status.lose{color:var(--danger);border-color:rgba(255,107,107,.35);background:rgba(255,107,107,.08)}
+  .status.draw{color:var(--warn);border-color:rgba(240,192,80,.35);background:rgba(240,192,80,.08)}
+  .status .dot{
+    width:9px;height:9px;border-radius:50%;background:var(--accent);
+    flex:0 0 auto;display:none;
+  }
+  .status.thinking .dot{display:block;animation:pulse 1.1s infinite ease-in-out}
+  @keyframes pulse{0%,100%{opacity:.25;transform:scale(.75)}50%{opacity:1;transform:scale(1.2)}}
+
+  .info-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;
+    font-family:var(--mono);font-size:.78rem;
+  }
+  .info-cell{
+    padding:7px 9px;border-radius:7px;
+    background:rgba(0,0,0,.22);border:1px solid var(--border);
+  }
+  .info-cell .k{color:var(--text-mute);font-size:.66rem;text-transform:uppercase;letter-spacing:.08em}
+  .info-cell .v{color:var(--text);font-weight:600;margin-top:2px}
+  .info-cell .v.pos{color:var(--success)}
+  .info-cell .v.neg{color:var(--danger)}
+
+  .color-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .color-picker button{
+    padding:9px 6px;font-size:.84rem;border-radius:8px;
+    background:#222b3c;border:1px solid var(--border);color:var(--text);
+    cursor:pointer;transition:.15s;font-family:inherit;
+  }
+  .color-picker button:hover{background:#2a3547;border-color:var(--border-strong)}
+  .color-picker button.active{
+    background:linear-gradient(180deg,#2f7cf6,#215ec4);
+    border-color:#2f7cf6;color:#fff;font-weight:600;
+  }
+
+  select,button{
+    font:inherit;width:100%;padding:10px 12px;border-radius:var(--radius-sm);
+    border:1px solid var(--border);background:#222b3c;color:var(--text);
+    cursor:pointer;transition:.15s;font-family:inherit;
+  }
+  select:hover,button:hover{background:#2a3547;border-color:var(--border-strong)}
+  select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  button:active{transform:translateY(1px)}
+  button.primary{
+    background:linear-gradient(180deg,#2f7cf6,#215ec4);
+    border-color:#2f7cf6;font-weight:600;
+  }
+  button.primary:hover{background:linear-gradient(180deg,#3c88ff,#2a6ad4)}
+  button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  button.ghost{background:transparent}
+
+  .btn-row{display:flex;gap:8px}
+  .btn-row button{padding:9px 8px;font-size:.85rem}
+  .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .btn-grid button{padding:9px 8px;font-size:.85rem}
+
+  .moves{
+    height:170px;overflow-y:auto;border-radius:var(--radius-sm);
+    background:rgba(0,0,0,.28);border:1px solid var(--border);
+    padding:6px;font-size:.85rem;font-family:var(--mono);
+  }
+  .moves::-webkit-scrollbar{width:8px}
+  .moves::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px}
+  .mv-row{
+    display:grid;grid-template-columns:34px 1fr 1fr;gap:4px;
+    padding:3px 5px;border-radius:6px;
+  }
+  .mv-row:nth-child(odd){background:rgba(255,255,255,.03)}
+  .mv-row.current{background:rgba(79,157,255,.22);outline:1px solid rgba(79,157,255,.4)}
+  .mv-num{color:var(--text-mute)}
+  .mv{color:var(--text);cursor:default}
+  .mv.empty{color:var(--text-mute)}
+
+  /* ============================================================
+     Modals
+     ============================================================ */
+  .modal{
+    position:fixed;inset:0;display:none;
+    align-items:center;justify-content:center;
+    background:rgba(5,8,12,.72);backdrop-filter:blur(4px);
+    z-index:60;padding:20px;
+  }
+  .modal.show{display:flex}
+  .modal-box{
+    background:var(--panel);border:1px solid var(--border-strong);
+    border-radius:var(--radius);padding:22px 24px;
+    box-shadow:0 30px 70px rgba(0,0,0,.6);
+    max-width:420px;width:100%;
+  }
+  .modal-box h3{margin:0 0 12px;font-size:1.05rem}
+  .modal-box p{margin:0 0 14px;font-size:.88rem;color:var(--text-dim);line-height:1.5}
+  .promo-row{display:flex;gap:10px;justify-content:center}
+  .promo-btn{
+    width:68px;height:68px;font-size:40px;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--light-sq);color:#1a1a1a;
+    border:2px solid transparent;border-radius:12px;padding:0;
+    font-family:"Segoe UI Symbol","Apple Symbols","Noto Sans Symbols 2",sans-serif;
+  }
+  .promo-btn:hover{background:#fff;border-color:var(--accent)}
+  .pgn-textarea{
+    width:100%;min-height:160px;resize:vertical;
+    padding:10px;border-radius:8px;
+    background:#0e131c;border:1px solid var(--border);
+    color:var(--text);font-family:var(--mono);font-size:.82rem;
+    margin-bottom:12px;
+  }
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+  .modal-actions button{width:auto;padding:9px 16px}
+
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+    background:rgba(20,26,38,.95);border:1px solid var(--border-strong);
+    color:var(--text);padding:11px 18px;border-radius:10px;
+    font-size:.88rem;z-index:80;
+    box-shadow:0 12px 30px rgba(0,0,0,.5);
+    opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+
+  /* Small screens */
+  @media(max-width:560px){
+    .app{padding:10px 10px 18px}
+    .app-title{font-size:1.05rem}
+    .top-actions{width:100%;justify-content:stretch}
+    .top-actions button{flex:1}
+    .panel{padding:13px}
+    .captured-row{font-size:18px;min-height:38px;padding:5px 9px}
+  }
+</style>
 </head>
 <body>
-<!-- Header -->
-<div class="header">
-    <h1>♞ Chess Master ♟</h1>
-    <p>Play against AI or challenge a friend</p>
-    <div class="mode-indicator pve" id="mode-indicator" style="display: none;">
-        <span id="mode-text">vs AI</span>
-        <span class="elo-badge" id="elo-badge">1200 ELO</span>
+<div class="app">
+  <header class="app-header">
+    <div class="app-title">
+      <span class="logo">♞</span>
+      <span>Schach <span style="color:var(--text-mute);font-weight:400">vs. Engine</span></span>
     </div>
+    <div class="top-actions">
+      <button id="newGame" class="primary" style="width:auto;padding:9px 16px">Neue Partie</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="board-area">
+      <div class="captured-row" id="capturedTop">
+        <div class="side empty" id="capturedTopSide"></div>
+        <div class="advantage" id="advantageTop" style="visibility:hidden">+0</div>
+      </div>
+      <div class="board-wrap">
+        <div id="board" class="board" role="grid" aria-label="Schachbrett"></div>
+      </div>
+      <div class="captured-row" id="capturedBottom">
+        <div class="side empty" id="capturedBottomSide"></div>
+        <div class="advantage" id="advantageBottom" style="visibility:hidden">+0</div>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <div id="status" class="status">
+        <span class="dot"></span>
+        <span id="statusText">Bereit. Wähle eine Farbe und starte eine Partie.</span>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-cell"><div class="k">Tiefe</div><div class="v" id="infoDepth">–</div></div>
+        <div class="info-cell"><div class="k">Knoten</div><div class="v" id="infoNodes">–</div></div>
+        <div class="info-cell"><div class="k">Zeit</div><div class="v" id="infoTime">–</div></div>
+        <div class="info-cell"><div class="k">Bewertung</div><div class="v" id="infoScore">–</div></div>
+      </div>
+
+      <div class="panel-section">
+        <label>Spielfarbe</label>
+        <div class="color-picker" id="colorPicker">
+          <button data-color="w" class="active">Weiß</button>
+          <button data-color="b">Schwarz</button>
+          <button data-color="r">Zufällig</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <label for="level">Schwierigkeit</label>
+        <select id="level">
+          <option value="0">Anfänger</option>
+          <option value="1">Leicht</option>
+          <option value="2" selected>Mittel</option>
+          <option value="3">Schwer</option>
+          <option value="4">Meister</option>
+        </select>
+      </div>
+
+      <div class="btn-grid">
+        <button id="undo">↶ Zurück</button>
+        <button id="redo">↷ Wiederholen</button>
+        <button id="flip">⇅ Drehen</button>
+        <button id="resign" class="ghost">Aufgeben</button>
+      </div>
+
+      <div class="btn-grid">
+        <button id="copyPgn" class="ghost">PGN kopieren</button>
+        <button id="importPgn" class="ghost">PGN laden</button>
+      </div>
+
+      <div class="panel-section">
+        <label>Züge</label>
+        <div id="moves" class="moves"></div>
+      </div>
+    </aside>
+  </main>
 </div>
 
-<!-- Main Container -->
-<div class="main-container">
-    <!-- Game Layout -->
-    <div class="game-layout" id="game-container" style="display: none;">
-        <!-- Captured Pieces - Black (top) -->
-        <div class="captured-section" id="captured-black">
-            <div class="captured-title black">
-                <span class="dot"></span>
-                Black Captured
-            </div>
-            <div class="captured-pieces" id="black-captured-pieces"></div>
-            <div class="captured-value" id="black-captured-value"></div>
-        </div>
-
-        <!-- Board Wrapper -->
-        <div class="board-wrapper">
-            <div class="board-container">
-                <div class="ranks ranks-left">
-                    <div>8</div><div>7</div><div>6</div><div>5</div>
-                    <div>4</div><div>3</div><div>2</div><div>1</div>
-                </div>
-                <div class="chessboard" id="board"></div>
-                <div class="ranks ranks-right">
-                    <div>8</div><div>7</div><div>6</div><div>5</div>
-                    <div>4</div><div>3</div><div>2</div><div>1</div>
-                </div>
-            </div>
-            <div class="files">
-                <div>a</div><div>b</div><div>c</div><div>d</div>
-                <div>e</div><div>f</div><div>g</div><div>h</div>
-            </div>
-        </div>
-
-        <!-- Captured Pieces - White (side) -->
-        <div class="captured-section" id="captured-white">
-            <div class="captured-title white">
-                <span class="dot"></span>
-                White Captured
-            </div>
-            <div class="captured-pieces" id="white-captured-pieces"></div>
-            <div class="captured-value" id="white-captured-value"></div>
-        </div>
-    </div>
-
-    <!-- Status Bar -->
-    <div class="status-bar" id="status-container" style="display: none;">
-        <div class="status-text" id="status">White to move</div>
-    </div>
-
-    <!-- Controls -->
-    <div class="controls" id="controls" style="display: none;">
-        <button class="btn btn-success" id="hint-btn">💡 Hint</button>
-        <button class="btn btn-warning" id="undo-btn">↩️ Undo</button>
-        <button class="btn btn-danger" id="reset-btn">🔄 New Game</button>
-    </div>
+<!-- Promotion modal -->
+<div id="promo" class="modal">
+  <div class="modal-box">
+    <h3>Umwandlung</h3>
+    <p>Wähle die Figur, in die der Bauer umgewandelt werden soll.</p>
+    <div class="promo-row" id="promoRow"></div>
+  </div>
 </div>
 
-<!-- Footer -->
-<div class="footer">
-    <p>Developed with ❤️ | Chess Engine with AI</p>
+<!-- PGN modal -->
+<div id="pgnModal" class="modal">
+  <div class="modal-box">
+    <h3 id="pgnTitle">PGN</h3>
+    <p id="pgnHint">Füge hier eine Partie im PGN-Format ein:</p>
+    <textarea id="pgnText" class="pgn-textarea" spellcheck="false"></textarea>
+    <div class="modal-actions">
+      <button id="pgnCancel" class="ghost" style="width:auto">Abbrechen</button>
+      <button id="pgnOk" class="primary" style="width:auto">Übernehmen</button>
+    </div>
+  </div>
 </div>
 
-<!-- Mode Selection Modal -->
-<div class="modal-overlay" id="mode-modal">
-    <div class="modal">
-        <h2>♟️ Chess Master</h2>
-        <p>Choose your game mode</p>
-        <div class="mode-buttons">
-            <button class="mode-btn pvp" data-mode="pvp">
-                👥 Player vs Player
-                <span class="subtitle">Challenge a friend locally</span>
-            </button>
-            <button class="mode-btn pve" data-mode="pve">
-                🤖 Player vs AI
-                <span class="subtitle">Play against the computer</span>
-            </button>
-        </div>
+<!-- Confirm modal -->
+<div id="confirmModal" class="modal">
+  <div class="modal-box">
+    <h3 id="confirmTitle">Bestätigen</h3>
+    <p id="confirmText">Sicher?</p>
+    <div class="modal-actions">
+      <button id="confirmNo" class="ghost" style="width:auto">Abbrechen</button>
+      <button id="confirmYes" class="primary" style="width:auto">Bestätigen</button>
     </div>
+  </div>
 </div>
 
-<!-- Difficulty Selection Modal -->
-<div class="modal-overlay" id="difficulty-modal">
-    <div class="modal">
-        <h2>🎯 Select Difficulty</h2>
-        <p>Choose AI strength level</p>
-        <div class="difficulty-buttons">
-            <button class="difficulty-btn elo-600" data-elo="600">
-                <span class="elo-label">600 ELO</span>
-                <span class="elo-desc">Beginner - Makes many mistakes</span>
-            </button>
-            <button class="difficulty-btn elo-1200" data-elo="1200">
-                <span class="elo-label">1200 ELO</span>
-                <span class="elo-desc">Club Player - Realistic play</span>
-            </button>
-            <button class="difficulty-btn elo-1800" data-elo="1800">
-                <span class="elo-label">1800 ELO</span>
-                <span class="elo-desc">Advanced - Few mistakes</span>
-            </button>
-            <button class="difficulty-btn elo-2400" data-elo="2400">
-                <span class="elo-label">2400 ELO</span>
-                <span class="elo-desc">Master Level - Very strong</span>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Promotion Modal -->
-<div class="modal-overlay" id="promotion-modal">
-    <div class="modal">
-        <h2>👑 Pawn Promotion</h2>
-        <p>Choose a piece to promote to</p>
-        <div class="promotion-pieces">
-            <div class="promotion-piece" data-piece="q">♕</div>
-            <div class="promotion-piece" data-piece="r">♖</div>
-            <div class="promotion-piece" data-piece="b">♗</div>
-            <div class="promotion-piece" data-piece="n">♘</div>
-        </div>
-    </div>
-</div>
+<div id="toast" class="toast"></div>
 
 <script>
-    // ==================== CHESS ENGINE ====================
-    class ChessEngine {
-        constructor() {
-            this.board = [];
-            this.turn = 'w';
-            this.gameOver = false;
-            this.inCheck = { w: false, b: false };
-            this.moveHistory = [];
-            this.capturedPieces = { w: [], b: [] };
-            this.castlingRights = { w: { kingside: true, queenside: true }, b: { kingside: true, queenside: true } };
-            this.enPassantTarget = null;
-            this.lastMove = null;
-            this.reset();
+/* chess.js v0.10.3 (jhlywa/chess.js) - lokal eingebettet statt CDN,
+   damit das Spiel vollstaendig offline laeuft. Inhalt unveraendert. */
+var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t="pnbrqkPNBRQK",e="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",g=["1-0","0-1","1/2-1/2","*"],C={b:[16,32,17,15],w:[-16,-32,-17,-15]},T={n:[-18,-33,-31,-14,18,33,31,14],b:[-17,-15,17,15],r:[-16,1,16,-1],q:[-17,-16,-15,1,17,16,15,-1],k:[-17,-16,-15,1,17,16,15,-1]},c=[20,0,0,0,0,0,0,24,0,0,0,0,0,0,20,0,0,20,0,0,0,0,0,24,0,0,0,0,0,20,0,0,0,0,20,0,0,0,0,24,0,0,0,0,20,0,0,0,0,0,0,20,0,0,0,24,0,0,0,20,0,0,0,0,0,0,0,0,20,0,0,24,0,0,20,0,0,0,0,0,0,0,0,0,0,20,2,24,2,20,0,0,0,0,0,0,0,0,0,0,0,2,53,56,53,2,0,0,0,0,0,0,24,24,24,24,24,24,56,0,56,24,24,24,24,24,24,0,0,0,0,0,0,2,53,56,53,2,0,0,0,0,0,0,0,0,0,0,0,20,2,24,2,20,0,0,0,0,0,0,0,0,0,0,20,0,0,24,0,0,20,0,0,0,0,0,0,0,0,20,0,0,0,24,0,0,0,20,0,0,0,0,0,0,20,0,0,0,0,24,0,0,0,0,20,0,0,0,0,20,0,0,0,0,0,24,0,0,0,0,0,20,0,0,20,0,0,0,0,0,0,24,0,0,0,0,0,0,20],v=[17,0,0,0,0,0,0,16,0,0,0,0,0,0,15,0,0,17,0,0,0,0,0,16,0,0,0,0,0,15,0,0,0,0,17,0,0,0,0,16,0,0,0,0,15,0,0,0,0,0,0,17,0,0,0,16,0,0,0,15,0,0,0,0,0,0,0,0,17,0,0,16,0,0,15,0,0,0,0,0,0,0,0,0,0,17,0,16,0,15,0,0,0,0,0,0,0,0,0,0,0,0,17,16,15,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,-1,-1,-1,-1,-1,-1,-1,0,0,0,0,0,0,0,-15,-16,-17,0,0,0,0,0,0,0,0,0,0,0,0,-15,0,-16,0,-17,0,0,0,0,0,0,0,0,0,0,-15,0,0,-16,0,0,-17,0,0,0,0,0,0,0,0,-15,0,0,0,-16,0,0,0,-17,0,0,0,0,0,0,-15,0,0,0,0,-16,0,0,0,0,-17,0,0,0,0,-15,0,0,0,0,0,-16,0,0,0,0,0,-17,0,0,-15,0,0,0,0,0,0,-16,0,0,0,0,0,0,-17],h={p:0,n:1,b:2,r:3,q:4,k:5},o={NORMAL:"n",CAPTURE:"c",BIG_PAWN:"b",EP_CAPTURE:"e",PROMOTION:"p",KSIDE_CASTLE:"k",QSIDE_CASTLE:"q"},I={NORMAL:1,CAPTURE:2,BIG_PAWN:4,EP_CAPTURE:8,PROMOTION:16,KSIDE_CASTLE:32,QSIDE_CASTLE:64},P=7,w=6,L=1,R=0,N={a8:0,b8:1,c8:2,d8:3,e8:4,f8:5,g8:6,h8:7,a7:16,b7:17,c7:18,d7:19,e7:20,f7:21,g7:22,h7:23,a6:32,b6:33,c6:34,d6:35,e6:36,f6:37,g6:38,h6:39,a5:48,b5:49,c5:50,d5:51,e5:52,f5:53,g5:54,h5:55,a4:64,b4:65,c4:66,d4:67,e4:68,f4:69,g4:70,h4:71,a3:80,b3:81,c3:82,d3:83,e3:84,f3:85,g3:86,h3:87,a2:96,b2:97,c2:98,d2:99,e2:100,f2:101,g2:102,h2:103,a1:112,b1:113,c1:114,d1:115,e1:116,f1:117,g1:118,h1:119},E={w:[{square:N.a1,flag:I.QSIDE_CASTLE},{square:N.h1,flag:I.KSIDE_CASTLE}],b:[{square:N.a8,flag:I.QSIDE_CASTLE},{square:N.h8,flag:I.KSIDE_CASTLE}]},O=new Array(128),k={w:l,b:l},q=s,D={w:0,b:0},K=l,d=0,b=1,Q=[],U={};function x(r){void 0===r&&(r=!1),O=new Array(128),k={w:l,b:l},q=s,D={w:0,b:0},K=l,d=0,b=1,Q=[],r||(U={}),F(M())}function j(){B(e)}function B(r,e){void 0===e&&(e=!1);var n=r.split(/\s+/),t=n[0],o=0;if(!$(r).valid)return!1;x(e);for(var i=0;i<t.length;i++){var f=t.charAt(i);if("/"===f)o+=8;else if(-1!=="0123456789".indexOf(f))o+=parseInt(f,10);else{var a=f<"a"?s:u;W({type:f.toLowerCase(),color:a},fr(o)),o++}}return q=n[1],-1<n[2].indexOf("K")&&(D.w|=I.KSIDE_CASTLE),-1<n[2].indexOf("Q")&&(D.w|=I.QSIDE_CASTLE),-1<n[2].indexOf("k")&&(D.b|=I.KSIDE_CASTLE),-1<n[2].indexOf("q")&&(D.b|=I.QSIDE_CASTLE),K="-"===n[3]?l:N[n[3]],d=parseInt(n[4],10),b=parseInt(n[5],10),F(M()),!0}function $(r){var e="No errors.",n="FEN string must contain six space-delimited fields.",t="6th field (move number) must be a positive integer.",o="5th field (half move counter) must be a non-negative integer.",i="4th field (en-passant square) is invalid.",f="3rd field (castling availability) is invalid.",a="2nd field (side to move) is invalid.",l="1st field (piece positions) does not contain 8 '/'-delimited rows.",u="1st field (piece positions) is invalid [consecutive numbers].",s="1st field (piece positions) is invalid [invalid piece].",p="1st field (piece positions) is invalid [row too large].",c="Illegal en-passant square",v=r.split(/\s+/);if(6!==v.length)return{valid:!1,error_number:1,error:n};if(isNaN(v[5])||parseInt(v[5],10)<=0)return{valid:!1,error_number:2,error:t};if(isNaN(v[4])||parseInt(v[4],10)<0)return{valid:!1,error_number:3,error:o};if(!/^(-|[abcdefgh][36])$/.test(v[3]))return{valid:!1,error_number:4,error:i};if(!/^(KQ?k?q?|Qk?q?|kq?|q|-)$/.test(v[2]))return{valid:!1,error_number:5,error:f};if(!/^(w|b)$/.test(v[1]))return{valid:!1,error_number:6,error:a};var g=v[0].split("/");if(8!==g.length)return{valid:!1,error_number:7,error:l};for(var h=0;h<g.length;h++){for(var E=0,d=!1,b=0;b<g[h].length;b++)if(isNaN(g[h][b])){if(!/^[prnbqkPRNBQK]$/.test(g[h][b]))return{valid:!1,error_number:9,error:s};E+=1,d=!1}else{if(d)return{valid:!1,error_number:8,error:u};E+=parseInt(g[h][b],10),d=!0}if(8!==E)return{valid:!1,error_number:10,error:p}}return"3"==v[3][1]&&"w"==v[1]||"6"==v[3][1]&&"b"==v[1]?{valid:!1,error_number:11,error:c}:{valid:!0,error_number:0,error:e}}function M(){for(var r=0,e="",n=N.a8;n<=N.h1;n++){if(null==O[n])r++;else{0<r&&(e+=r,r=0);var t=O[n].color,o=O[n].type;e+=t===s?o.toUpperCase():o.toLowerCase()}n+1&136&&(0<r&&(e+=r),n!==N.h1&&(e+="/"),r=0,n+=8)}var i="";D[s]&I.KSIDE_CASTLE&&(i+="K"),D[s]&I.QSIDE_CASTLE&&(i+="Q"),D[u]&I.KSIDE_CASTLE&&(i+="k"),D[u]&I.QSIDE_CASTLE&&(i+="q"),i=i||"-";var f=K===l?"-":fr(K);return[e,q,i,f,d,b].join(" ")}function G(r){for(var e=0;e<r.length;e+=2)"string"==typeof r[e]&&"string"==typeof r[e+1]&&(U[r[e]]=r[e+1]);return U}function F(r){0<Q.length||(r!==e?(U.SetUp="1",U.FEN=r):(delete U.SetUp,delete U.FEN))}function i(r){var e=O[N[r]];return e?{type:e.type,color:e.color}:null}function W(r,e){if(!("type"in r&&"color"in r))return!1;if(-1===t.indexOf(r.type.toLowerCase()))return!1;if(!(e in N))return!1;var n=N[e];return(r.type!=p||k[r.color]==l||k[r.color]==n)&&(O[n]={type:r.type,color:r.color},r.type===p&&(k[r.color]=n),F(M()),!0)}function H(r,e,n,t,o){var i={color:q,from:e,to:n,flags:t,piece:r[e].type};return o&&(i.flags|=I.PROMOTION,i.promotion=o),r[n]?i.captured=r[n].type:t&I.EP_CAPTURE&&(i.captured=_),i}function Z(r){function e(r,e,n,t,o){if(r[n].type!==_||or(t)!==R&&or(t)!==P)e.push(H(r,n,t,o));else for(var i=[y,m,S,A],f=0,a=i.length;f<a;f++)e.push(H(r,n,t,o,i[f]))}var n=[],t=q,o=ar(t),i={b:L,w:w},f=N.a8,a=N.h1,l=!1,u=!(void 0!==r&&"legal"in r)||r.legal;if(void 0!==r&&"square"in r){if(!(r.square in N))return[];f=a=N[r.square],l=!0}for(var s=f;s<=a;s++)if(136&s)s+=7;else{var p=O[s];if(null!=p&&p.color===t)if(p.type===_){var c=s+C[t][0];if(null==O[c]){e(O,n,s,c,I.NORMAL);c=s+C[t][1];i[t]===or(s)&&null==O[c]&&e(O,n,s,c,I.BIG_PAWN)}for(v=2;v<4;v++){136&(c=s+C[t][v])||(null!=O[c]&&O[c].color===o?e(O,n,s,c,I.CAPTURE):c===K&&e(O,n,s,K,I.EP_CAPTURE))}}else for(var v=0,g=T[p.type].length;v<g;v++){var h=T[p.type][v];for(c=s;!(136&(c+=h));){if(null!=O[c]){if(O[c].color===t)break;e(O,n,s,c,I.CAPTURE);break}if(e(O,n,s,c,I.NORMAL),"n"===p.type||"k"===p.type)break}}}if(!l||a===k[t]){if(D[t]&I.KSIDE_CASTLE){var E=(d=k[t])+2;null!=O[d+1]||null!=O[E]||V(o,k[t])||V(o,d+1)||V(o,E)||e(O,n,k[t],E,I.KSIDE_CASTLE)}if(D[t]&I.QSIDE_CASTLE){var d;E=(d=k[t])-2;null!=O[d-1]||null!=O[d-2]||null!=O[d-3]||V(o,k[t])||V(o,d-1)||V(o,E)||e(O,n,k[t],E,I.QSIDE_CASTLE)}}if(!u)return n;var b=[];for(s=0,g=n.length;s<g;s++)er(n[s]),X(t)||b.push(n[s]),nr();return b}function z(r,e){var n="";if(r.flags&I.KSIDE_CASTLE)n="O-O";else if(r.flags&I.QSIDE_CASTLE)n="O-O-O";else{var t=function(r,e){for(var n=Z({legal:!e}),t=r.from,o=r.to,i=r.piece,f=0,a=0,l=0,u=0,s=n.length;u<s;u++){var p=n[u].from,c=n[u].to,v=n[u].piece;i===v&&t!==p&&o===c&&(f++,or(t)===or(p)&&a++,ir(t)===ir(p)&&l++)}if(0<f)return 0<a&&0<l?fr(t):0<l?fr(t).charAt(1):fr(t).charAt(0);return""}(r,e);r.piece!==_&&(n+=r.piece.toUpperCase()+t),r.flags&(I.CAPTURE|I.EP_CAPTURE)&&(r.piece===_&&(n+=fr(r.from)[0]),n+="x"),n+=fr(r.to),r.flags&I.PROMOTION&&(n+="="+r.promotion.toUpperCase())}return er(r),f()&&(a()?n+="#":n+="+"),nr(),n}function J(r){return r.replace(/=/,"").replace(/[+#]?[?!]*$/,"")}function V(r,e){for(var n=N.a8;n<=N.h1;n++)if(136&n)n+=7;else if(null!=O[n]&&O[n].color===r){var t=O[n],o=n-e,i=119+o;if(c[i]&1<<h[t.type]){if(t.type===_){if(0<o){if(t.color===s)return!0}else if(t.color===u)return!0;continue}if("n"===t.type||"k"===t.type)return!0;for(var f=v[i],a=n+f,l=!1;a!==e;){if(null!=O[a]){l=!0;break}a+=f}if(!l)return!0}}return!1}function X(r){return V(ar(r),k[r])}function f(){return X(q)}function a(){return f()&&0===Z().length}function n(){return!f()&&0===Z().length}function Y(){for(var r={},e=[],n=0,t=0,o=N.a8;o<=N.h1;o++)if(t=(t+1)%2,136&o)o+=7;else{var i=O[o];i&&(r[i.type]=i.type in r?r[i.type]+1:1,i.type===S&&e.push(t),n++)}if(2===n)return!0;if(3===n&&(1===r[S]||1===r[A]))return!0;if(n===r[S]+2){var f=0,a=e.length;for(o=0;o<a;o++)f+=e[o];if(0===f||f===a)return!0}return!1}function rr(){for(var r=[],e={},n=!1;;){var t=nr();if(!t)break;r.push(t)}for(;;){var o=M().split(" ").slice(0,4).join(" ");if(e[o]=o in e?e[o]+1:1,3<=e[o]&&(n=!0),!r.length)break;er(r.pop())}return n}function er(r){var e,n=q,t=ar(n);if(e=r,Q.push({move:e,kings:{b:k.b,w:k.w},turn:q,castling:{b:D.b,w:D.w},ep_square:K,half_moves:d,move_number:b}),O[r.to]=O[r.from],O[r.from]=null,r.flags&I.EP_CAPTURE&&(q===u?O[r.to-16]=null:O[r.to+16]=null),r.flags&I.PROMOTION&&(O[r.to]={type:r.promotion,color:n}),O[r.to].type===p){if(k[O[r.to].color]=r.to,r.flags&I.KSIDE_CASTLE){var o=r.to-1,i=r.to+1;O[o]=O[i],O[i]=null}else if(r.flags&I.QSIDE_CASTLE){o=r.to+1,i=r.to-2;O[o]=O[i],O[i]=null}D[n]=""}if(D[n])for(var f=0,a=E[n].length;f<a;f++)if(r.from===E[n][f].square&&D[n]&E[n][f].flag){D[n]^=E[n][f].flag;break}if(D[t])for(f=0,a=E[t].length;f<a;f++)if(r.to===E[t][f].square&&D[t]&E[t][f].flag){D[t]^=E[t][f].flag;break}K=r.flags&I.BIG_PAWN?"b"===q?r.to-16:r.to+16:l,r.piece===_||r.flags&(I.CAPTURE|I.EP_CAPTURE)?d=0:d++,q===u&&b++,q=ar(q)}function nr(){var r=Q.pop();if(null==r)return null;var e=r.move;k=r.kings,q=r.turn,D=r.castling,K=r.ep_square,d=r.half_moves,b=r.move_number;var n,t,o=q,i=ar(q);if(O[e.from]=O[e.to],O[e.from].type=e.piece,O[e.to]=null,e.flags&I.CAPTURE)O[e.to]={type:e.captured,color:i};else if(e.flags&I.EP_CAPTURE){var f;f=o===u?e.to-16:e.to+16,O[f]={type:_,color:i}}e.flags&(I.KSIDE_CASTLE|I.QSIDE_CASTLE)&&(e.flags&I.KSIDE_CASTLE?(n=e.to+1,t=e.to-1):e.flags&I.QSIDE_CASTLE&&(n=e.to-2,t=e.to+1),O[n]=O[t],O[t]=null);return e}function tr(r,e){var n=J(r);if(e){var t=n.match(/([pnbrqkPNBRQK])?([a-h][1-8])x?-?([a-h][1-8])([qrbnQRBN])?/);if(t)var o=t[1],i=t[2],f=t[3],a=t[4]}for(var l=Z(),u=0,s=l.length;u<s;u++){if(n===J(z(l[u]))||e&&n===J(z(l[u],!0)))return l[u];if(t&&(!o||o.toLowerCase()==l[u].piece)&&N[i]==l[u].from&&N[f]==l[u].to&&(!a||a.toLowerCase()==l[u].promotion))return l[u]}return null}function or(r){return r>>4}function ir(r){return 15&r}function fr(r){var e=ir(r),n=or(r);return"abcdefgh".substring(e,e+1)+"87654321".substring(n,n+1)}function ar(r){return r===s?u:s}function lr(r){var e=function r(e){var n=e instanceof Array?[]:{};for(var t in e)n[t]="object"==typeof t?r(e[t]):e[t];return n}(r);e.san=z(e,!1),e.to=fr(e.to),e.from=fr(e.from);var n="";for(var t in I)I[t]&e.flags&&(n+=o[t]);return e.flags=n,e}function ur(r){return r.replace(/^\s+|\s+$/g,"")}return B(void 0===r?e:r),{WHITE:s,BLACK:u,PAWN:_,KNIGHT:A,BISHOP:S,ROOK:m,QUEEN:y,KING:p,SQUARES:function(){for(var r=[],e=N.a8;e<=N.h1;e++)136&e?e+=7:r.push(fr(e));return r}(),FLAGS:o,load:function(r){return B(r)},reset:function(){return j()},moves:function(r){for(var e=Z(r),n=[],t=0,o=e.length;t<o;t++)void 0!==r&&"verbose"in r&&r.verbose?n.push(lr(e[t])):n.push(z(e[t],!1));return n},in_check:function(){return f()},in_checkmate:function(){return a()},in_stalemate:function(){return n()},in_draw:function(){return 100<=d||n()||Y()||rr()},insufficient_material:function(){return Y()},in_threefold_repetition:function(){return rr()},game_over:function(){return 100<=d||a()||n()||Y()||rr()},validate_fen:function(r){return $(r)},fen:function(){return M()},board:function(){for(var r=[],e=[],n=N.a8;n<=N.h1;n++)null==O[n]?e.push(null):e.push({type:O[n].type,color:O[n].color}),n+1&136&&(r.push(e),e=[],n+=8);return r},pgn:function(r){var e="object"==typeof r&&"string"==typeof r.newline_char?r.newline_char:"\n",n="object"==typeof r&&"number"==typeof r.max_width?r.max_width:0,t=[],o=!1;for(var i in U)t.push("["+i+' "'+U[i]+'"]'+e),o=!0;o&&Q.length&&t.push(e);for(var f=[];0<Q.length;)f.push(nr());for(var a=[],l="";0<f.length;){var u=f.pop();Q.length||"b"!==u.color?"w"===u.color&&(l.length&&a.push(l),l=b+"."):l=b+". ...",l=l+" "+z(u,!1),er(u)}if(l.length&&a.push(l),void 0!==U.Result&&a.push(U.Result),0===n)return t.join("")+a.join(" ");var s=0;for(i=0;i<a.length;i++)s+a[i].length>n&&0!==i?(" "===t[t.length-1]&&t.pop(),t.push(e),s=0):0!==i&&(t.push(" "),s++),t.push(a[i]),s+=a[i].length;return t.join("")},load_pgn:function(r,e){var n=void 0!==e&&"sloppy"in e&&e.sloppy;function l(r){return r.replace(/\\/g,"\\")}var t="object"==typeof e&&"string"==typeof e.newline_char?e.newline_char:"\r?\n",o=new RegExp("^(\\[((?:"+l(t)+")|.)*\\])(?:"+l(t)+"){2}"),i=o.test(r)?o.exec(r)[1]:"";j();var f=function(r,e){for(var n="object"==typeof e&&"string"==typeof e.newline_char?e.newline_char:"\r?\n",t={},o=r.split(new RegExp(l(n))),i="",f="",a=0;a<o.length;a++)i=o[a].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/,"$1"),f=o[a].replace(/^\[[A-Za-z]+\s"(.*)"\]$/,"$1"),0<ur(i).length&&(t[i]=f);return t}(i,e);for(var a in f)G([a,f[a]]);if("1"===f.SetUp&&!("FEN"in f&&B(f.FEN,!0)))return!1;var u=r.replace(i,"").replace(new RegExp(l(t),"g")," ");u=u.replace(/(\{[^}]+\})+?/g,"");for(var s=/(\([^\(\)]+\))+?/g;s.test(u);)u=u.replace(s,"");var p=ur(u=(u=(u=u.replace(/\d+\.(\.\.)?/g,"")).replace(/\.\.\./g,"")).replace(/\$\d+/g,"")).split(new RegExp(/\s+/));p=p.join(",").replace(/,,+/g,",").split(",");for(var c="",v=0;v<p.length-1;v++){if(null==(c=tr(p[v],n)))return!1;er(c)}if(c=p[p.length-1],-1<g.indexOf(c))!function(r){for(var e in r)return 1}(U)||void 0!==U.Result||G(["Result",c]);else{if(null==(c=tr(c,n)))return!1;er(c)}return!0},header:function(){return G(arguments)},ascii:function(){return function(){for(var r="   +------------------------+\n",e=N.a8;e<=N.h1;e++){if(0===ir(e)&&(r+=" "+"87654321"[or(e)]+" |"),null==O[e])r+=" . ";else{var n=O[e].type;r+=" "+(O[e].color===s?n.toUpperCase():n.toLowerCase())+" "}e+1&136&&(r+="|\n",e+=8)}return r+="   +------------------------+\n",r+="     a  b  c  d  e  f  g  h\n"}()},turn:function(){return q},move:function(r,e){var n=void 0!==e&&"sloppy"in e&&e.sloppy,t=null;if("string"==typeof r)t=tr(r,n);else if("object"==typeof r)for(var o=Z(),i=0,f=o.length;i<f;i++)if(!(r.from!==fr(o[i].from)||r.to!==fr(o[i].to)||"promotion"in o[i]&&r.promotion!==o[i].promotion)){t=o[i];break}if(!t)return null;var a=lr(t);return er(t),a},undo:function(){var r=nr();return r?lr(r):null},clear:function(){return x()},put:function(r,e){return W(r,e)},get:function(r){return i(r)},remove:function(r){return n=i(e=r),O[N[e]]=null,n&&n.type===p&&(k[n.color]=l),F(M()),n;var e,n},perft:function(r){return function r(e){for(var n=Z({legal:!1}),t=0,o=q,i=0,f=n.length;i<f;i++)er(n[i]),X(o)||(0<e-1?t+=r(e-1):t++),nr();return t}(r)},square_color:function(r){if(r in N){var e=N[r];return(or(e)+ir(e))%2==0?"light":"dark"}return null},history:function(r){for(var e=[],n=[],t=(void 0!==r&&"verbose"in r&&r.verbose);0<Q.length;)e.push(nr());for(;0<e.length;){var o=e.pop();t?n.push(lr(o)):n.push(z(o)),er(o)}return n}}};"undefined"!=typeof exports&&(exports.Chess=Chess),"undefined"!=typeof define&&define(function(){return Chess});
+</script>
+
+<!-- ============================================================
+     ENGINE — runs inside a Web Worker
+     ============================================================ -->
+<script id="engineSrc" type="text/js-worker">
+'use strict';
+/* ============================================================
+   Schach-Engine "Meister" — nativer 0x88-Suchkern (Änderung 3)
+   ============================================================
+   Motivation (aus der Baseline-Analyse): chess.js verursacht ~85%
+   der Suchzeit (Zugerzeugung + game_over + Hash). Dieser Kern
+   ersetzt chess.js INNERHALB der Engine vollständig:
+   - 0x88-Brett mit inkrementellem Zobrist-Hashing (2×32 Bit)
+   - eigene Zugerzeugung mit Make/Unmake (perft-geprüft)
+   - PVS + iterative Tiefensuche + Aspiration
+   - Transpositionstabelle (Typed Arrays, 2^20 Einträge)
+   - Quiescence mit MVV-LVA + Delta- + SEE-Pruning
+   - Killer/History, LMR, Nullzug-Pruning, RFP, Matt-Distanz-Pruning
+   - getaperte Bewertung: Material+PST (inkrementell), Bauernstruktur,
+     Freibauern, Läuferpaar, offene Linien, Königungssicherheit
+   Der Code läuft im Browser-Worker UND in Node (Tests/Turnier).
+   ============================================================ */
+(function (root, factory) {
+  var createEngineCtor = factory();
+  if (typeof module !== 'undefined' && module.exports) module.exports = { createEngine: createEngineCtor };
+  else root.createEngine = createEngineCtor;
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  /* ---------- Konstanten ---------- */
+  var PAWN = 1, KNIGHT = 2, BISHOP = 3, ROOK = 4, QUEEN = 5, KING = 6;
+  var MATE = 30000, MATE_BOUND = 29000, INF = 32000;
+  var MAX_PLY = 96;
+  var VAL_T = [0, 100, 320, 330, 500, 900, 20000];        // MVV-LVA / Delta
+  var PH_UNIT = [0, 0, 1, 1, 2, 4, 0];                    // Phaseneinheiten
+  var PASS_MG = [0, 4, 8, 14, 24, 44, 80];
+  var PASS_EG = [0, 12, 22, 36, 60, 100, 160];
+  var CHAR_CODE = { P: 1, N: 2, B: 3, R: 4, Q: 5, K: 6, p: 9, n: 10, b: 11, r: 12, q: 13, k: 14 };
+  var PROMO_CH = { 2: 'n', 3: 'b', 4: 'r', 5: 'q' };
+  var PROMO_CODE = { n: 2, b: 3, r: 4, q: 5 };
+  var BISHOP_PAIR_MG = 22, BISHOP_PAIR_EG = 40;
+  var DOUBLED_MG = 10, DOUBLED_EG = 20;
+  var ISOLATED_MG = 12, ISOLATED_EG = 14;
+  var ROOK_OPEN_MG = 28, ROOK_OPEN_EG = 10, ROOK_SEMI_MG = 11, ROOK_SEMI_EG = 5;
+  var SHIELD_FULL = 12, SHIELD_HALF = 6, SHIELD_MISS = 16, SHIELD_OPP = 8;
+  var TEMPO = 10;
+
+  /* ---------- Zobrist (2×32 Bit, verschiedene Seeds!) ---------- */
+  function makeZobrist(seed) {
+    var s = seed >>> 0;
+    function next() { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s >>>= 0; s ^= s << 5; return s >>> 0; }
+    var P_LO = new Uint32Array(15 * 128), P_HI = new Uint32Array(15 * 128);
+    for (var code = 1; code < 15; code++) {
+      if ((code & 7) === 0 || (code & 7) > 6) continue;
+      for (var sq = 0; sq < 128; sq++) {
+        if (sq & 0x88) continue;
+        P_LO[code * 128 + sq] = next();
+        P_HI[code * 128 + sq] = next();
+      }
+    }
+    var C_LO = new Uint32Array(16), C_HI = new Uint32Array(16);
+    for (var b = 1; b < 16; b++) { C_LO[b] = next(); C_HI[b] = next(); }
+    var EP_LO = new Uint32Array(8), EP_HI = new Uint32Array(8);
+    for (var f = 0; f < 8; f++) { EP_LO[f] = next(); EP_HI[f] = next(); }
+    return { P_LO: P_LO, P_HI: P_HI, C_LO: C_LO, C_HI: C_HI, EP_LO: EP_LO, EP_HI: EP_HI,
+             SIDE_LO: next(), SIDE_HI: next() };
+  }
+  var Z = makeZobrist(0x9E3779B9), Z2 = makeZobrist(0x85EBCA6B);
+
+  /* ---------- Piece-Square-Tabellen (a8-first, klassische Werte) ---------- */
+  var PST_SRC_MG = {
+    p: [0,0,0,0,0,0,0,0, 50,50,50,50,50,50,50,50, 10,10,20,30,30,20,10,10,
+        5,5,10,25,25,10,5,5, 0,0,0,20,20,0,0,0, 5,-5,-10,0,0,-10,-5,5,
+        5,10,10,-20,-20,10,10,5, 0,0,0,0,0,0,0,0],
+    n: [-50,-40,-30,-30,-30,-30,-40,-50, -40,-20,0,0,0,0,-20,-40, -30,0,10,15,15,10,0,-30,
+        -30,5,15,20,20,15,5,-30, -30,0,15,20,20,15,0,-30, -30,5,10,15,15,10,5,-30,
+        -40,-20,0,5,5,0,-20,-40, -50,-40,-30,-30,-30,-30,-40,-50],
+    b: [-20,-10,-10,-10,-10,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,10,10,5,0,-10,
+        -10,5,5,10,10,5,5,-10, -10,0,10,10,10,10,0,-10, -10,10,10,10,10,10,10,-10,
+        -10,5,0,0,0,0,5,-10, -20,-10,-10,-10,-10,-10,-10,-20],
+    r: [0,0,0,0,0,0,0,0, 5,10,10,10,10,10,10,5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5,
+        -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, 0,0,0,5,5,0,0,0],
+    q: [-20,-10,-10,-5,-5,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,5,5,5,0,-10,
+        -5,0,5,5,5,5,0,-5, 0,0,5,5,5,5,0,-5, -10,5,5,5,5,5,0,-10,
+        -10,0,5,0,0,0,0,-10, -20,-10,-10,-5,-5,-10,-10,-20],
+    k: [-30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30,
+        -30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30,
+        -20,-30,-30,-40,-40,-30,-30,-20, -10,-20,-20,-20,-20,-20,-20,-10,
+        20,20,0,0,0,0,20,20, 20,30,10,0,0,10,30,20]
+  };
+  var PST_SRC_EG = {
+    p: [0,0,0,0,0,0,0,0, 50,50,50,50,50,50,50,50, 30,30,30,30,30,30,30,30,
+        25,25,25,25,25,25,25,25, 15,15,15,15,15,15,15,15, 5,5,5,5,5,5,5,5,
+        0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0],
+    n: [-50,-40,-30,-30,-30,-30,-40,-50, -30,-20,-10,-10,-10,-10,-20,-30, -30,-10,0,0,0,0,-10,-30,
+        -30,-10,10,15,15,10,-10,-30, -30,-10,15,20,20,15,-10,-30, -30,-10,10,15,15,10,-10,-30,
+        -30,-30,0,0,0,0,-30,-30, -50,-30,-30,-30,-30,-30,-30,-50],
+    b: [-20,-10,-10,-10,-10,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,10,10,5,0,-10,
+        -10,5,5,10,10,5,5,-10, -10,0,5,10,10,5,0,-10, -10,5,5,10,10,5,5,-10,
+        -10,0,5,0,0,5,0,-10, -20,-10,-10,-10,-10,-10,-10,-20],
+    r: [-15,-10,-5,0,0,-5,-10,-15, -15,-5,0,5,5,0,-5,-15, -15,-5,5,10,10,5,-5,-15,
+        -15,-5,5,10,10,5,-5,-15, -15,-5,5,10,10,5,-5,-15, -15,-5,5,10,10,5,-5,-15,
+        -15,-5,0,5,5,0,-5,-15, -15,-10,-5,0,0,-5,-10,-15],
+    q: [-10,-5,-5,-5,-5,-5,-5,-10, -5,0,0,0,0,0,0,-5, -5,0,5,5,5,5,0,-5,
+        -5,0,5,5,5,5,0,-5, -5,0,5,5,5,5,0,-5, -5,0,5,5,5,5,0,-5,
+        -5,0,0,0,0,0,0,-5, -10,-5,-5,-5,-5,-5,-5,-10],
+    k: [-50,-40,-30,-20,-20,-30,-40,-50, -30,-20,-10,0,0,-10,-20,-30, -30,-10,20,30,30,20,-10,-30,
+        -30,-10,30,40,40,30,-10,-30, -30,-10,30,40,40,30,-10,-30, -30,-10,20,30,30,20,-10,-30,
+        -30,-30,0,0,0,0,-30,-30, -50,-30,-30,-30,-30,-30,-30,-50]
+  };
+  var VAL_MG_T = [0, 100, 320, 330, 500, 900, 0];
+  var VAL_EG_T = [0, 130, 290, 320, 540, 880, 0];
+  var PST_MG_BYT = [null, PST_SRC_MG.p, PST_SRC_MG.n, PST_SRC_MG.b, PST_SRC_MG.r, PST_SRC_MG.q, PST_SRC_MG.k];
+  var PST_EG_BYT = [null, PST_SRC_EG.p, PST_SRC_EG.n, PST_SRC_EG.b, PST_SRC_EG.r, PST_SRC_EG.q, PST_SRC_EG.k];
+  // Flache Tabellen inkl. Material, Vorzeichen je Farbe eingebacken:
+  var PST_MG = new Int16Array(15 * 128), PST_EG = new Int16Array(15 * 128);
+  (function buildPST() {
+    for (var sq = 0; sq < 128; sq++) {
+      if (sq & 0x88) continue;
+      var r = sq >> 4, f = sq & 7;
+      var vw = (7 - r) * 8 + f, vb = r * 8 + f;
+      for (var t = 1; t <= 6; t++) {
+        PST_MG[t * 128 + sq] = VAL_MG_T[t] + PST_MG_BYT[t][vw];
+        PST_MG[(t | 8) * 128 + sq] = -(VAL_MG_T[t] + PST_MG_BYT[t][vb]);
+        PST_EG[t * 128 + sq] = VAL_EG_T[t] + PST_EG_BYT[t][vw];
+        PST_EG[(t | 8) * 128 + sq] = -(VAL_EG_T[t] + PST_EG_BYT[t][vb]);
+      }
+    }
+  })();
+
+  /* ---------- Angriffs-Tabellen ---------- */
+  var KNIGHT_TO = [], KING_TO = [], RAY_B = [], RAY_R = [], RAY_Q = [];
+  var SQ64 = new Int16Array(64);
+  (function buildTables() {
+    var KN = [33, 31, 18, 14, -33, -31, -18, -14];
+    var KG = [16, -16, 1, -1, 17, 15, -15, -17];
+    for (var sq = 0; sq < 128; sq++) {
+      if (sq & 0x88) continue;
+      var r = sq >> 4, f = sq & 7;
+      SQ64[r * 8 + f] = sq;
+      var kn = [], kg = [];
+      for (var i = 0; i < 8; i++) {
+        var t1 = sq + KN[i]; if (!(t1 & 0x88)) kn.push(t1);
+        var t2 = sq + KG[i]; if (!(t2 & 0x88)) kg.push(t2);
+      }
+      KNIGHT_TO[sq] = kn; KING_TO[sq] = kg;
+      function ray(d) {
+        var out = [], t = sq + d;
+        while (!(t & 0x88)) { out.push(t); t += d; }
+        return out;
+      }
+      RAY_B[sq] = [ray(17), ray(15), ray(-15), ray(-17)];
+      RAY_R[sq] = [ray(16), ray(-16), ray(1), ray(-1)];
+      RAY_Q[sq] = RAY_B[sq].concat(RAY_R[sq]);
+    }
+  })();
+
+  var POPCNT = new Uint8Array(256);
+  for (var pc0 = 0; pc0 < 256; pc0++) POPCNT[pc0] = POPCNT[pc0 >> 1] + (pc0 & 1);
+
+  var CASTLE_MASK = new Uint8Array(128);
+  CASTLE_MASK.fill(15);
+  CASTLE_MASK[0] = 13; CASTLE_MASK[4] = 12; CASTLE_MASK[7] = 14;
+  CASTLE_MASK[112] = 7; CASTLE_MASK[116] = 3; CASTLE_MASK[119] = 11;
+
+  /* ============================================================
+     createEngine(): eine Instanz = ein Brett + Suche + TT
+     ============================================================ */
+  function createEngine() {
+    var board = new Int8Array(128);
+    var side = 0;                     // 0 = Weiß, 1 = Schwarz
+    var castleRights = 0, epSq = -1, fifty = 0;
+    var kingSq = [4, 116];
+    var mgScore = 0, egScore = 0, phaseUnits = 0;
+    var bishops = [0, 0];
+    var pawnMask = [new Uint8Array(8), new Uint8Array(8)];
+
+    // Undo-Stack
+    var UNDO_MOVE = new Int32Array(4096), UNDO_CASTLE = new Uint8Array(4096);
+    var UNDO_EP = new Int16Array(4096), UNDO_FIFTY = new Int16Array(4096);
+    var UNDO_MG = new Int32Array(4096), UNDO_EG = new Int32Array(4096);
+    var UNDO_PH = new Int8Array(4096), UNDO_WB = new Int8Array(4096), UNDO_BB = new Int8Array(4096);
+    var UNDO_HLO = new Uint32Array(4096), UNDO_HHI = new Uint32Array(4096);
+    var hp = 0;
+
+    // Repetitions-Stack (Partiehistorie + Suchpfad)
+    var REP_LO = new Uint32Array(4096), REP_HI = new Uint32Array(4096);
+    var repI = 0;
+    var GAME_KEYS = [];
+
+    // Hash-Zustand
+    var H_LO = 0, H_HI = 0;
+
+    // TT (Typed Arrays, 2^20 Einträge)
+    var TT_BITS = 20, TT_N = 1 << TT_BITS, TT_MASK = TT_N - 1;
+    var TT_USED = new Uint8Array(TT_N);
+    var TT_KEYLO = new Uint32Array(TT_N), TT_KEYHI = new Uint32Array(TT_N);
+    var TT_MOVE = new Int32Array(TT_N), TT_SCORE = new Int16Array(TT_N);
+    var TT_META = new Int32Array(TT_N); // (depth << 2) | flag
+
+    // Suchzustand
+    var nodes = 0, aborted = false, hardDeadline = Infinity;
+    var killer0 = new Int32Array(MAX_PLY + 8), killer1 = new Int32Array(MAX_PLY + 8);
+    var histTable = new Int32Array(16384);
+    var MBUFS = [], SBUFS = [];
+    function moveBuf(ply) { var b = MBUFS[ply]; if (!b) { b = new Int32Array(256); MBUFS[ply] = b; } return b; }
+    function scoreBuf(ply) { var b = SBUFS[ply]; if (!b) { b = new Int32Array(256); SBUFS[ply] = b; } return b; }
+
+    var now = (typeof performance !== 'undefined' && performance.now) ? function () { return performance.now(); }
+                                                                      : function () { return Date.now(); };
+
+    /* ---------- Hilfsfunktionen ---------- */
+    function mv(from, to, promo, flag, cap) {
+      return from | (to << 7) | (promo << 14) | (flag << 17) | (cap << 20);
+    }
+    function sqAlg(sq) { return String.fromCharCode(97 + (sq & 7)) + (1 + (sq >> 4)); }
+    function algToSq(a) { return (a.charCodeAt(1) - 49) * 16 + (a.charCodeAt(0) - 97); }
+
+    function attacked(sq, by) {
+      var b = board, i, t, p;
+      if (by === 0) {
+        t = sq - 15; if (!(t & 0x88) && b[t] === 1) return true;
+        t = sq - 17; if (!(t & 0x88) && b[t] === 1) return true;
+      } else {
+        t = sq + 15; if (!(t & 0x88) && b[t] === 9) return true;
+        t = sq + 17; if (!(t & 0x88) && b[t] === 9) return true;
+      }
+      var kl = KNIGHT_TO[sq];
+      for (i = 0; i < kl.length; i++) { p = b[kl[i]]; if (p && (p >> 3) === by && (p & 7) === KNIGHT) return true; }
+      var kk = KING_TO[sq];
+      for (i = 0; i < kk.length; i++) { p = b[kk[i]]; if (p && (p >> 3) === by && (p & 7) === KING) return true; }
+      var rb = RAY_B[sq];
+      for (i = 0; i < 4; i++) {
+        var ray1 = rb[i];
+        for (var j = 0; j < ray1.length; j++) {
+          p = b[ray1[j]];
+          if (!p) continue;
+          if ((p >> 3) === by) { var q1 = p & 7; if (q1 === BISHOP || q1 === QUEEN) return true; }
+          break;
         }
-
-        reset() {
-            this.board = Array(8).fill(null).map(() => Array(8).fill(null));
-            this.setupInitialPosition();
-            this.turn = 'w';
-            this.gameOver = false;
-            this.inCheck = { w: false, b: false };
-            this.moveHistory = [];
-            this.capturedPieces = { w: [], b: [] };
-            this.castlingRights = { w: { kingside: true, queenside: true }, b: { kingside: true, queenside: true } };
-            this.enPassantTarget = null;
-            this.lastMove = null;
+      }
+      var rr = RAY_R[sq];
+      for (i = 0; i < 4; i++) {
+        var ray2 = rr[i];
+        for (var j2 = 0; j2 < ray2.length; j2++) {
+          p = b[ray2[j2]];
+          if (!p) continue;
+          if ((p >> 3) === by) { var q2 = p & 7; if (q2 === ROOK || q2 === QUEEN) return true; }
+          break;
         }
-
-        setupInitialPosition() {
-            // Black pieces
-            this.board[0] = [
-                { type: 'r', color: 'b' }, { type: 'n', color: 'b' }, { type: 'b', color: 'b' }, { type: 'q', color: 'b' },
-                { type: 'k', color: 'b' }, { type: 'b', color: 'b' }, { type: 'n', color: 'b' }, { type: 'r', color: 'b' }
-            ];
-            this.board[1] = Array(8).fill(null).map(() => ({ type: 'p', color: 'b' }));
-
-            // Empty squares
-            for (let i = 2; i < 6; i++) {
-                this.board[i] = Array(8).fill(null);
-            }
-
-            // White pieces
-            this.board[6] = Array(8).fill(null).map(() => ({ type: 'p', color: 'w' }));
-            this.board[7] = [
-                { type: 'r', color: 'w' }, { type: 'n', color: 'w' }, { type: 'b', color: 'w' }, { type: 'q', color: 'w' },
-                { type: 'k', color: 'w' }, { type: 'b', color: 'w' }, { type: 'n', color: 'w' }, { type: 'r', color: 'w' }
-            ];
-        }
-
-        posToIndex(pos) {
-            return { row: 8 - parseInt(pos[1]), col: pos.charCodeAt(0) - 97 };
-        }
-
-        indexToPos(row, col) {
-            return String.fromCharCode(97 + col) + (8 - row);
-        }
-
-        getLegalMoves(color) {
-            const moves = [];
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const piece = this.board[row][col];
-                    if (piece && piece.color === color) {
-                        const pos = this.indexToPos(row, col);
-                        const pieceMoves = this.getPieceMoves(pos, piece);
-                        for (const move of pieceMoves) {
-                            if (this.isMoveLegal(move, color)) {
-                                moves.push({
-                                    from: pos,
-                                    to: this.indexToPos(move.toRow, move.toCol),
-                                    piece: piece.type,
-                                    color: color,
-                                    promotion: move.promotion || null,
-                                    captured: this.board[move.toRow][move.toCol]?.type || null
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-            return moves;
-        }
-
-        isMoveLegal(move, color) {
-            const fromIdx = this.posToIndex(move.from || this.indexToPos(0, 0));
-            const toIdx = { row: move.toRow, col: move.toCol };
-            const piece = this.board[fromIdx.row]?.[fromIdx.col];
-            if (!piece) return false;
-
-            // Make temporary move
-            const captured = this.board[toIdx.row][toIdx.col];
-            this.board[toIdx.row][toIdx.col] = piece;
-            this.board[fromIdx.row][fromIdx.col] = null;
-
-            // Handle castling
-            if (piece.type === 'k' && Math.abs(toIdx.col - fromIdx.col) === 2) {
-                if (toIdx.col > fromIdx.col) {
-                    this.board[fromIdx.row][5] = this.board[fromIdx.row][7];
-                    this.board[fromIdx.row][7] = null;
-                } else {
-                    this.board[fromIdx.row][3] = this.board[fromIdx.row][0];
-                    this.board[fromIdx.row][0] = null;
-                }
-            }
-
-            const inCheck = this.isKingInCheck(color);
-
-            // Undo move
-            this.board[fromIdx.row][fromIdx.col] = piece;
-            this.board[toIdx.row][toIdx.col] = captured;
-            if (piece.type === 'k' && Math.abs(toIdx.col - fromIdx.col) === 2) {
-                if (toIdx.col > fromIdx.col) {
-                    this.board[fromIdx.row][7] = this.board[fromIdx.row][5];
-                    this.board[fromIdx.row][5] = null;
-                } else {
-                    this.board[fromIdx.row][0] = this.board[fromIdx.row][3];
-                    this.board[fromIdx.row][3] = null;
-                }
-            }
-
-            return !inCheck;
-        }
-
-        findKing(color) {
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const piece = this.board[row][col];
-                    if (piece && piece.type === 'k' && piece.color === color) {
-                        return { row, col };
-                    }
-                }
-            }
-            return null;
-        }
-
-        isKingInCheck(color) {
-            const kingPos = this.findKing(color);
-            if (!kingPos) return false;
-            return this.isSquareAttacked(kingPos.row, kingPos.col, color === 'w' ? 'b' : 'w');
-        }
-
-        isSquareAttacked(row, col, attackerColor) {
-            // Check knight attacks
-            const knightMoves = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
-            for (const [dr, dc] of knightMoves) {
-                const p = this.board[row + dr]?.[col + dc];
-                if (p && p.type === 'n' && p.color === attackerColor) return true;
-            }
-
-            // Check sliding pieces
-            const directions = [[-1,-1],[-1,1],[1,-1],[1,1],[-1,0],[1,0],[0,-1],[0,1]];
-            for (let i = 0; i < directions.length; i++) {
-                const [dr, dc] = directions[i];
-                let nr = row + dr, nc = col + dc;
-                let first = true;
-                while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-                    const p = this.board[nr][nc];
-                    if (p) {
-                        if (p.color === attackerColor) {
-                            const isDiag = i < 4;
-                            if (isDiag && (p.type === 'b' || p.type === 'q')) return true;
-                            if (isDiag && p.type === 'p' && first) {
-                                const dir = attackerColor === 'w' ? 1 : -1;
-                                if (dr === dir) return true;
-                            }
-                            if (!isDiag && (p.type === 'r' || p.type === 'q')) return true;
-                            if (!isDiag && p.type === 'k' && first) return true;
-                        }
-                        break;
-                    }
-                    nr += dr; nc += dc; first = false;
-                }
-            }
-            return false;
-        }
-
-        getPieceMoves(pos, piece) {
-            const { row, col } = this.posToIndex(pos);
-            const moves = [];
-            const color = piece.color;
-            const dir = color === 'w' ? -1 : 1;
-
-            switch (piece.type) {
-                case 'p':
-                    if (!this.board[row + dir]?.[col]) {
-                        if (row + dir === 0 || row + dir === 7) {
-                            ['q','r','b','n'].forEach(t => moves.push({ toRow: row + dir, toCol: col, promotion: t }));
-                        } else {
-                            moves.push({ toRow: row + dir, toCol: col });
-                            if ((color === 'w' && row === 6) || (color === 'b' && row === 1)) {
-                                if (!this.board[row + 2 * dir]?.[col]) {
-                                    moves.push({ toRow: row + 2 * dir, toCol: col });
-                                }
-                            }
-                        }
-                    }
-                    for (const dc of [-1, 1]) {
-                        const target = this.board[row + dir]?.[col + dc];
-                        if (target && target.color !== color) {
-                            if (row + dir === 0 || row + dir === 7) {
-                                ['q','r','b','n'].forEach(t => moves.push({ toRow: row + dir, toCol: col + dc, promotion: t }));
-                            } else {
-                                moves.push({ toRow: row + dir, toCol: col + dc });
-                            }
-                        }
-                    }
-                    break;
-
-                case 'n':
-                    [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr, dc]) => {
-                        const nr = row + dr, nc = col + dc;
-                        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && this.board[nr][nc]?.color !== color) {
-                            moves.push({ toRow: nr, toCol: nc });
-                        }
-                    });
-                    break;
-
-                case 'b':
-                    this.addSlidingMoves(moves, row, col, color, [[-1,-1],[-1,1],[1,-1],[1,1]]);
-                    break;
-
-                case 'r':
-                    this.addSlidingMoves(moves, row, col, color, [[-1,0],[1,0],[0,-1],[0,1]]);
-                    break;
-
-                case 'q':
-                    this.addSlidingMoves(moves, row, col, color, [[-1,-1],[-1,1],[1,-1],[1,1],[-1,0],[1,0],[0,-1],[0,1]]);
-                    break;
-
-                case 'k':
-                    [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr, dc]) => {
-                        const nr = row + dr, nc = col + dc;
-                        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && this.board[nr][nc]?.color !== color) {
-                            moves.push({ toRow: nr, toCol: nc });
-                        }
-                    });
-                    // Castling
-                    if (color === 'w' && row === 7 && col === 4 && !this.isKingInCheck('w')) {
-                        if (this.castlingRights.w.kingside && !this.board[7][5] && !this.board[7][6] &&
-                            !this.isSquareAttacked(7, 5, 'b') && !this.isSquareAttacked(7, 6, 'b')) {
-                            moves.push({ toRow: 7, toCol: 6 });
-                        }
-                        if (this.castlingRights.w.queenside && !this.board[7][1] && !this.board[7][2] && !this.board[7][3] &&
-                            !this.isSquareAttacked(7, 2, 'b') && !this.isSquareAttacked(7, 3, 'b')) {
-                            moves.push({ toRow: 7, toCol: 2 });
-                        }
-                    }
-                    if (color === 'b' && row === 0 && col === 4 && !this.isKingInCheck('b')) {
-                        if (this.castlingRights.b.kingside && !this.board[0][5] && !this.board[0][6] &&
-                            !this.isSquareAttacked(0, 5, 'w') && !this.isSquareAttacked(0, 6, 'w')) {
-                            moves.push({ toRow: 0, toCol: 6 });
-                        }
-                        if (this.castlingRights.b.queenside && !this.board[0][1] && !this.board[0][2] && !this.board[0][3] &&
-                            !this.isSquareAttacked(0, 2, 'w') && !this.isSquareAttacked(0, 3, 'w')) {
-                            moves.push({ toRow: 0, toCol: 2 });
-                        }
-                    }
-                    break;
-            }
-            return moves;
-        }
-
-        addSlidingMoves(moves, row, col, color, directions) {
-            for (const [dr, dc] of directions) {
-                let nr = row + dr, nc = col + dc;
-                while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-                    if (this.board[nr][nc]?.color === color) break;
-                    moves.push({ toRow: nr, toCol: nc });
-                    if (this.board[nr][nc]) break;
-                    nr += dr; nc += dc;
-                }
-            }
-        }
-
-        move(from, to, promotion = 'q') {
-            if (this.gameOver) return false;
-
-            const fromIdx = this.posToIndex(from);
-            const toIdx = this.posToIndex(to);
-            const piece = this.board[fromIdx.row][fromIdx.col];
-            if (!piece || piece.color !== this.turn) return false;
-
-            const legalMoves = this.getLegalMoves(this.turn);
-            if (!legalMoves.some(m => m.from === from && m.to === to && (m.promotion === promotion || !m.promotion))) {
-                return false;
-            }
-
-            const captured = this.board[toIdx.row][toIdx.col];
-
-            // Store move for undo
-            this.moveHistory.push({
-                from, to, piece: { ...piece }, captured: captured ? { ...captured } : null,
-                castlingRights: JSON.parse(JSON.stringify(this.castlingRights)),
-                enPassantTarget: this.enPassantTarget ? { ...this.enPassantTarget } : null
-            });
-
-            // Track captured pieces
-            if (captured) {
-                this.capturedPieces[piece.color].push(captured);
-            }
-
-            // Make move
-            this.board[toIdx.row][toIdx.col] = { ...piece };
-            this.board[fromIdx.row][fromIdx.col] = null;
-
-            // Pawn promotion
-            if (piece.type === 'p' && (toIdx.row === 0 || toIdx.row === 7)) {
-                this.board[toIdx.row][toIdx.col] = { type: promotion, color: piece.color };
-            }
-
-            // Castling
-            if (piece.type === 'k' && Math.abs(toIdx.col - fromIdx.col) === 2) {
-                if (toIdx.col > fromIdx.col) {
-                    this.board[fromIdx.row][5] = this.board[fromIdx.row][7];
-                    this.board[fromIdx.row][7] = null;
-                } else {
-                    this.board[fromIdx.row][3] = this.board[fromIdx.row][0];
-                    this.board[fromIdx.row][0] = null;
-                }
-            }
-
-            // Update castling rights
-            if (piece.type === 'k') {
-                this.castlingRights[piece.color].kingside = false;
-                this.castlingRights[piece.color].queenside = false;
-            }
-            if (piece.type === 'r') {
-                if (fromIdx.col === 0) this.castlingRights[piece.color].queenside = false;
-                if (fromIdx.col === 7) this.castlingRights[piece.color].kingside = false;
-            }
-            if (captured?.type === 'r') {
-                if (toIdx.col === 0) this.castlingRights[captured.color].queenside = false;
-                if (toIdx.col === 7) this.castlingRights[captured.color].kingside = false;
-            }
-
-            // En passant
-            this.enPassantTarget = null;
-            if (piece.type === 'p' && Math.abs(toIdx.row - fromIdx.row) === 2) {
-                this.enPassantTarget = { row: (fromIdx.row + toIdx.row) / 2, col: fromIdx.col };
-            }
-
-            // Store last move
-            this.lastMove = { from, to };
-
-            // Switch turn
-            this.turn = this.turn === 'w' ? 'b' : 'w';
-
-            // Check for check/checkmate
-            this.inCheck.w = this.isKingInCheck('w');
-            this.inCheck.b = this.isKingInCheck('b');
-
-            // Check for game over
-            const nextMoves = this.getLegalMoves(this.turn);
-            if (nextMoves.length === 0) {
-                this.gameOver = true;
-            }
-
-            return true;
-        }
-
-        undo() {
-            if (this.moveHistory.length === 0) return false;
-
-            const lastMove = this.moveHistory.pop();
-            const fromIdx = this.posToIndex(lastMove.from);
-            const toIdx = this.posToIndex(lastMove.to);
-
-            // Restore piece
-            this.board[fromIdx.row][fromIdx.col] = lastMove.piece;
-            this.board[toIdx.row][toIdx.col] = lastMove.captured;
-
-            // Remove from captured if applicable
-            if (lastMove.captured) {
-                this.capturedPieces[lastMove.piece.color].pop();
-            }
-
-            // Restore castling rights
-            this.castlingRights = lastMove.castlingRights;
-            this.enPassantTarget = lastMove.enPassantTarget;
-
-            // Switch turn back
-            this.turn = lastMove.piece.color;
-
-            // Reset game over
-            this.gameOver = false;
-            this.inCheck.w = this.isKingInCheck('w');
-            this.inCheck.b = this.isKingInCheck('b');
-            this.lastMove = null;
-
-            return true;
-        }
+      }
+      return false;
     }
 
-    // ==================== CHESS AI ====================
-    class ChessAI {
-        constructor(elo = 1200) {
-            this.elo = elo;
-            this.pieceValues = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
-        }
-
-        evaluate(game, color) {
-            let score = 0;
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const piece = game.board[row][col];
-                    if (piece) {
-                        let value = this.pieceValues[piece.type];
-                        // Center control bonus
-                        if (col >= 3 && col <= 4 && row >= 3 && row <= 4) value += 10;
-                        score += piece.color === color ? value : -value;
-                    }
-                }
+    /* ---------- Zugerzeugung (pseudo-legal; Legalität via Make-Test) ---------- */
+    function genMoves(out, capsOnly) {
+      var n = 0, us = side, them = side ^ 1, i, t, q;
+      for (var idx = 0; idx < 64; idx++) {
+        var sq = SQ64[idx], p = board[sq];
+        if (p === 0 || (p >> 3) !== us) continue;
+        var pt = p & 7;
+        if (pt === PAWN) {
+          var dir = us === 0 ? 16 : -16;
+          var r = sq >> 4;
+          var promoRank = us === 0 ? 6 : 1;
+          var one = sq + dir;
+          if (board[one] === 0) {
+            if (r === promoRank) {
+              out[n++] = mv(sq, one, QUEEN, 0, 0);
+              if (!capsOnly) {
+                out[n++] = mv(sq, one, ROOK, 0, 0);
+                out[n++] = mv(sq, one, BISHOP, 0, 0);
+                out[n++] = mv(sq, one, KNIGHT, 0, 0);
+              }
+            } else if (!capsOnly) {
+              out[n++] = mv(sq, one, 0, 0, 0);
+              var startRank = us === 0 ? 1 : 6;
+              if (r === startRank && board[sq + dir + dir] === 0) out[n++] = mv(sq, sq + dir + dir, 0, 1, 0);
             }
-            return score;
-        }
-
-        minimax(game, depth, alpha, beta, maximizing, color) {
-            if (depth === 0 || game.gameOver) return this.evaluate(game, color);
-
-            const moves = game.getLegalMoves(maximizing ? color : (color === 'w' ? 'b' : 'w'));
-            if (moves.length === 0) return this.evaluate(game, color);
-
-            if (maximizing) {
-                let max = -Infinity;
-                for (const move of moves) {
-                    const fromIdx = game.posToIndex(move.from);
-                    const toIdx = game.posToIndex(move.to);
-                    const captured = game.board[toIdx.row][toIdx.col];
-                    const piece = game.board[fromIdx.row][fromIdx.col];
-                    game.board[toIdx.row][toIdx.col] = piece ? { ...piece } : null;
-                    game.board[fromIdx.row][fromIdx.col] = null;
-                    const eval_ = this.minimax(game, depth - 1, alpha, beta, false, color);
-                    game.board[fromIdx.row][fromIdx.col] = piece;
-                    game.board[toIdx.row][toIdx.col] = captured;
-                    max = Math.max(max, eval_);
-                    alpha = Math.max(alpha, eval_);
-                    if (beta <= alpha) break;
-                }
-                return max;
+          }
+          var t1 = one + 1, t2 = one - 1;
+          if (!(t1 & 0x88)) {
+            q = board[t1];
+            if (q && (q >> 3) !== us) {
+              if (r === promoRank) {
+                out[n++] = mv(sq, t1, QUEEN, 0, q); out[n++] = mv(sq, t1, ROOK, 0, q);
+                out[n++] = mv(sq, t1, BISHOP, 0, q); out[n++] = mv(sq, t1, KNIGHT, 0, q);
+              } else out[n++] = mv(sq, t1, 0, 0, q);
+            } else if (q === 0 && t1 === epSq) out[n++] = mv(sq, t1, 0, 2, PAWN | (them << 3));
+          }
+          if (!(t2 & 0x88)) {
+            q = board[t2];
+            if (q && (q >> 3) !== us) {
+              if (r === promoRank) {
+                out[n++] = mv(sq, t2, QUEEN, 0, q); out[n++] = mv(sq, t2, ROOK, 0, q);
+                out[n++] = mv(sq, t2, BISHOP, 0, q); out[n++] = mv(sq, t2, KNIGHT, 0, q);
+              } else out[n++] = mv(sq, t2, 0, 0, q);
+            } else if (q === 0 && t2 === epSq) out[n++] = mv(sq, t2, 0, 2, PAWN | (them << 3));
+          }
+        } else if (pt === KNIGHT || pt === KING) {
+          var list = pt === KNIGHT ? KNIGHT_TO[sq] : KING_TO[sq];
+          for (i = 0; i < list.length; i++) {
+            t = list[i]; q = board[t];
+            if (q === 0) { if (!capsOnly) out[n++] = mv(sq, t, 0, 0, 0); }
+            else if ((q >> 3) !== us) out[n++] = mv(sq, t, 0, 0, q);
+          }
+          if (pt === KING && !capsOnly) {
+            if (us === 0) {
+              if ((castleRights & 1) && board[5] === 0 && board[6] === 0 &&
+                  !attacked(4, 1) && !attacked(5, 1) && !attacked(6, 1)) out[n++] = mv(4, 6, 0, 3, 0);
+              if ((castleRights & 2) && board[3] === 0 && board[2] === 0 && board[1] === 0 &&
+                  !attacked(4, 1) && !attacked(3, 1) && !attacked(2, 1)) out[n++] = mv(4, 2, 0, 3, 0);
             } else {
-                let min = Infinity;
-                for (const move of moves) {
-                    const fromIdx = game.posToIndex(move.from);
-                    const toIdx = game.posToIndex(move.to);
-                    const captured = game.board[toIdx.row][toIdx.col];
-                    const piece = game.board[fromIdx.row][fromIdx.col];
-                    game.board[toIdx.row][toIdx.col] = piece ? { ...piece } : null;
-                    game.board[fromIdx.row][fromIdx.col] = null;
-                    const eval_ = this.minimax(game, depth - 1, alpha, beta, true, color);
-                    game.board[fromIdx.row][fromIdx.col] = piece;
-                    game.board[toIdx.row][toIdx.col] = captured;
-                    min = Math.min(min, eval_);
-                    beta = Math.min(beta, eval_);
-                    if (beta <= alpha) break;
-                }
-                return min;
+              if ((castleRights & 4) && board[117] === 0 && board[118] === 0 &&
+                  !attacked(116, 0) && !attacked(117, 0) && !attacked(118, 0)) out[n++] = mv(116, 118, 0, 3, 0);
+              if ((castleRights & 8) && board[115] === 0 && board[114] === 0 && board[113] === 0 &&
+                  !attacked(116, 0) && !attacked(115, 0) && !attacked(114, 0)) out[n++] = mv(116, 114, 0, 3, 0);
             }
+          }
+        } else { // Läufer, Turm, Dame
+          var dirs = pt === BISHOP ? RAY_B[sq] : pt === ROOK ? RAY_R[sq] : RAY_Q[sq];
+          for (i = 0; i < dirs.length; i++) {
+            var ray = dirs[i];
+            for (var j = 0; j < ray.length; j++) {
+              t = ray[j]; q = board[t];
+              if (q === 0) { if (!capsOnly) out[n++] = mv(sq, t, 0, 0, 0); continue; }
+              if ((q >> 3) !== us) out[n++] = mv(sq, t, 0, 0, q);
+              break;
+            }
+          }
         }
-
-        getBestMove(game) {
-            const moves = game.getLegalMoves(game.turn);
-            if (moves.length === 0) return null;
-
-            // Random factor based on ELO
-            let randomFactor = this.elo <= 800 ? 0.75 : this.elo <= 1400 ? 0.35 : this.elo <= 2000 ? 0.15 : 0.05;
-            if (Math.random() < randomFactor) {
-                return moves[Math.floor(Math.random() * moves.length)];
-            }
-
-            const depth = this.elo <= 800 ? 1 : this.elo <= 1400 ? 2 : this.elo <= 2000 ? 3 : 4;
-            let best = moves[0], bestScore = -Infinity;
-
-            for (const move of moves) {
-                const fromIdx = game.posToIndex(move.from);
-                const toIdx = game.posToIndex(move.to);
-                const captured = game.board[toIdx.row][toIdx.col];
-                const piece = game.board[fromIdx.row][fromIdx.col];
-                game.board[toIdx.row][toIdx.col] = piece ? { ...piece } : null;
-                game.board[fromIdx.row][fromIdx.col] = null;
-                const score = this.minimax(game, depth - 1, -Infinity, Infinity, false, game.turn);
-                game.board[fromIdx.row][fromIdx.col] = piece;
-                game.board[toIdx.row][toIdx.col] = captured;
-                if (score > bestScore) { bestScore = score; best = move; }
-            }
-            return best;
-        }
+      }
+      return n;
     }
 
-    // ==================== GAME UI ====================
-    class ChessGame {
-        constructor() {
-            this.game = new ChessEngine();
-            this.ai = null;
-            this.selectedSquare = null;
-            this.possibleMoves = [];
-            this.gameMode = 'pve'; // 'pvp' or 'pve'
-            this.elo = 1200;
-            this.isThinking = false;
-            this.hintSquares = null;
-
-            this.pieceSymbols = {
-                w: { k: '♔', q: '♕', r: '♖', b: '♗', n: '♘', p: '♙' },
-                b: { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' }
-            };
-
-            this.pieceValues = { p: 1, n: 3, b: 3, r: 5, q: 9 };
-
-            this.initUI();
-            this.showModeModal();
+    /* ---------- Make / Unmake (inkrementeller Hash + PST + Struktur) ---------- */
+    function make(m) {
+      var from = m & 127, to = (m >>> 7) & 127;
+      var promo = (m >>> 14) & 7, flag = (m >>> 17) & 7, cap = (m >>> 20) & 255;
+      var piece = board[from];
+      var pt = piece & 7, c = piece >> 3;
+      UNDO_MOVE[hp] = m; UNDO_CASTLE[hp] = castleRights; UNDO_EP[hp] = epSq;
+      UNDO_FIFTY[hp] = fifty; UNDO_MG[hp] = mgScore; UNDO_EG[hp] = egScore;
+      UNDO_PH[hp] = phaseUnits; UNDO_WB[hp] = bishops[0]; UNDO_BB[hp] = bishops[1];
+      UNDO_HLO[hp] = H_LO; UNDO_HHI[hp] = H_HI;
+      hp++;
+      if (epSq >= 0) { H_LO ^= Z.EP_LO[epSq & 7]; H_HI ^= Z.EP_HI[epSq & 7]; }
+      board[from] = 0;
+      H_LO ^= Z.P_LO[piece * 128 + from]; H_HI ^= Z.P_HI[piece * 128 + from];
+      if (flag === 3) { // Rochade: Turm mitbewegen
+        var rf, rt;
+        if (to === 6) { rf = 7; rt = 5; }
+        else if (to === 2) { rf = 0; rt = 3; }
+        else if (to === 118) { rf = 119; rt = 117; }
+        else { rf = 112; rt = 115; }
+        var rook = board[rf];
+        board[rf] = 0; board[rt] = rook;
+        H_LO ^= Z.P_LO[rook * 128 + rf] ^ Z.P_LO[rook * 128 + rt];
+        H_HI ^= Z.P_HI[rook * 128 + rf] ^ Z.P_HI[rook * 128 + rt];
+        mgScore += PST_MG[rook * 128 + rt] - PST_MG[rook * 128 + rf];
+        egScore += PST_EG[rook * 128 + rt] - PST_EG[rook * 128 + rf];
+      } else if (flag === 2) { // en passant
+        var capSq = (c === 0) ? to - 16 : to + 16;
+        var capPiece = board[capSq];
+        board[capSq] = 0;
+        H_LO ^= Z.P_LO[capPiece * 128 + capSq]; H_HI ^= Z.P_HI[capPiece * 128 + capSq];
+        mgScore -= PST_MG[capPiece * 128 + capSq]; egScore -= PST_EG[capPiece * 128 + capSq];
+        pawnMask[c ^ 1][capSq & 7] &= ~(1 << (capSq >> 4));
+      } else if (cap) {
+        H_LO ^= Z.P_LO[cap * 128 + to]; H_HI ^= Z.P_HI[cap * 128 + to];
+        mgScore -= PST_MG[cap * 128 + to]; egScore -= PST_EG[cap * 128 + to];
+        if ((cap & 7) === PAWN) pawnMask[c ^ 1][to & 7] &= ~(1 << (to >> 4));
+        else {
+          phaseUnits -= PH_UNIT[cap & 7];
+          if ((cap & 7) === BISHOP) bishops[c ^ 1]--;
         }
-
-        initUI() {
-            // Create board squares
-            const board = document.getElementById('board');
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const square = document.createElement('div');
-                    square.className = `square ${(row + col) % 2 === 0 ? 'white-square' : 'black-square'}`;
-                    square.dataset.row = row;
-                    square.dataset.col = col;
-                    square.addEventListener('click', () => this.handleClick(row, col));
-                    board.appendChild(square);
-                }
-            }
-
-            // Modal handlers
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    this.gameMode = btn.dataset.mode;
-                    if (this.gameMode === 'pvp') {
-                        this.startGame();
-                    } else {
-                        document.getElementById('mode-modal').classList.remove('active');
-                        document.getElementById('difficulty-modal').classList.add('active');
-                    }
-                });
-            });
-
-            document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    this.elo = parseInt(btn.dataset.elo);
-                    this.startGame();
-                });
-            });
-
-            document.querySelectorAll('.promotion-piece').forEach(piece => {
-                piece.addEventListener('click', () => this.handlePromotion(piece.dataset.piece));
-            });
-
-            // Button handlers
-            document.getElementById('hint-btn').addEventListener('click', () => this.showHint());
-            document.getElementById('undo-btn').addEventListener('click', () => this.undoMove());
-            document.getElementById('reset-btn').addEventListener('click', () => this.resetGame());
+      }
+      if (promo) {
+        var placed = promo | (c << 3);
+        board[to] = placed;
+        H_LO ^= Z.P_LO[placed * 128 + to]; H_HI ^= Z.P_HI[placed * 128 + to];
+        mgScore += PST_MG[placed * 128 + to]; egScore += PST_EG[placed * 128 + to];
+        pawnMask[c][from & 7] &= ~(1 << (from >> 4));
+        phaseUnits += PH_UNIT[promo];
+        if (promo === BISHOP) bishops[c]++;
+      } else {
+        board[to] = piece;
+        H_LO ^= Z.P_LO[piece * 128 + to]; H_HI ^= Z.P_HI[piece * 128 + to];
+        mgScore += PST_MG[piece * 128 + to] - PST_MG[piece * 128 + from];
+        egScore += PST_EG[piece * 128 + to] - PST_EG[piece * 128 + from];
+        if (pt === PAWN) {
+          pawnMask[c][from & 7] &= ~(1 << (from >> 4));
+          pawnMask[c][to & 7] |= 1 << (to >> 4);
         }
-
-        showModeModal() {
-            document.getElementById('mode-modal').classList.add('active');
+      }
+      if (pt === KING) kingSq[c] = to;
+      if (flag === 1) { // Doppelschritt: EP nur setzen, wenn Gegner schlagen kann
+        var eRank = (c === 0) ? (from >> 4) + 1 : (from >> 4) - 1;
+        var fl = from & 7, can = false, oppPawn = 1 | ((c ^ 1) << 3);
+        var esqTmp = eRank * 16 + fl, sE;
+        if (c === 0) { // schwarze Schläger stehen diagonal unter dem EP-Feld
+          sE = esqTmp + 15; if (!(sE & 0x88) && board[sE] === oppPawn) can = true;
+          sE = esqTmp + 17; if (!(sE & 0x88) && board[sE] === oppPawn) can = true;
+        } else {
+          sE = esqTmp - 15; if (!(sE & 0x88) && board[sE] === oppPawn) can = true;
+          sE = esqTmp - 17; if (!(sE & 0x88) && board[sE] === oppPawn) can = true;
         }
-
-        startGame() {
-            document.getElementById('mode-modal').classList.remove('active');
-            document.getElementById('difficulty-modal').classList.remove('active');
-            document.getElementById('game-container').style.display = 'flex';
-            document.getElementById('status-container').style.display = 'block';
-            document.getElementById('controls').style.display = 'flex';
-
-            // Update mode indicator
-            const indicator = document.getElementById('mode-indicator');
-            indicator.style.display = 'inline-flex';
-            indicator.className = `mode-indicator ${this.gameMode}`;
-            document.getElementById('mode-text').textContent = this.gameMode === 'pvp' ? 'Player vs Player' : 'vs AI';
-            document.getElementById('elo-badge').textContent = this.gameMode === 'pvp' ? 'Local' : `${this.elo} ELO`;
-            document.getElementById('elo-badge').style.display = this.gameMode === 'pve' ? 'inline' : 'none';
-
-            this.ai = this.gameMode === 'pve' ? new ChessAI(this.elo) : null;
-            this.render();
-        }
-
-        handleClick(row, col) {
-            if (this.isThinking || this.game.gameOver) return;
-
-            const piece = this.game.board[row][col];
-
-            // Check if clicking on a valid move
-            if (this.selectedSquare && this.possibleMoves.some(m => m.toRow === row && m.toCol === col)) {
-                const from = this.game.indexToPos(this.selectedSquare.row, this.selectedSquare.col);
-                const to = this.game.indexToPos(row, col);
-
-                // Check for pawn promotion
-                if (piece?.type === 'p' || this.game.board[this.selectedSquare.row][this.selectedSquare.col]?.type === 'p') {
-                    if ((this.game.turn === 'w' && row === 0) || (this.game.turn === 'b' && row === 7)) {
-                        this.promotionFrom = from;
-                        this.promotionTo = to;
-                        this.showPromotionModal(this.game.turn);
-                        return;
-                    }
-                }
-
-                this.makeMove(from, to);
-                return;
-            }
-
-            // Select piece
-            if (piece && piece.color === this.game.turn) {
-                this.selectedSquare = { row, col };
-                this.possibleMoves = this.game.getPieceMoves(this.game.indexToPos(row, col), piece);
-            } else {
-                this.selectedSquare = null;
-                this.possibleMoves = [];
-            }
-            this.render();
-        }
-
-        makeMove(from, to, promotion = 'q') {
-            const success = this.game.move(from, to, promotion);
-            if (success) {
-                this.selectedSquare = null;
-                this.possibleMoves = [];
-                this.hintSquares = null;
-                this.render();
-
-                // AI move
-                if (this.gameMode === 'pve' && !this.game.gameOver && this.game.turn === 'b') {
-                    this.isThinking = true;
-                    this.updateStatus();
-                    setTimeout(() => this.makeAIMove(), 500);
-                }
-            }
-        }
-
-        makeAIMove() {
-            const move = this.ai.getBestMove(this.game);
-            if (move) {
-                this.game.move(move.from, move.to, move.promotion || 'q');
-            }
-            this.isThinking = false;
-            this.render();
-        }
-
-        showPromotionModal(color) {
-            const modal = document.getElementById('promotion-modal');
-            const pieces = modal.querySelectorAll('.promotion-piece');
-            pieces.forEach(p => {
-                const type = p.dataset.piece;
-                p.textContent = this.pieceSymbols[color][type];
-                p.className = `promotion-piece ${color === 'w' ? 'piece-white' : 'piece-black'}`;
-            });
-            modal.classList.add('active');
-        }
-
-        handlePromotion(type) {
-            document.getElementById('promotion-modal').classList.remove('active');
-            if (this.promotionFrom && this.promotionTo) {
-                this.makeMove(this.promotionFrom, this.promotionTo, type);
-            }
-        }
-
-        showHint() {
-            if (this.isThinking || this.game.gameOver) return;
-
-            const moves = this.game.getLegalMoves(this.game.turn);
-            if (moves.length === 0) return;
-
-            // Get a decent move
-            const goodMoves = moves.filter(m => m.captured || ['d4','e4','d5','e5'].includes(m.to));
-            const hint = goodMoves.length > 0 ? goodMoves[Math.floor(Math.random() * goodMoves.length)] : moves[0];
-
-            const fromIdx = this.game.posToIndex(hint.from);
-            const toIdx = this.game.posToIndex(hint.to);
-            this.hintSquares = { from: fromIdx, to: toIdx };
-            this.render();
-
-            setTimeout(() => {
-                this.hintSquares = null;
-                this.render();
-            }, 2000);
-        }
-
-        undoMove() {
-            if (this.isThinking) return;
-
-            // In AI mode, undo two moves (player + AI)
-            if (this.gameMode === 'pve') {
-                this.game.undo();
-                this.game.undo();
-            } else {
-                this.game.undo();
-            }
-            this.selectedSquare = null;
-            this.possibleMoves = [];
-            this.render();
-        }
-
-        resetGame() {
-            document.getElementById('game-container').style.display = 'none';
-            document.getElementById('status-container').style.display = 'none';
-            document.getElementById('controls').style.display = 'none';
-            document.getElementById('mode-indicator').style.display = 'none';
-            this.game.reset();
-            this.selectedSquare = null;
-            this.possibleMoves = [];
-            this.hintSquares = null;
-            this.showModeModal();
-        }
-
-        render() {
-            // Render board
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const square = document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
-                    const piece = this.game.board[row][col];
-
-                    // Reset classes
-                    square.className = `square ${(row + col) % 2 === 0 ? 'white-square' : 'black-square'}`;
-
-                    // Highlight states
-                    if (this.selectedSquare?.row === row && this.selectedSquare?.col === col) {
-                        square.classList.add('selected');
-                    }
-                    if (this.possibleMoves.some(m => m.toRow === row && m.toCol === col)) {
-                        square.classList.add('highlight');
-                    }
-                    if (this.hintSquares) {
-                        if (this.hintSquares.from.row === row && this.hintSquares.from.col === col) {
-                            square.classList.add('hint-from');
-                        }
-                        if (this.hintSquares.to.row === row && this.hintSquares.to.col === col) {
-                            square.classList.add('hint-to');
-                        }
-                    }
-                    if (piece?.type === 'k' && this.game.inCheck[piece.color]) {
-                        square.classList.add('check');
-                    }
-                    if (this.game.lastMove) {
-                        const fromIdx = this.game.posToIndex(this.game.lastMove.from);
-                        const toIdx = this.game.posToIndex(this.game.lastMove.to);
-                        if ((fromIdx.row === row && fromIdx.col === col) || (toIdx.row === row && toIdx.col === col)) {
-                            square.classList.add('last-move');
-                        }
-                    }
-
-                    // Render piece
-                    if (piece) {
-                        square.textContent = this.pieceSymbols[piece.color][piece.type];
-                        square.classList.add(piece.color === 'w' ? 'piece-white' : 'piece-black');
-                    } else {
-                        square.textContent = '';
-                    }
-                }
-            }
-
-            // Render captured pieces
-            this.renderCapturedPieces();
-
-            // Update status
-            this.updateStatus();
-        }
-
-        renderCapturedPieces() {
-            const whiteCaptured = document.getElementById('white-captured-pieces');
-            const blackCaptured = document.getElementById('black-captured-pieces');
-
-            // White's captures (black pieces taken by white)
-            whiteCaptured.innerHTML = this.game.capturedPieces.w
-                .sort((a, b) => this.pieceValues[b.type] - this.pieceValues[a.type])
-                .map(p => `<span class="captured-piece">${this.pieceSymbols.b[p.type]}</span>`)
-                .join('');
-
-            // Black's captures (white pieces taken by black)
-            blackCaptured.innerHTML = this.game.capturedPieces.b
-                .sort((a, b) => this.pieceValues[b.type] - this.pieceValues[a.type])
-                .map(p => `<span class="captured-piece">${this.pieceSymbols.w[p.type]}</span>`)
-                .join('');
-
-            // Calculate material advantage
-            const whiteValue = this.game.capturedPieces.w.reduce((sum, p) => sum + this.pieceValues[p.type], 0);
-            const blackValue = this.game.capturedPieces.b.reduce((sum, p) => sum + this.pieceValues[p.type], 0);
-
-            const whiteValueEl = document.getElementById('white-captured-value');
-            const blackValueEl = document.getElementById('black-captured-value');
-
-            if (whiteValue > blackValue) {
-                whiteValueEl.innerHTML = `Material: +<span class="advantage">${whiteValue - blackValue}</span>`;
-                blackValueEl.innerHTML = `Material: <span class="disadvantage">-${whiteValue - blackValue}</span>`;
-            } else if (blackValue > whiteValue) {
-                whiteValueEl.innerHTML = `Material: <span class="disadvantage">-${blackValue - whiteValue}</span>`;
-                blackValueEl.innerHTML = `Material: +<span class="advantage">${blackValue - whiteValue}</span>`;
-            } else {
-                whiteValueEl.innerHTML = 'Material: Even';
-                blackValueEl.innerHTML = 'Material: Even';
-            }
-        }
-
-        updateStatus() {
-            const status = document.getElementById('status');
-            status.className = 'status-text';
-
-            if (this.isThinking) {
-                status.textContent = 'AI is thinking...';
-                status.classList.add('thinking');
-                return;
-            }
-
-            if (this.game.gameOver) {
-                if (this.game.inCheck[this.game.turn]) {
-                    const winner = this.game.turn === 'w' ? 'Black' : 'White';
-                    status.textContent = `Checkmate! ${winner} wins!`;
-                    status.classList.add('checkmate');
-                } else {
-                    status.textContent = 'Stalemate - Draw!';
-                    status.classList.add('stalemate');
-                }
-                return;
-            }
-
-            if (this.game.inCheck[this.game.turn]) {
-                status.textContent = `${this.game.turn === 'w' ? 'White' : 'Black'} is in check!`;
-                status.classList.add('check');
-                return;
-            }
-
-            status.textContent = `${this.game.turn === 'w' ? 'White' : 'Black'} to move`;
-        }
+        if (can) { epSq = esqTmp; H_LO ^= Z.EP_LO[fl]; H_HI ^= Z.EP_HI[fl]; }
+        else epSq = -1;
+      } else epSq = -1;
+      var oc = castleRights;
+      var nc = oc & CASTLE_MASK[from] & CASTLE_MASK[to];
+      if (nc !== oc) {
+        H_LO ^= Z.C_LO[oc] ^ Z.C_LO[nc]; H_HI ^= Z.C_HI[oc] ^ Z.C_HI[nc];
+        castleRights = nc;
+      }
+      fifty = (pt === PAWN || cap) ? 0 : fifty + 1;
+      side = c ^ 1;
+      H_LO ^= Z.SIDE_LO; H_HI ^= Z.SIDE_HI;
+      REP_LO[repI] = H_LO; REP_HI[repI] = H_HI; repI++;
     }
 
-    // Initialize game
-    const chessGame = new ChessGame();
+    function unmake() {
+      repI--; hp--;
+      var m = UNDO_MOVE[hp];
+      castleRights = UNDO_CASTLE[hp]; epSq = UNDO_EP[hp]; fifty = UNDO_FIFTY[hp];
+      mgScore = UNDO_MG[hp]; egScore = UNDO_EG[hp]; phaseUnits = UNDO_PH[hp];
+      bishops[0] = UNDO_WB[hp]; bishops[1] = UNDO_BB[hp];
+      H_LO = UNDO_HLO[hp]; H_HI = UNDO_HHI[hp];
+      side ^= 1;
+      var c = side;
+      var from = m & 127, to = (m >>> 7) & 127;
+      var promo = (m >>> 14) & 7, flag = (m >>> 17) & 7, cap = (m >>> 20) & 255;
+      if (flag === 3) { // Rochade
+        board[to] = 0;
+        board[from] = KING | (c << 3);
+        if (to === 6) { board[7] = ROOK | (c << 3); board[5] = 0; }
+        else if (to === 2) { board[0] = ROOK | (c << 3); board[3] = 0; }
+        else if (to === 118) { board[119] = ROOK | 8; board[117] = 0; }
+        else { board[112] = ROOK | 8; board[115] = 0; }
+      } else {
+        board[from] = promo ? (PAWN | (c << 3)) : board[to];
+        board[to] = cap ? cap : 0;
+        if (flag === 2) {
+          board[to] = 0;
+          var cs = (c === 0) ? to - 16 : to + 16;
+          board[cs] = PAWN | ((c ^ 1) << 3);
+        }
+      }
+      if ((board[from] & 7) === KING) kingSq[c] = from;
+      // pawnMask zurück
+      if (promo) {
+        pawnMask[c][from & 7] |= 1 << (from >> 4);
+      } else if ((board[from] & 7) === PAWN) {
+        pawnMask[c][to & 7] &= ~(1 << (to >> 4));
+        pawnMask[c][from & 7] |= 1 << (from >> 4);
+      }
+      if (cap && (cap & 7) === PAWN) {
+        if (flag === 2) {
+          var cs2 = (c === 0) ? to - 16 : to + 16;
+          pawnMask[c ^ 1][cs2 & 7] |= 1 << (cs2 >> 4);
+        } else {
+          pawnMask[c ^ 1][to & 7] |= 1 << (to >> 4);
+        }
+      }
+    }
+
+    function makeNull() {
+      UNDO_MOVE[hp] = 0; UNDO_CASTLE[hp] = castleRights; UNDO_EP[hp] = epSq;
+      UNDO_FIFTY[hp] = fifty; UNDO_MG[hp] = mgScore; UNDO_EG[hp] = egScore;
+      UNDO_PH[hp] = phaseUnits; UNDO_WB[hp] = bishops[0]; UNDO_BB[hp] = bishops[1];
+      UNDO_HLO[hp] = H_LO; UNDO_HHI[hp] = H_HI;
+      hp++;
+      if (epSq >= 0) { H_LO ^= Z.EP_LO[epSq & 7]; H_HI ^= Z.EP_HI[epSq & 7]; epSq = -1; }
+      fifty = fifty + 1;
+      side ^= 1;
+      H_LO ^= Z.SIDE_LO; H_HI ^= Z.SIDE_HI;
+      REP_LO[repI] = H_LO; REP_HI[repI] = H_HI; repI++;
+    }
+
+    function unmakeNull() {
+      repI--; hp--;
+      castleRights = UNDO_CASTLE[hp]; epSq = UNDO_EP[hp]; fifty = UNDO_FIFTY[hp];
+      mgScore = UNDO_MG[hp]; egScore = UNDO_EG[hp]; phaseUnits = UNDO_PH[hp];
+      bishops[0] = UNDO_WB[hp]; bishops[1] = UNDO_BB[hp];
+      H_LO = UNDO_HLO[hp]; H_HI = UNDO_HHI[hp];
+      side ^= 1;
+    }
+
+    function isRepetition() {
+      var stop = repI - 1 - fifty;
+      if (stop < 0) stop = 0;
+      for (var i = repI - 3; i >= stop; i -= 2) {
+        if (REP_LO[i] === H_LO && REP_HI[i] === H_HI) return true;
+      }
+      return false;
+    }
+
+    /* ---------- Bewertung (getapert, allokationsfrei) ---------- */
+    function kingShield(c) {
+      var ks = kingSq[c];
+      var f = ks & 7, r = ks >> 4;
+      var own = pawnMask[c], opp = pawnMask[c ^ 1];
+      var s = 0;
+      for (var df = -1; df <= 1; df++) {
+        var ff = f + df;
+        if (ff < 0 || ff > 7) continue;
+        var r1 = c === 0 ? r + 1 : r - 1;
+        var r2 = c === 0 ? r + 2 : r - 2;
+        var mask = own[ff];
+        if (r1 >= 0 && r1 <= 7) {
+          if (mask & (1 << r1)) s += SHIELD_FULL;
+          else if (r2 >= 0 && r2 <= 7 && (mask & (1 << r2))) s += SHIELD_HALF;
+          else s -= SHIELD_MISS;
+          if (opp[ff] & (1 << r1)) s -= SHIELD_OPP;
+        }
+      }
+      return s;
+    }
+
+    function evaluate() { // weiß-Perspektive
+      var mg = mgScore, eg = egScore;
+      if (bishops[0] >= 2) { mg += BISHOP_PAIR_MG; eg += BISHOP_PAIR_EG; }
+      if (bishops[1] >= 2) { mg -= BISHOP_PAIR_MG; eg -= BISHOP_PAIR_EG; }
+      var wM = pawnMask[0], bM = pawnMask[1], f, r, w, b;
+      for (f = 0; f < 8; f++) {
+        w = wM[f]; b = bM[f];
+        if (w) {
+          var wc = POPCNT[w];
+          if (wc > 1) { mg -= (wc - 1) * DOUBLED_MG; eg -= (wc - 1) * DOUBLED_EG; }
+          if (!((f > 0 ? wM[f - 1] : 0) || (f < 7 ? wM[f + 1] : 0))) { mg -= wc * ISOLATED_MG; eg -= wc * ISOLATED_EG; }
+          for (r = 0; r < 7; r++) if (w & (1 << r)) {
+            var blk = bM[f];
+            if (f > 0) blk |= bM[f - 1];
+            if (f < 7) blk |= bM[f + 1];
+            blk &= (0xFE << r) & 0xFF;
+            if (!blk) { mg += PASS_MG[r]; eg += PASS_EG[r]; }
+          }
+        }
+        if (b) {
+          var bc = POPCNT[b];
+          if (bc > 1) { mg += (bc - 1) * DOUBLED_MG; eg += (bc - 1) * DOUBLED_EG; }
+          if (!((f > 0 ? bM[f - 1] : 0) || (f < 7 ? bM[f + 1] : 0))) { mg += bc * ISOLATED_MG; eg += bc * ISOLATED_EG; }
+          for (r = 0; r < 7; r++) if (b & (1 << r)) {
+            var blk2 = wM[f];
+            if (f > 0) blk2 |= wM[f - 1];
+            if (f < 7) blk2 |= wM[f + 1];
+            blk2 &= (1 << r) - 1;
+            if (!blk2) { mg -= PASS_MG[7 - r]; eg -= PASS_EG[7 - r]; }
+          }
+        }
+      }
+      for (var i = 0; i < 64; i++) {
+        var sq = SQ64[i], p = board[sq];
+        if (p === 4) {
+          var ff2 = sq & 7;
+          if (!wM[ff2] && !bM[ff2]) { mg += ROOK_OPEN_MG; eg += ROOK_OPEN_EG; }
+          else if (!wM[ff2]) { mg += ROOK_SEMI_MG; eg += ROOK_SEMI_EG; }
+        } else if (p === 12) {
+          var ff3 = sq & 7;
+          if (!wM[ff3] && !bM[ff3]) { mg -= ROOK_OPEN_MG; eg -= ROOK_OPEN_EG; }
+          else if (!bM[ff3]) { mg -= ROOK_SEMI_MG; eg -= ROOK_SEMI_EG; }
+        }
+      }
+      mg += kingShield(0) - kingShield(1);
+      mg += side === 0 ? TEMPO : -TEMPO;
+      var ph = phaseUnits;
+      if (ph > 24) ph = 24;
+      return ((mg * ph + eg * (24 - ph)) / 24) | 0;
+    }
+    function evalSide() { var e = evaluate(); return side === 0 ? e : -e; }
+
+    /* ---------- SEE (statische Schlagzug-Bewertung) ---------- */
+    function leastAttacker(sq, by) {
+      var b = board, i, j, t, p;
+      if (by === 0) {
+        t = sq - 15; if (!(t & 0x88) && b[t] === 1) return t;
+        t = sq - 17; if (!(t & 0x88) && b[t] === 1) return t;
+      } else {
+        t = sq + 15; if (!(t & 0x88) && b[t] === 9) return t;
+        t = sq + 17; if (!(t & 0x88) && b[t] === 9) return t;
+      }
+      var kl = KNIGHT_TO[sq];
+      for (i = 0; i < kl.length; i++) { p = b[kl[i]]; if (p && (p >> 3) === by && (p & 7) === KNIGHT) return kl[i]; }
+      var rb = RAY_B[sq];
+      for (i = 0; i < 4; i++) {
+        var ray1 = rb[i];
+        for (j = 0; j < ray1.length; j++) {
+          p = b[ray1[j]];
+          if (!p) continue;
+          if ((p >> 3) === by) { var q1 = p & 7; if (q1 === BISHOP || q1 === QUEEN) return ray1[j]; }
+          break;
+        }
+      }
+      var rr = RAY_R[sq];
+      for (i = 0; i < 4; i++) {
+        var ray2 = rr[i];
+        for (j = 0; j < ray2.length; j++) {
+          p = b[ray2[j]];
+          if (!p) continue;
+          if ((p >> 3) === by) { var q2 = p & 7; if (q2 === ROOK || q2 === QUEEN) return ray2[j]; }
+          break;
+        }
+      }
+      var kk = KING_TO[sq];
+      for (i = 0; i < kk.length; i++) { p = b[kk[i]]; if (p && (p >> 3) === by && (p & 7) === KING) return kk[i]; }
+      return -1;
+    }
+
+    function seeRec(sq, by, depth) {
+      if (depth > 32) return 0;
+      var a = leastAttacker(sq, by);
+      if (a < 0) return 0;
+      var p = board[a], pt = p & 7;
+      if (pt === KING && attacked(sq, by ^ 1)) return 0; // König darf nicht geschlagen werden
+      var victim = board[sq];
+      board[a] = 0;
+      var v = VAL_T[victim & 7] - seeRec(sq, by ^ 1, depth + 1);
+      board[a] = p;
+      return v > 0 ? v : 0;
+    }
+
+    function seeOfMove(m) {
+      var from = m & 127, to = (m >>> 7) & 127;
+      var flag = (m >>> 17) & 7, promo = (m >>> 14) & 7;
+      var attacker = board[from];
+      var c = attacker >> 3;
+      if (flag === 2) { // en passant
+        var cs = (c === 0) ? to - 16 : to + 16;
+        var vp = board[cs];
+        board[from] = 0; board[cs] = 0; board[to] = attacker;
+        var vEP = VAL_T[PAWN] - seeRec(to, c ^ 1, 0);
+        board[to] = 0; board[cs] = vp; board[from] = attacker;
+        return vEP;
+      }
+      var victim = board[to];
+      board[from] = 0;
+      var v = VAL_T[victim & 7] - seeRec(to, c ^ 1, 0);
+      board[from] = attacker;
+      if (promo) v += VAL_T[promo] - VAL_T[PAWN];
+      return v;
+    }
+
+    /* ---------- gibt der Zug Schach? (Approximation fürs Pruning) ---------- */
+    function givesCheck(m) {
+      var from = m & 127, to = (m >>> 7) & 127;
+      var ksq = kingSq[side ^ 1];
+      var pt = (m >>> 14) & 7;
+      if (!pt) pt = board[from] & 7;
+      var dr = (to >> 4) - (ksq >> 4), df = (to & 7) - (ksq & 7);
+      var adr = dr < 0 ? -dr : dr, adf = df < 0 ? -df : df;
+      if (pt === KNIGHT) return (adr === 1 && adf === 2) || (adr === 2 && adf === 1);
+      if (pt === PAWN) return (side === 0) ? (dr === 1 && adf === 1) : (dr === -1 && adf === 1);
+      if (pt === KING) return false;
+      var aligned = false;
+      if (dr === 0 || df === 0) aligned = (pt === ROOK || pt === QUEEN);
+      else if (adr === adf) aligned = (pt === BISHOP || pt === QUEEN);
+      if (aligned) {
+        var kr = ksq >> 4, kf = ksq & 7;
+        // FIX: Laufrichtung HIN zum König (vorher von to weg -> Endlosschleife)
+        var rr = kr > (to >> 4) ? 1 : (kr < (to >> 4) ? -1 : 0);
+        var ff = kf > (to & 7) ? 1 : (kf < (to & 7) ? -1 : 0);
+        var r2 = (to >> 4) + rr, f2 = (to & 7) + ff;
+        // FIX (redundante Boundary-Prüfung): Der Lauf von `to` zum König ist bei
+        // ausgerichteten Feldern (gleiche Reihe/Linie/Diagonale) IMMER komplett auf
+        // dem Brett — beide Endpunkte liegen auf dem Brett und r2/f2 laufen monoton
+        // dazwischen. Die Prüfung war toter Code (historisches Sicherheitsnetz nach
+        // dem früheren Ray-Walk-Bug) und ist deshalb entfernt.
+        while (!(r2 === kr && f2 === kf)) {
+          var s = r2 * 16 + f2;
+          if (s !== from && board[s]) { aligned = false; break; }
+          r2 += rr; f2 += ff;
+        }
+        if (aligned) return true;
+      }
+      // Entdecktes Schach: hinter `from` auf der Königslinie ein eigener Slider?
+      var dr2 = (from >> 4) - (ksq >> 4), df2 = (from & 7) - (ksq & 7);
+      var a2r = dr2 < 0 ? -dr2 : dr2, a2f = df2 < 0 ? -df2 : df2;
+      if (!(dr2 === 0 || df2 === 0 || a2r === a2f)) return false;
+      var nR = (dr2 > 0) - (dr2 < 0), nF = (df2 > 0) - (df2 < 0);
+      var r4 = (from >> 4) + nR, f4 = (from & 7) + nF;
+      while (r4 >= 0 && r4 <= 7 && f4 >= 0 && f4 <= 7) {
+        var p4 = board[r4 * 16 + f4];
+        if (p4) {
+          if ((p4 >> 3) !== side) return false;
+          var t4 = p4 & 7;
+          if (nR === 0 || nF === 0) return t4 === ROOK || t4 === QUEEN;
+          return t4 === BISHOP || t4 === QUEEN;
+        }
+        r4 += nR; f4 += nF;
+      }
+      return false;
+    }
+
+    /* ---------- TT ---------- */
+    function ttIndex() {
+      return ((H_LO ^ Math.imul(H_HI, 0x9E3779B1)) >>> 0) & TT_MASK;
+    }
+    function ttStoreIdx(idx, depth, score, flag, move) {
+      TT_USED[idx] = 1;
+      TT_KEYLO[idx] = H_LO; TT_KEYHI[idx] = H_HI;
+      TT_MOVE[idx] = move;
+      TT_SCORE[idx] = score;
+      TT_META[idx] = (depth << 2) | flag;
+    }
+
+    /* ---------- Zugbewertung (Ordering) ---------- */
+    function scoreMoves(buf, n, sc, ttMove, ply) {
+      for (var i = 0; i < n; i++) {
+        var m = buf[i];
+        if (m === ttMove) { sc[i] = 1000000000; continue; }
+        var cap = (m >>> 20) & 255, promo = (m >>> 14) & 7;
+        if (cap) sc[i] = 800000 + VAL_T[cap & 7] * 16 - (board[m & 127] & 7) + (promo ? 5000 : 0);
+        else if (promo) sc[i] = 700000 + promo;
+        else if (killer0[ply] === m) sc[i] = 600000;
+        else if (killer1[ply] === m) sc[i] = 590000;
+        else sc[i] = histTable[((m & 127) << 7) | ((m >>> 7) & 127)];
+      }
+    }
+    function pickBest(buf, sc, n, i) {
+      var bi = i, bs = sc[i];
+      for (var j = i + 1; j < n; j++) {
+        if (sc[j] > bs) { bs = sc[j]; bi = j; }
+      }
+      if (bi !== i) {
+        var tm = buf[i]; buf[i] = buf[bi]; buf[bi] = tm;
+        var ts = sc[i]; sc[i] = sc[bi]; sc[bi] = ts;
+      }
+    }
+
+    function checkTime() {
+      if (now() > hardDeadline) aborted = true;
+    }
+
+    /* ---------- Quiescence ---------- */
+    function qsearch(alpha, beta, ply) {
+      if ((++nodes & 1023) === 0) checkTime();
+      if (aborted) return 0;
+      if (ply >= MAX_PLY - 2) return evalSide();
+      var inChk = attacked(kingSq[side], side ^ 1);
+      var best = -INF, stand = -INF;
+      if (!inChk) {
+        stand = evalSide();
+        if (stand >= beta) return stand;
+        if (stand > alpha) alpha = stand;
+        best = stand;
+      }
+      var buf = moveBuf(ply), sc = scoreBuf(ply);
+      var n = genMoves(buf, !inChk);
+      for (var s0 = 0; s0 < n; s0++) {
+        var m0 = buf[s0];
+        var cap0 = (m0 >>> 20) & 255, promo0 = (m0 >>> 14) & 7;
+        if (cap0) sc[s0] = 800000 + VAL_T[cap0 & 7] * 16 - (board[m0 & 127] & 7);
+        else if (promo0) sc[s0] = 700000 + promo0;
+        else sc[s0] = histTable[((m0 & 127) << 7) | ((m0 >>> 7) & 127)];
+      }
+      var legal = 0;
+      for (var i = 0; i < n; i++) {
+        pickBest(buf, sc, n, i);
+        var m = buf[i];
+        var cap = (m >>> 20) & 255, promo = (m >>> 14) & 7;
+        if (!inChk) {
+          if (cap && !promo && stand + VAL_T[cap & 7] + 200 <= alpha) continue; // Delta
+          if (cap && seeOfMove(m) < 0) continue;                                 // SEE
+        }
+        make(m);
+        if (attacked(kingSq[side ^ 1], side)) { unmake(); continue; }
+        legal++;
+        var v = -qsearch(-beta, -alpha, ply + 1);
+        unmake();
+        if (aborted) return 0;
+        if (v > best) {
+          best = v;
+          if (v > alpha) {
+            alpha = v;
+            if (alpha >= beta) break;
+          }
+        }
+      }
+      if (inChk && legal === 0) return -MATE + ply;
+      return best;
+    }
+
+    /* ---------- Hauptsuche (PVS) ---------- */
+    function search(depth, alpha, beta, ply, allowNull) {
+      if ((++nodes & 1023) === 0) checkTime();
+      if (aborted) return 0;
+      if (ply > 0) {
+        if (isRepetition()) return 0;
+        if (fifty >= 100) return 0;
+        if (ply >= MAX_PLY - 2) return evalSide();
+      }
+      var pv = beta - alpha > 1;
+      var inChk = attacked(kingSq[side], side ^ 1);
+      if (inChk) depth++;
+      if (depth <= 0) return qsearch(alpha, beta, ply);
+      // Matt-Distanz-Pruning
+      var lo = -MATE + ply, hi = MATE - ply - 1;
+      if (alpha < lo) alpha = lo;
+      if (beta > hi) beta = hi;
+      if (alpha >= beta) return alpha;
+      // TT
+      var idx = ttIndex();
+      var ttMove = 0;
+      if (TT_USED[idx] && TT_KEYLO[idx] === H_LO && TT_KEYHI[idx] === H_HI) {
+        ttMove = TT_MOVE[idx];
+        if ((TT_META[idx] >> 2) >= depth) {
+          var s0 = TT_SCORE[idx];
+          if (s0 > MATE_BOUND) s0 -= ply;
+          else if (s0 < -MATE_BOUND) s0 += ply;
+          var fl0 = TT_META[idx] & 3;
+          if (fl0 === 0) return s0;
+          if (fl0 === 1 && s0 >= beta) return s0;
+          if (fl0 === 2 && s0 <= alpha) return s0;
+        }
+      }
+      var staticEval = inChk ? -INF : evalSide();
+      // Reverse Futility Pruning
+      if (!pv && !inChk && depth <= 3 && staticEval - (90 + 70 * depth) >= beta && staticEval < MATE_BOUND) {
+        return staticEval;
+      }
+      // Nullzug-Pruning
+      if (allowNull && !pv && !inChk && depth >= 3 && phaseUnits >= 8 && staticEval >= beta && beta < MATE_BOUND) {
+        makeNull();
+        var R = 2 + (depth > 6 ? 1 : 0);
+        var vN = -search(depth - 1 - R, -beta, -beta + 1, ply + 1, false);
+        unmakeNull();
+        if (aborted) return 0;
+        if (vN >= beta) return vN >= MATE_BOUND ? beta : vN;
+      }
+      var buf = moveBuf(ply), sc = scoreBuf(ply);
+      var n = genMoves(buf, false);
+      scoreMoves(buf, n, sc, ttMove, ply);
+      var best = -INF, bestMove = 0, alphaOrig = alpha, legal = 0, quiets = 0;
+      for (var i = 0; i < n; i++) {
+        pickBest(buf, sc, n, i);
+        var m = buf[i];
+        var cap = (m >>> 20) & 255, promo = (m >>> 14) & 7;
+        var quiet = !cap && !promo;
+        var chk = quiet ? givesCheck(m) : false;
+        // Futility / Late-Move-Pruning für ruhige Züge
+        if (!pv && !inChk && quiet && !chk && best > -INF && depth <= 2) {
+          if (staticEval + (depth === 1 ? 130 : 260) <= alpha && legal > 2) continue;
+          if (quiets >= 4 + 3 * depth) continue;
+        }
+        make(m);
+        if (attacked(kingSq[side ^ 1], side)) { unmake(); continue; } // illegal
+        legal++;
+        if (quiet && !chk) quiets++;
+        var v;
+        var nd = depth - 1;
+        if (legal === 1) {
+          v = -search(nd, -beta, -alpha, ply + 1, true);
+        } else {
+          var red = 0;
+          if (depth >= 3 && quiet && !chk && !inChk && legal >= 4) {
+            red = 1 + (legal >= 14 ? 1 : 0) + (depth >= 6 ? 1 : 0);
+            if (red > nd - 1) red = nd - 1;
+          }
+          v = -search(nd - red, -alpha - 1, -alpha, ply + 1, true);
+          if (v > alpha && (red > 0 || v < beta)) v = -search(nd, -beta, -alpha, ply + 1, true);
+        }
+        unmake();
+        if (aborted) return 0;
+        if (v > best) {
+          best = v; bestMove = m;
+          if (v > alpha) {
+            alpha = v;
+            if (alpha >= beta) {
+              if (quiet) {
+                if (killer0[ply] !== m) { killer1[ply] = killer0[ply]; killer0[ply] = m; }
+                var hI = ((m & 127) << 7) | ((m >>> 7) & 127);
+                histTable[hI] += depth * depth;
+                if (histTable[hI] > (1 << 17)) {
+                  for (var hh = 0; hh < 16384; hh++) histTable[hh] >>= 1;
+                }
+              }
+              break;
+            }
+          }
+        }
+      }
+      if (legal === 0) return inChk ? -MATE + ply : 0;
+      var fl2 = best <= alphaOrig ? 2 : (best >= beta ? 1 : 0);
+      var ss = best;
+      if (ss > MATE_BOUND) ss += ply;
+      else if (ss < -MATE_BOUND) ss -= ply;
+      ttStoreIdx(idx, depth, ss, fl2, bestMove);
+      return best;
+    }
+
+    /* ---------- Root-Suche mit iterativer Tiefensuche + Aspiration ---------- */
+    function rootSearchAt(depth, alpha, beta, rootArr) {
+      var best = -INF, bestM = 0, found = false;
+      for (var i = 0; i < rootArr.length; i++) {
+        var m = rootArr[i].m;
+        make(m);
+        var v;
+        if (i === 0) {
+          v = -search(depth - 1, -beta, -alpha, 1, true);
+        } else {
+          v = -search(depth - 1, -alpha - 1, -alpha, 1, true);
+          if (v > alpha && v < beta) v = -search(depth - 1, -beta, -alpha, 1, true);
+        }
+        unmake();
+        if (aborted) break;
+        rootArr[i].score = v;
+        if (v > best) {
+          best = v; bestM = m; found = true;
+          if (v > alpha) {
+            alpha = v;
+            if (alpha >= beta) break;
+          }
+        }
+      }
+      rootArr.sort(function (a, b) { return b.score - a.score; });
+      return { score: best, move: bestM, found: found };
+    }
+
+    function searchRoot(timeMs, maxDepth) {
+      var t0 = now();
+      hardDeadline = t0 + timeMs;
+      aborted = false;
+      nodes = 0;
+      killer0.fill(0); killer1.fill(0); histTable.fill(0);
+      var buf = moveBuf(MAX_PLY + 1);
+      var n = genMoves(buf, false);
+      var rootArr = [];
+      for (var i = 0; i < n; i++) {
+        var m0 = buf[i];
+        make(m0);
+        var ok = !attacked(kingSq[side ^ 1], side);
+        unmake();
+        if (ok) rootArr.push({ m: m0, score: 0 });
+      }
+      if (rootArr.length === 0) {
+        return { move: 0, score: 0, depth: 0, nodes: nodes, elapsed: 0, scored: [] };
+      }
+      if (rootArr.length === 1) {
+        return { move: rootArr[0].m, score: 0, depth: 0, nodes: 0, elapsed: now() - t0, scored: [{ m: rootArr[0].m, score: 0 }] };
+      }
+      var bestMove = rootArr[0].m, bestScore = 0, depthDone = 0;
+      for (var d = 1; d <= maxDepth; d++) {
+        var alpha = -INF, beta = INF, delta = 32, fails = 0;
+        if (d >= 4 && Math.abs(bestScore) < MATE_BOUND) { alpha = bestScore - delta; beta = bestScore + delta; }
+        var res = null;
+        for (;;) {
+          res = rootSearchAt(d, alpha, beta, rootArr);
+          if (aborted) break;
+          if (res.score <= alpha) { delta *= 2; alpha = res.score - delta; if (alpha < -INF) alpha = -INF; }
+          else if (res.score >= beta) { delta *= 2; beta = res.score + delta; if (beta > INF) beta = INF; }
+          else break;
+          if (++fails >= 3) { alpha = -INF; beta = INF; }
+          if (fails > 8) break;
+        }
+        if (res && res.found) {
+          bestMove = res.move; bestScore = res.score; depthDone = d;
+        }
+        if (aborted) break;
+        if (Math.abs(bestScore) >= MATE_BOUND) break;
+        var el = now() - t0;
+        if (el > timeMs * 0.5) break;
+        if (timeMs - el < 30) break;
+      }
+      return { move: bestMove, score: bestScore, depth: depthDone, nodes: nodes, elapsed: now() - t0, scored: rootArr };
+    }
+
+    /* ---------- FEN / Stellungsverwaltung ---------- */
+    var SCR_BOARD = new Int8Array(128);
+    function parseFenInto(fen, targetBoard) {
+      var parts = fen.trim().split(/\s+/);
+      var rows = parts[0].split('/');
+      for (var rr = 0; rr < 8; rr++) {
+        var row = rows[rr];
+        var rank = 7 - rr, f = 0;
+        for (var k = 0; k < row.length; k++) {
+          var ch = row[k];
+          if (ch >= '1' && ch <= '8') { f += ch.charCodeAt(0) - 48; continue; }
+          targetBoard[rank * 16 + f] = CHAR_CODE[ch];
+          f++;
+        }
+      }
+      return parts;
+    }
+    function hashOfFenParts(parts, targetBoard) {
+      var lo = 0, hi = 0;
+      for (var i = 0; i < 64; i++) {
+        var sq = SQ64[i], p = targetBoard[sq];
+        if (p) { lo ^= Z.P_LO[p * 128 + sq]; hi ^= Z.P_HI[p * 128 + sq]; }
+      }
+      var sideK = parts[1] === 'w' ? 0 : 1;
+      if (sideK === 1) { lo ^= Z.SIDE_LO; hi ^= Z.SIDE_HI; }
+      var cr = 0, cs = parts[2] || '-';
+      if (cs.indexOf('K') >= 0) cr |= 1;
+      if (cs.indexOf('Q') >= 0) cr |= 2;
+      if (cs.indexOf('k') >= 0) cr |= 4;
+      if (cs.indexOf('q') >= 0) cr |= 8;
+      lo ^= Z.C_LO[cr]; hi ^= Z.C_HI[cr];
+      var eps = parts[3] || '-';
+      if (eps !== '-' && eps.length === 2) {
+        var ef = eps.charCodeAt(0) - 97, er = eps.charCodeAt(1) - 49;
+        var esq = er * 16 + ef;
+        var ok2 = false, sE3;
+        if (sideK === 0) {
+          sE3 = esq - 15; if (!(sE3 & 0x88) && targetBoard[sE3] === 1) ok2 = true;
+          sE3 = esq - 17; if (!(sE3 & 0x88) && targetBoard[sE3] === 1) ok2 = true;
+        } else {
+          sE3 = esq + 15; if (!(sE3 & 0x88) && targetBoard[sE3] === 9) ok2 = true;
+          sE3 = esq + 17; if (!(sE3 & 0x88) && targetBoard[sE3] === 9) ok2 = true;
+        }
+        if (ok2) { lo ^= Z.EP_LO[ef]; hi ^= Z.EP_HI[ef]; }
+      }
+      return { lo: lo >>> 0, hi: hi >>> 0 };
+    }
+
+    function loadFen(fen, histKeys) {
+      board.fill(0);
+      pawnMask[0].fill(0); pawnMask[1].fill(0);
+      hp = 0; repI = 0;
+      mgScore = 0; egScore = 0; phaseUnits = 0;
+      bishops[0] = 0; bishops[1] = 0;
+      var parts = parseFenInto(fen, board);
+      for (var i = 0; i < 64; i++) {
+        var sq = SQ64[i], p = board[sq];
+        if (!p) continue;
+        var t = p & 7, c = p >> 3;
+        if (t === KING) kingSq[c] = sq;
+        else {
+          phaseUnits += PH_UNIT[t];
+          if (t === PAWN) pawnMask[c][sq & 7] |= 1 << (sq >> 4);
+          else if (t === BISHOP) bishops[c]++;
+        }
+        mgScore += PST_MG[p * 128 + sq];
+        egScore += PST_EG[p * 128 + sq];
+      }
+      side = parts[1] === 'w' ? 0 : 1;
+      castleRights = 0;
+      var cs = parts[2] || '-';
+      if (cs.indexOf('K') >= 0) castleRights |= 1;
+      if (cs.indexOf('Q') >= 0) castleRights |= 2;
+      if (cs.indexOf('k') >= 0) castleRights |= 4;
+      if (cs.indexOf('q') >= 0) castleRights |= 8;
+      fifty = parts[4] ? (parseInt(parts[4], 10) || 0) : 0;
+      epSq = -1;
+      var eps = parts[3] || '-';
+      if (eps !== '-' && eps.length === 2) {
+        var ef = eps.charCodeAt(0) - 97, er = eps.charCodeAt(1) - 49;
+        var esq = er * 16 + ef;
+        var ok = false, sE2;
+        if (side === 0) { // weißer Schläger steht diagonal unter dem EP-Feld
+          sE2 = esq - 15; if (!(sE2 & 0x88) && board[sE2] === 1) ok = true;
+          sE2 = esq - 17; if (!(sE2 & 0x88) && board[sE2] === 1) ok = true;
+        } else {
+          sE2 = esq + 15; if (!(sE2 & 0x88) && board[sE2] === 9) ok = true;
+          sE2 = esq + 17; if (!(sE2 & 0x88) && board[sE2] === 9) ok = true;
+        }
+        if (ok) epSq = esq;
+      }
+      var h = hashOfFenParts(parts, board);
+      H_LO = h.lo; H_HI = h.hi;
+      GAME_KEYS = [positionKey()];
+      if (histKeys && histKeys.length) {
+        var curKey = GAME_KEYS[0];
+        for (var k2 = 0; k2 < histKeys.length; k2++) {
+          var key = histKeys[k2];
+          if (key === curKey) continue;
+          SCR_BOARD.fill(0);
+          var p2 = parseFenInto(key, SCR_BOARD);
+          var hh = hashOfFenParts(p2, SCR_BOARD);
+          REP_LO[repI] = hh.lo; REP_HI[repI] = hh.hi; repI++;
+        }
+      }
+      REP_LO[repI] = H_LO; REP_HI[repI] = H_HI; repI++;
+    }
+
+    function fen() {
+      var out = '';
+      for (var rr = 7; rr >= 0; rr--) {
+        var empty = 0;
+        for (var f = 0; f < 8; f++) {
+          var p = board[rr * 16 + f];
+          if (!p) { empty++; continue; }
+          if (empty) { out += empty; empty = 0; }
+          var t = p & 7;
+          var ch = ' PNBRQK'[t];
+          out += (p >> 3) === 0 ? ch : ch.toLowerCase();
+        }
+        if (empty) out += empty;
+        if (rr > 0) out += '/';
+      }
+      out += ' ' + (side === 0 ? 'w' : 'b') + ' ';
+      var cr = '';
+      if (castleRights & 1) cr += 'K';
+      if (castleRights & 2) cr += 'Q';
+      if (castleRights & 4) cr += 'k';
+      if (castleRights & 8) cr += 'q';
+      out += (cr || '-') + ' ' + (epSq >= 0 ? sqAlg(epSq) : '-') + ' ' + fifty + ' 1';
+      return out;
+    }
+    function positionKey() {
+      var parts = fen().split(' ');
+      return parts[0] + ' ' + parts[1] + ' ' + parts[2] + ' ' + parts[3];
+    }
+
+    /* ---------- Partie-Verwaltung ---------- */
+    function moveFromTo(f, t, promoChar) {
+      var from = algToSq(f), to = algToSq(t);
+      var buf = moveBuf(MAX_PLY + 2);
+      var n = genMoves(buf, false);
+      var promoCode = promoChar ? PROMO_CODE[promoChar] : 0;
+      for (var i = 0; i < n; i++) {
+        var m = buf[i];
+        if ((m & 127) !== from || ((m >>> 7) & 127) !== to) continue;
+        var pr = (m >>> 14) & 7;
+        if (pr) {
+          if (!promoCode || pr !== promoCode) continue;
+        }
+        make(m);
+        if (!attacked(kingSq[side ^ 1], side)) {
+          GAME_KEYS.push(positionKey());
+          return true;
+        }
+        unmake();
+      }
+      return false;
+    }
+    function undoMove() {
+      if (hp === 0) return false;
+      unmake();
+      if (GAME_KEYS.length > 1) GAME_KEYS.pop();
+      return true;
+    }
+    function legalMoveList() {
+      var buf = moveBuf(MAX_PLY + 3);
+      var n = genMoves(buf, false);
+      var out = [];
+      for (var i = 0; i < n; i++) {
+        var m = buf[i];
+        make(m);
+        var ok = !attacked(kingSq[side ^ 1], side);
+        unmake();
+        if (ok) {
+          var pr = (m >>> 14) & 7;
+          out.push({ from: sqAlg(m & 127), to: sqAlg((m >>> 7) & 127), promotion: pr ? PROMO_CH[pr] : null });
+        }
+      }
+      return out;
+    }
+    function gameResult() {
+      var buf = moveBuf(MAX_PLY + 4);
+      var n = genMoves(buf, false);
+      var any = false;
+      for (var i = 0; i < n && !any; i++) {
+        make(buf[i]);
+        if (!attacked(kingSq[side ^ 1], side)) any = true;
+        unmake();
+      }
+      var inChk = attacked(kingSq[side], side ^ 1);
+      if (!any) {
+        return inChk
+          ? { over: true, result: side === 0 ? '0-1' : '1-0', reason: 'Schachmatt' }
+          : { over: true, result: '1/2-1/2', reason: 'Patt' };
+      }
+      if (fifty >= 100) return { over: true, result: '1/2-1/2', reason: '50-Züge-Regel' };
+      var minors = 0, heavy = 0;
+      for (var j = 0; j < 64; j++) {
+        var p = board[SQ64[j]];
+        if (!p) continue;
+        var t = p & 7;
+        if (t === PAWN || t === ROOK || t === QUEEN) { heavy++; break; }
+        if (t === KNIGHT || t === BISHOP) minors++;
+      }
+      if (heavy === 0 && minors <= 1) return { over: true, result: '1/2-1/2', reason: 'ungenügendes Material' };
+      var cnt = 0;
+      for (var k = 0; k < repI; k++) {
+        if (REP_LO[k] === H_LO && REP_HI[k] === H_HI) cnt++;
+      }
+      if (cnt >= 3) return { over: true, result: '1/2-1/2', reason: 'dreifache Stellungswiederholung' };
+      return null;
+    }
+
+    /* ---------- Öffentliche API ---------- */
+    function moveObj(m) {
+      var pr = (m >>> 14) & 7;
+      return { from: sqAlg(m & 127), to: sqAlg((m >>> 7) & 127), promotion: pr ? PROMO_CH[pr] : null };
+    }
+    function perft(depth) {
+      if (depth === 0) return 1;
+      var buf = moveBuf(200 + depth);
+      var n = genMoves(buf, false);
+      var cnt = 0;
+      for (var i = 0; i < n; i++) {
+        make(buf[i]);
+        if (!attacked(kingSq[side ^ 1], side)) {
+          cnt += depth === 1 ? 1 : perft(depth - 1);
+        }
+        unmake();
+      }
+      return cnt;
+    }
+    function divide(depth) {
+      var buf = moveBuf(210);
+      var n = genMoves(buf, false);
+      var out = [];
+      for (var i = 0; i < n; i++) {
+        var m = buf[i];
+        make(m);
+        var ok = !attacked(kingSq[side ^ 1], side);
+        var c = ok && depth > 1 ? perft(depth - 1) : (ok ? 1 : 0);
+        unmake();
+        if (ok) out.push({ move: moveObj(m), count: depth === 1 ? 1 : c });
+      }
+      return out;
+    }
+    function searchPublic(timeMs, maxDepth) {
+      var r = searchRoot(timeMs, maxDepth || 64);
+      var scored = [];
+      if (r.scored) {
+        for (var i = 0; i < r.scored.length; i++) {
+          scored.push({ move: moveObj(r.scored[i].m), score: r.scored[i].score });
+        }
+      }
+      return {
+        move: r.move ? moveObj(r.move) : null,
+        score: r.score, depth: r.depth, nodes: r.nodes, elapsed: r.elapsed, scored: scored
+      };
+    }
+
+    return {
+      loadFen: loadFen,
+      fen: fen,
+      positionKey: positionKey,
+      moveFromTo: moveFromTo,
+      undoMove: undoMove,
+      legalMoves: legalMoveList,
+      gameResult: gameResult,
+      search: searchPublic,
+      perft: perft,
+      divide: divide,
+      evaluate: evaluate,
+      getHistoryKeys: function () { return GAME_KEYS.slice(); },
+      inCheck: function () { return attacked(kingSq[side], side ^ 1); },
+      turn: function () { return side === 0 ? 'w' : 'b'; }
+    };
+  }
+
+  return createEngine;
+});
+
+
+/* ============================================================
+   Worker-Glue (Release) — protokollkompatibel zur bisherigen Engine
+   Eingang:  { fen, level, requestId, histKeys? }
+   Ausgang:  { requestId, move:{from,to,promotion}, depth, score, nodes, elapsed }
+             | { requestId, gameOver:true } | { requestId, fatal }
+   Score aus Sicht der Seite am Zug (wie bisher; die UI rechnet um).
+   ============================================================ */
+var ENGINE = createEngine();
+var LEVELS = [
+  { time: 400,  depth: 2,  topN: 5, margin: 120, rand: 0.20 }, // Anfänger
+  { time: 900,  depth: 4,  topN: 3, margin: 60,  rand: 0.05 }, // Leicht
+  { time: 2000, depth: 12, topN: 1, margin: 0,   rand: 0.00 }, // Mittel
+  { time: 4000, depth: 24, topN: 1, margin: 0,   rand: 0.00 }, // Schwer
+  { time: 8000, depth: 64, topN: 1, margin: 0,   rand: 0.00 }  // Meister
+];
+
+self.onmessage = function (e) {
+  var data = e.data;
+  if (!data || !data.fen || !data.requestId) return;
+  var myRequest = data.requestId;
+  try {
+    var cfg = LEVELS[data.level] || LEVELS[2];
+    // histKeys = bisherige Stellungen der Partie (Positionsschlüssel) für
+    // Wiederholungserkennung; doppelte/aktuelle Stellung wird intern gefiltert.
+    ENGINE.loadFen(data.fen, data.histKeys || []);
+    var res = ENGINE.gameResult();
+    if (res && res.over) {
+      self.postMessage({ requestId: myRequest, gameOver: true });
+      return;
+    }
+
+    var rootMoves = ENGINE.legalMoves();
+    if (rootMoves.length === 0) {
+      self.postMessage({ requestId: myRequest, gameOver: true });
+      return;
+    }
+
+    // Bewusste Schwächung (wie bisher): gelegentlich ein Zufallszug
+    if (cfg.rand > 0 && Math.random() < cfg.rand && rootMoves.length > 1) {
+      var rm = rootMoves[Math.floor(Math.random() * rootMoves.length)];
+      self.postMessage({
+        requestId: myRequest,
+        move: { from: rm.from, to: rm.to, promotion: rm.promotion || null },
+        depth: 0, score: 0, nodes: 0, elapsed: 0
+      });
+      return;
+    }
+
+    var r = ENGINE.search(cfg.time, cfg.depth);
+    if (!r || !r.move) {
+      var fb = rootMoves[0];
+      self.postMessage({
+        requestId: myRequest,
+        move: { from: fb.from, to: fb.to, promotion: fb.promotion || null },
+        depth: 0, score: 0, nodes: 0, elapsed: 0,
+        warning: 'fallback'
+      });
+      return;
+    }
+
+    // Defensive Legalitätsprüfung (eigene Zugliste)
+    var ok = false;
+    for (var i = 0; i < rootMoves.length; i++) {
+      if (rootMoves[i].from === r.move.from && rootMoves[i].to === r.move.to &&
+          (rootMoves[i].promotion || null) === (r.move.promotion || null)) { ok = true; break; }
+    }
+    if (!ok) {
+      var fb2 = rootMoves[0];
+      self.postMessage({
+        requestId: myRequest,
+        move: { from: fb2.from, to: fb2.to, promotion: fb2.promotion || null },
+        depth: 0, score: 0, nodes: 0, elapsed: 0,
+        warning: 'illegal-from-engine'
+      });
+      return;
+    }
+
+    // Kontrollierte Zugauswahl bei niedrigen Stufen (wie bisher)
+    var moveOut = r.move;
+    if (cfg.topN > 1 && r.scored && r.scored.length > 1) {
+      var candidates = r.scored.slice(0, Math.min(cfg.topN, r.scored.length));
+      var top = candidates[0].score;
+      var pool = candidates.filter(function (x) { return x.score >= top - cfg.margin; });
+      if (pool.length > 1) moveOut = pool[Math.floor(Math.random() * pool.length)].move;
+    }
+
+    self.postMessage({
+      requestId: myRequest,
+      move: { from: moveOut.from, to: moveOut.to, promotion: moveOut.promotion || null },
+      depth: r.depth, score: r.score, nodes: r.nodes, elapsed: r.elapsed
+    });
+  } catch (err) {
+    self.postMessage({
+      requestId: myRequest,
+      fatal: String(err && err.message || err)
+    });
+  }
+};
+
+</script>
+
+<!-- ============================================================
+     HAUPT-UI
+     ============================================================ -->
+<script>
+(function(){
+  'use strict';
+
+  if (typeof Chess === 'undefined') {
+    document.body.innerHTML = '<p style="color:#fff;padding:40px;text-align:center">chess.js konnte nicht geladen werden. Bitte Netzwerkverbindung prüfen.</p>';
+    return;
+  }
+
+  /* ============================================================
+     Konstanten
+     ============================================================ */
+  var FILES = ['a','b','c','d','e','f','g','h'];
+  var GLYPH = { p:'♟', n:'♞', b:'♝', r:'♜', q:'♛', k:'♚' };
+  var PIECE_VAL = { p:1, n:3, b:3, r:5, q:9, k:0 };
+
+  /* ============================================================
+     Zustand
+     ============================================================ */
+  var game = new Chess();
+  var humanColor = 'w';
+  var flipped = false;
+  var selected = null;
+  var legalTargets = [];
+  var lastMove = null;
+  var thinking = false;
+  var levelIndex = 2;
+  var pendingPromo = null;
+  var gameId = 0;
+  var worker = null;
+  var workerUrl = null;
+  var redoStack = []; // für Wiederholen
+  var engineStartTime = 0;
+  // FIX (Aufgeben): resigned ist jetzt ein echter Spielzustand. Vorher wurde nur
+  // game._resigned gesetzt — ein Flag, das NIRGENDS geprüft wurde, sodass die
+  // Partie nach dem Aufgeben einfach weiterlief.
+  var resigned = false;
+  // FIX (Zufallsfarbe blockiert): 'r' wird NIE in humanColor gespeichert.
+  // colorChoice hält die Nutzerwahl ('w'|'b'|'r'); humanColor ist nach dem
+  // Auslösen immer 'w' oder 'b' → game.turn() === humanColor kann nie blockieren.
+  var colorChoice = 'w';
+  // FIX (Hard-Timeout-Leak): Timer global, damit cancelBot() ihn räumen kann.
+  var hardTimeoutHandle = null;
+
+  /* ============================================================
+     DOM-Referenzen
+     ============================================================ */
+  var boardEl = document.getElementById('board');
+  var statusEl = document.getElementById('status');
+  var statusTextEl = document.getElementById('statusText');
+  var movesEl = document.getElementById('moves');
+  var levelEl = document.getElementById('level');
+  var promoEl = document.getElementById('promo');
+  var promoRowEl = document.getElementById('promoRow');
+  var capturedTopSideEl = document.getElementById('capturedTopSide');
+  var capturedBottomSideEl = document.getElementById('capturedBottomSide');
+  var advantageTopEl = document.getElementById('advantageTop');
+  var advantageBottomEl = document.getElementById('advantageBottom');
+  var infoDepthEl = document.getElementById('infoDepth');
+  var infoNodesEl = document.getElementById('infoNodes');
+  var infoTimeEl = document.getElementById('infoTime');
+  var infoScoreEl = document.getElementById('infoScore');
+  var colorPickerEl = document.getElementById('colorPicker');
+  var pgnModalEl = document.getElementById('pgnModal');
+  var pgnTextEl = document.getElementById('pgnText');
+  var pgnTitleEl = document.getElementById('pgnTitle');
+  var pgnHintEl = document.getElementById('pgnHint');
+  var confirmModalEl = document.getElementById('confirmModal');
+  var confirmTitleEl = document.getElementById('confirmTitle');
+  var confirmTextEl = document.getElementById('confirmText');
+  var toastEl = document.getElementById('toast');
+
+  /* ============================================================
+     Worker-Setup (Blob-URL)
+     ============================================================ */
+  try {
+    var engineSrc = document.getElementById('engineSrc').textContent;
+    workerUrl = URL.createObjectURL(new Blob([engineSrc], { type:'application/javascript' }));
+  } catch (e) {
+    showToast('Engine konnte nicht initialisiert werden.');
+  }
+
+  /* ============================================================
+     Hilfsfunktionen
+     ============================================================ */
+  function showToast(msg, ms) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ toastEl.classList.remove('show'); }, ms || 2200);
+  }
+
+  function confirmDialog(title, text, onYes) {
+    // FIX (Dialog-Randfall): Re-Entrancy-Guard + vollständiges Aufräumen (auch bei
+    // Escape/Klick auf den Hintergrund). Vorher blieben die yes/no-Listener nach
+    // Escape bestehen und wurden beim nächsten Dialog DOPPELT gefeuert.
+    if (confirmModalEl.classList.contains('show')) return;
+    confirmTitleEl.textContent = title;
+    confirmTextEl.textContent = text;
+    confirmModalEl.classList.add('show');
+    var yes = document.getElementById('confirmYes');
+    var no = document.getElementById('confirmNo');
+    var done = false;
+    var cleanup = function () {
+      if (done) return;
+      done = true;
+      confirmModalEl.classList.remove('show');
+      yes.removeEventListener('click', onYesClick);
+      no.removeEventListener('click', onNoClick);
+      confirmModalEl.removeEventListener('click', onBackdrop);
+      document.removeEventListener('keydown', onKey);
+    };
+    var onYesClick = function(){ cleanup(); onYes(); };
+    var onNoClick = function(){ cleanup(); };
+    var onBackdrop = function(e){ if (e.target === confirmModalEl) cleanup(); };
+    var onKey = function(e){ if (e.key === 'Escape') cleanup(); };
+    yes.addEventListener('click', onYesClick);
+    no.addEventListener('click', onNoClick);
+    confirmModalEl.addEventListener('click', onBackdrop);
+    document.addEventListener('keydown', onKey);
+  }
+
+  function isHumanTurn() {
+    // FIX (Aufgeben): resigned sperrt das Brett explizit.
+    return !resigned && !game.game_over() && game.turn() === humanColor && !thinking;
+  }
+
+  function setInfo(data) {
+    if (!data || (!data.depth && !data.nodes)) {
+      infoDepthEl.textContent = '–';
+      infoNodesEl.textContent = '–';
+      infoTimeEl.textContent = '–';
+      infoScoreEl.textContent = '–';
+      infoScoreEl.className = 'v';
+      return;
+    }
+    infoDepthEl.textContent = data.depth || '–';
+    var n = data.nodes || 0;
+    infoNodesEl.textContent = n >= 1000000 ? (n/1000000).toFixed(2) + 'M'
+                            : n >= 1000 ? (n/1000).toFixed(1) + 'k'
+                            : String(n);
+    infoTimeEl.textContent = data.elapsed ? (data.elapsed/1000).toFixed(2) + 's' : '–';
+
+    // Score aus Sicht des Menschen umrechnen
+    if (typeof data.score === 'number') {
+      // Engine rechnet aus Sicht der Seite am Zug; UI will Sicht des Menschen.
+      var humanScore = (game.turn() === humanColor) ? data.score : -data.score;
+      if (Math.abs(humanScore) > 99000) {
+        var movesToMate = Math.max(1, 100000 - Math.abs(humanScore));
+        var mateIn = Math.ceil(movesToMate / 2);
+        infoScoreEl.textContent = (humanScore > 0 ? '+' : '-') + 'M' + mateIn;
+        infoScoreEl.className = 'v ' + (humanScore > 0 ? 'pos' : 'neg');
+      } else {
+        var pawns = (humanScore / 100).toFixed(2);
+        var sign = humanScore > 0 ? '+' : (humanScore < 0 ? '' : '');
+        infoScoreEl.textContent = sign + pawns;
+        infoScoreEl.className = 'v ' + (humanScore > 0 ? 'pos' : (humanScore < 0 ? 'neg' : ''));
+      }
+    }
+  }
+
+  /* ============================================================
+     Brett Rendering
+     ============================================================ */
+  function render() {
+    var board = game.board();
+    var rows = flipped ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+    var cols = flipped ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+
+    // Bestimme Königsfeld bei Schach
+    var checkSquare = null;
+    if (game.in_check() && !game.game_over()) {
+      var kc = game.turn();
+      for (var r=0; r<8; r++) for (var c=0; c<8; c++) {
+        var p = board[r][c];
+        if (p && p.type === 'k' && p.color === kc) checkSquare = FILES[c] + (8 - r);
+      }
+    }
+    // Auch bei Schachmatt markieren
+    if (game.in_checkmate()) {
+      var kcm = game.turn();
+      for (var r2=0; r2<8; r2++) for (var c2=0; c2<8; c2++) {
+        var p2 = board[r2][c2];
+        if (p2 && p2.type === 'k' && p2.color === kcm) checkSquare = FILES[c2] + (8 - r2);
+      }
+    }
+
+    var frag = document.createDocumentFragment();
+    for (var ri=0; ri<8; ri++) {
+      var r = rows[ri];
+      for (var ci=0; ci<8; ci++) {
+        var c = cols[ci];
+        var sq = FILES[c] + (8 - r);
+        var piece = board[r][c];
+        var el = document.createElement('div');
+        el.className = 'square ' + (((r + c) % 2 === 0) ? 'light' : 'dark');
+        el.dataset.square = sq;
+        el.setAttribute('role','gridcell');
+
+        if (lastMove && (sq === lastMove.from || sq === lastMove.to)) el.classList.add('last');
+        if (sq === selected) el.classList.add('sel');
+        if (sq === checkSquare) el.classList.add('check');
+
+        if (ci === 0) {
+          var rl = document.createElement('span');
+          rl.className = 'coord rank';
+          rl.textContent = String(8 - r);
+          el.appendChild(rl);
+        }
+        if (ri === 7) {
+          var fl = document.createElement('span');
+          fl.className = 'coord file';
+          fl.textContent = FILES[c];
+          el.appendChild(fl);
+        }
+        if (piece) {
+          var sp = document.createElement('span');
+          sp.className = 'piece ' + piece.color;
+          sp.textContent = GLYPH[piece.type];
+          sp.dataset.pieceType = piece.type;
+          sp.dataset.pieceColor = piece.color;
+          el.appendChild(sp);
+        }
+        if (legalTargets.indexOf(sq) !== -1) {
+          var h = document.createElement('span');
+          h.className = piece ? 'hint capture' : 'hint';
+          el.appendChild(h);
+        }
+        frag.appendChild(el);
+      }
+    }
+    boardEl.innerHTML = '';
+    boardEl.appendChild(frag);
+
+    // Buttons aktualisieren
+    // FIX (Undo-Race): "Zurück" ist jetzt auch während des Engine-Denkens aktiv —
+    // cancelBot() bricht die Suche sauber ab (Worker terminiert, Timer geräumt).
+    document.getElementById('undo').disabled = game.history().length === 0;
+    document.getElementById('redo').disabled = redoStack.length === 0 || thinking || resigned;
+  }
+
+  /* ============================================================
+     Status & Move List
+     ============================================================ */
+  function updateStatus() {
+    var text, cls = '';
+    if (resigned) {
+      // FIX (Aufgeben): Status bleibt stabil, auch wenn später updateAll() läuft.
+      text = 'Du hast aufgegeben – die Engine gewinnt.';
+      cls = 'lose';
+    } else if (game.game_over()) {
+      if (game.in_checkmate()) {
+        if (game.turn() === humanColor) { text = 'Schachmatt – die Engine gewinnt.'; cls = 'lose'; }
+        else { text = 'Schachmatt – du gewinnst!'; cls = 'win'; }
+      } else if (game.in_stalemate()) {
+        text = 'Patt – Remis.'; cls = 'draw';
+      } else if (game.in_threefold_repetition()) {
+        text = 'Remis – dreifache Stellungswiederholung.'; cls = 'draw';
+      } else if (game.insufficient_material()) {
+        text = 'Remis – ungenügend Material.'; cls = 'draw';
+      } else {
+        // 50-Züge-Regel oder sonstiges Remis — chess.js game_over() deckt das ab
+        var fenParts = game.fen().split(' ');
+        var halfmove = parseInt(fenParts[4], 10) || 0;
+        if (halfmove >= 100) { text = 'Remis – 50-Züge-Regel.'; cls = 'draw'; }
+        else { text = 'Partie beendet.'; cls = 'draw'; }
+      }
+    } else if (thinking) {
+      text = 'Engine denkt nach …';
+    } else if (game.turn() === humanColor) {
+      text = game.in_check() ? 'Schach! Du bist am Zug.' : 'Du bist am Zug.';
+    } else {
+      text = 'Engine ist am Zug.';
+    }
+    statusTextEl.textContent = text;
+    statusEl.className = 'status ' + cls + (thinking ? ' thinking' : '');
+  }
+
+  function updateMoveList() {
+    var hist = game.history();
+    var html = '';
+    for (var i=0; i<hist.length; i += 2) {
+      var num = (i/2 + 1) + '.';
+      var w = hist[i] || '';
+      var b = hist[i+1] || '';
+      var isCurrent = (i + 1 === hist.length) || (i + 2 === hist.length);
+      html += '<div class="mv-row' + (isCurrent ? ' current' : '') + '">'
+            + '<span class="mv-num">' + num + '</span>'
+            + '<span class="mv' + (w ? '' : ' empty') + '">' + (w || '') + '</span>'
+            + '<span class="mv' + (b ? '' : ' empty') + '">' + (b || '') + '</span>'
+            + '</div>';
+    }
+    movesEl.innerHTML = html;
+    movesEl.scrollTop = movesEl.scrollHeight;
+  }
+
+  /* ============================================================
+     Geschlagene Figuren & Materialbilanz
+     ============================================================ */
+  function computeCaptured() {
+    // FIX (Materialanzeige bei Umwandlungen): Geschlagene Figuren kommen JETZT aus
+    // der Zug-Historie (echte Captures) statt aus einem Abgleich mit dem
+    // Startmaterial. Vorher sah eine Umwandlung wie "Bauer geschlagen" aus
+    // (z. B. "8 Bauern geschlagen", obwohl nur verwandelt wurde). Die
+    // Materialbilanz (Vorteilszahl) wird weiterhin aus der IST-Stellung berechnet
+    // — die ist auch bei Umwandlungen korrekt, weil die neue Dame auf dem Brett steht.
+    var cap = { w:{}, b:{} }; // cap.w = von Weiß geschlagene (schwarze) Figuren
+    var hist = game.history({ verbose:true });
+    for (var i=0; i<hist.length; i++) {
+      var m = hist[i];
+      if (m.captured) cap[m.color][m.captured] = (cap[m.color][m.captured] || 0) + 1;
+    }
+    // Material aus IST-Zustand (korrekt bei Umwandlungen)
+    var mat = { w:0, b:0 };
+    var board = game.board();
+    for (var r=0; r<8; r++) for (var c=0; c<8; c++) {
+      var p = board[r][c];
+      if (p) mat[p.color] += PIECE_VAL[p.type];
+    }
+    return { capturedByWhite: cap.w, capturedByBlack: cap.b, matW: mat.w, matB: mat.b };
+  }
+
+  function renderCaptured() {
+    var data = computeCaptured();
+    // capturedByWhite = schwarze Figuren, die Weiß geschlagen hat
+    // capturedByBlack = weiße Figuren, die Schwarz geschlagen hat
+    var diff = data.matW - data.matB; // >0: Weiß führt
+
+    // Oben: zeigt die Figuren, die der OBEN stehende Spieler verloren hat.
+    // Wir zeigen oben die GEGNER-FIGUREN des menschlichen Spielers, wenn
+    // der Mensch unten sitzt. Generell: oben = Gegenseite des menschlichen
+    // Spielers (Standardansicht). Wenn geflippt, andersherum.
+    var topIsHumanColor = flipped;
+    var topColor = topIsHumanColor ? humanColor : (humanColor === 'w' ? 'b' : 'w');
+    // Figuren, die oben angezeigt werden: die des Spielers, der OBEN sitzt,
+    // die er VERLOREN hat.
+    var topCaptured = topColor === 'w' ? data.capturedByBlack : data.capturedByWhite;
+    var bottomCaptured = topColor === 'w' ? data.capturedByWhite : data.capturedByBlack;
+
+    renderCapturedSide(capturedTopSideEl, topCaptured, topColor === 'w' ? 'w' : 'b');
+    renderCapturedSide(capturedBottomSideEl, bottomCaptured, topColor === 'w' ? 'b' : 'w');
+
+    // Materialvorteil aus Sicht des jeweiligen Spielers anzeigen
+    var topAdvantage = topColor === 'w' ? diff : -diff;
+    var bottomAdvantage = -topAdvantage;
+
+    updateAdvantage(advantageTopEl, topAdvantage);
+    updateAdvantage(advantageBottomEl, bottomAdvantage);
+  }
+
+  function renderCapturedSide(container, captured, color) {
+    container.innerHTML = '';
+    var order = ['q','r','b','n','p'];
+    var hasAny = false;
+    for (var i=0; i<order.length; i++) {
+      var ty = order[i];
+      var n = captured[ty] || 0;
+      if (n <= 0) continue;
+      hasAny = true;
+      for (var j=0; j<n; j++) {
+        var span = document.createElement('span');
+        span.className = 'piece-glyph ' + color;
+        span.textContent = GLYPH[ty];
+        container.appendChild(span);
+      }
+    }
+    if (hasAny) container.classList.remove('empty');
+    else container.classList.add('empty');
+  }
+
+  function updateAdvantage(el, value) {
+    if (value === 0) {
+      el.style.visibility = 'hidden';
+      el.textContent = '0';
+      el.className = 'advantage';
+    } else {
+      el.style.visibility = 'visible';
+      var sign = value > 0 ? '+' : '';
+      el.textContent = sign + value;
+      el.className = 'advantage ' + (value > 0 ? 'pos' : 'neg');
+    }
+  }
+
+  /* ============================================================
+     Komplettes UI-Update
+     ============================================================ */
+  function updateAll() {
+    render();
+    updateStatus();
+    updateMoveList();
+    renderCaptured();
+  }
+
+  /* ============================================================
+     Spielsteuerung
+     ============================================================ */
+  function newGame(force) {
+    var startNew = function() {
+      gameId++;
+      cancelBot();
+      closePromo();
+      thinking = false;
+      resigned = false; // FIX (Aufgeben): Neue Partie räumt den resignierten Zustand ab
+      game = new Chess();
+      selected = null;
+      legalTargets = [];
+      lastMove = null;
+      redoStack = [];
+      setInfo(null);
+      // FIX (Zufallsfarbe): Auslosen basiert auf colorChoice; humanColor ist
+      // danach IMMER 'w' oder 'b' (nie 'r').
+      resolveColor();
+      flipped = (humanColor === 'b');
+      setActiveColorButton(colorChoice);
+      updateAll();
+      // Wenn die Engine anzieht (Mensch spielt Schwarz), Engine starten
+      if (game.turn() !== humanColor && !game.game_over()) {
+        botTurn();
+      }
+    };
+    if (!force && game.history().length > 0 && !game.game_over() && !resigned) {
+      confirmDialog('Neue Partie', 'Die aktuelle Partie ist noch nicht beendet. Wirklich neu starten?', startNew);
+    } else {
+      startNew();
+    }
+  }
+
+  function resolveColor() {
+    // FIX (Zufallsfarbe blockiert): Das Auslösen passiert NUR hier — humanColor
+    // kann danach nie 'r' sein, also bleibt game.turn() === humanColor immer
+    // entscheidbar und das Spiel kann nicht blockieren.
+    humanColor = (colorChoice === 'r') ? (Math.random() < 0.5 ? 'w' : 'b') : colorChoice;
+  }
+
+  function chooseColor(c) {
+    // FIX (Farbwahl inkonsistent + Zufallsfarbe): Jede Farbwahl wird SOFORT
+    // aufgelöst ('r' → Münzwurf), nie als 'r' gespeichert. Bei laufender Partie
+    // startet die gewählte Farbe eine NEUE Partie (mit Bestätigung) — vorher
+    // zeigte der Button "Zufällig" an, aber Brett/Farbe änderten sich erst bei
+    // der nächsten Partie (oder schlimmer: 'r' blockierte das Spiel komplett).
+    var inProgress = game.history().length > 0 && !game.game_over() && !resigned;
+    var label = (c === 'r') ? 'mit zufälliger Farbe' : ('als ' + (c === 'w' ? 'Weiß' : 'Schwarz'));
+    var apply = function () {
+      colorChoice = c;
+      setActiveColorButton(c);
+      resolveColor();
+      var restart = game.history().length > 0 || game.game_over() || resigned;
+      if (restart) {
+        newGame(true); // colorChoice ist bereits gesetzt; Bestätigung entfällt
+      } else {
+        flipped = (humanColor === 'b');
+        updateAll();
+        if (!game.game_over() && game.turn() !== humanColor) botTurn();
+      }
+      showToast('Du spielst ' + (humanColor === 'w' ? 'Weiß' : 'Schwarz') + (c === 'r' ? ' (ausgelost).' : '.'));
+    };
+    if (inProgress) {
+      confirmDialog('Farbwechsel', 'Neue Partie ' + label + ' starten? Die laufende Partie wird dabei beendet.', apply);
+    } else {
+      apply();
+    }
+  }
+
+  function setActiveColorButton(color) {
+    var btns = colorPickerEl.querySelectorAll('button');
+    for (var i=0; i<btns.length; i++) {
+      var bc = btns[i].dataset.color;
+      btns[i].classList.toggle('active', bc === color || (color === 'r' && bc === 'r'));
+    }
+  }
+
+  function clearHardTimeout() {
+    if (hardTimeoutHandle !== null) {
+      clearTimeout(hardTimeoutHandle);
+      hardTimeoutHandle = null;
+    }
+  }
+
+  function cancelBot() {
+    // Beendet eine laufende Engine-Berechnung HART (Undo/Neue Partie/Aufgeben/
+    // PGN-Import/Hard-Timeout).
+    // EHRICHE DOKU (statt der alten irreführenden Formulierung):
+    // worker.terminate() zerstört auch die Transpositionstabelle des Workers.
+    // Das ist hier GEWOLLT: nach Undo/Neue Partie/Import soll keine veraltete TT
+    // in eine neue Suche einfließen. Bei NORMALEN Zügen wird cancelBot() deshalb
+    // NICHT aufgerufen — dort bleiben Worker und TT erhalten (siehe onmessage),
+    // nur die Event-Handler werden abgekoppelt.
+    clearHardTimeout();
+    thinking = false;
+    if (worker) {
+      try { worker.terminate(); } catch(e) {}
+      worker = null;
+    }
+  }
+
+  function getWorker() {
+    if (!worker) {
+      try { worker = new Worker(workerUrl); } catch (e) { worker = null; }
+    }
+    return worker;
+  }
+
+  function playHumanMove(move) {
+    if (!isHumanTurn()) return;
+    var made = game.move(move);
+    if (!made) return;
+    lastMove = { from: made.from, to: made.to };
+    selected = null;
+    legalTargets = [];
+    redoStack = []; // neuer Zug → Redo-Historie verwerfen
+    updateAll();
+    if (game.game_over()) return;
+    botTurn();
+  }
+
+  function botTurn() {
+    var myGameId = gameId;
+    var myRequestId = gameId + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    // FIX (Undo/Redo-Race): erwartete Stellung merken — eine Engine-Antwort wird nur
+    // angewendet, wenn sich das Brett seither NICHT geändert hat (zusätzliche
+    // Absicherung neben gameId/requestId).
+    var expectedFen = game.fen();
+    thinking = true;
+    engineStartTime = performance.now();
+    updateStatus();
+    setInfo(null);
+
+    if (resigned || game.game_over()) {
+      thinking = false;
+      updateStatus();
+      return;
+    }
+
+    if (!workerUrl) {
+      thinking = false;
+      updateStatus();
+      showToast('Engine nicht verfügbar.');
+      return;
+    }
+
+    var w = getWorker();
+    if (!w) {
+      thinking = false;
+      updateStatus();
+      showToast('Worker konnte nicht gestartet werden.');
+      return;
+    }
+
+    w.onmessage = function(e) {
+      if (myGameId !== gameId) {
+        // Späte Nachricht aus alter Partie — verwerfen!
+        return;
+      }
+      var data = e.data || {};
+      // Auch requestId prüfen
+      if (data.requestId && data.requestId !== myRequestId) return;
+      // FIX (Undo/Redo-Race): Antwort nur im erwarteten Kontext anwenden.
+      if (!thinking || game.fen() !== expectedFen) return;
+
+      // FIX (Hard-Timeout-Leak): Antwort da → Timer sofort räumen.
+      clearHardTimeout();
+      // FIX (TT bleibt erhalten): Worker wird bei NORMALEN Zügen NICHT terminiert.
+      // Vorher lief cancelBot() hier bei jedem Zug → worker.terminate() killte die
+      // TT jedes Mal (und der alte cancelBot-Kommentar beschrieb das Gegenteil).
+      // Nur die Handler werden abgekoppelt; cancelBot() bleibt echten Abbrüchen
+      // (Undo/Neu/Aufgeben/Import/Timeout) vorbehalten.
+      w.onmessage = null;
+      w.onerror = null;
+      thinking = false;
+
+      if (data.fatal) {
+        setInfo(null);
+        updateStatus();
+        showToast('Engine-Fehler: ' + data.fatal);
+        // Versuche Fallback
+        if (!game.game_over() && !resigned) playFallbackMove('Engine-Fehler');
+        return;
+      }
+      if (data.gameOver || !data.move) {
+        updateStatus();
+        if (!data.move) showToast('Engine lieferte keinen Zug.');
+        return;
+      }
+      // Legalität prüfen, bevor der Zug ausgeführt wird
+      var verify = new Chess(game.fen());
+      var verifyMove = verify.move({
+        from: data.move.from, to: data.move.to,
+        promotion: data.move.promotion || 'q'
+      });
+      if (!verifyMove) {
+        updateStatus();
+        showToast('Engine lieferte illegalen Zug –Fallback.');
+        if (!game.game_over() && !resigned) playFallbackMove('Illegaler Engine-Zug');
+        return;
+      }
+      // Zug ausführen
+      var made = game.move({
+        from: data.move.from, to: data.move.to,
+        promotion: data.move.promotion || 'q'
+      });
+      if (made) {
+        lastMove = { from: made.from, to: made.to };
+      }
+      setInfo(data);
+      updateAll();
+    };
+
+    w.onerror = function(err) {
+      if (myGameId !== gameId) return;
+      cancelBot();
+      updateStatus();
+      if (!game.game_over() && !resigned) {
+        playFallbackMove('Worker-Absturz');
+      } else {
+        showToast('Worker-Fehler.');
+      }
+      if (err && err.preventDefault) err.preventDefault();
+    };
+
+    // Stellungshistorie für Wiederholungserkennung (per Replay, zustandslos)
+    var posKeys = [];
+    try {
+      var tmpGame = new Chess();
+      function pk(f) { var p = f.split(' '); return p[0] + ' ' + p[1] + ' ' + p[2] + ' ' + p[3]; }
+      posKeys.push(pk(tmpGame.fen()));
+      var histSans = game.history();
+      for (var hi = 0; hi < histSans.length; hi++) {
+        tmpGame.move(histSans[hi]);
+        posKeys.push(pk(tmpGame.fen()));
+      }
+    } catch (eHist) { posKeys = []; }
+
+    // FIX (Hard-Timeout-Race): Der 14s-Timer wird ERST NACH erfolgreichem
+    // postMessage scharf geschaltet. Wirft postMessage (z. B. toter Worker),
+    // gibt es keinen Timer, der später einen "Phantom-Ersatzzug" ohne laufende
+    // Anfrage auslösen kann. Der Fallback selbst validiert erneut (gameId/State).
+    try {
+      w.postMessage({
+        fen: expectedFen,
+        level: levelIndex,
+        requestId: myRequestId,
+        histKeys: posKeys
+      });
+    } catch (err) {
+      cancelBot();
+      updateStatus();
+      if (!game.game_over() && !resigned) playFallbackMove('postMessage fehlgeschlagen');
+      return;
+    }
+    clearHardTimeout();
+    hardTimeoutHandle = setTimeout(function() {
+      hardTimeoutHandle = null;
+      if (myGameId !== gameId) return;   // Anfrage gehört nicht mehr zur Partie
+      if (!thinking) return;             // Antwort wurde längst verarbeitet
+      cancelBot();                        // Worker hängt → terminieren (TT-Verlust ok)
+      updateStatus();
+      if (!game.game_over() && !resigned) playFallbackMove('Timeout');
+    }, 14000);
+  }
+
+  function playFallbackMove(reason) {
+    // FIX (Hard-Timeout-Race): Doppelabsicherung — niemals einen Ersatzzug spielen,
+    // wenn die Partie längst beendet/verlassen ist.
+    if (resigned || game.game_over()) { updateAll(); return; }
+    var ms = game.moves({ verbose:true });
+    if (ms.length === 0) {
+      updateAll();
+      return;
+    }
+    // Wähle zufälligen legalen Zug (möglichst keinen, der sofort Material verliert)
+    // Simpel: zuerst nach Schlagzügen suchen, sonst zufällig
+    var captures = ms.filter(function(m){ return m.captured; });
+    var pool = captures.length > 0 ? captures : ms;
+    var m = pool[Math.floor(Math.random() * pool.length)];
+    var made = game.move({ from:m.from, to:m.to, promotion:m.promotion || 'q' });
+    if (made) lastMove = { from: made.from, to: made.to };
+    showToast('Ersatzzug gespielt (' + reason + ').');
+    updateAll();
+  }
+
+  function undoMove() {
+    if (game.history().length === 0) return;
+    // FIX (Undo/Redo-Race): Undo ist jetzt auch während des Engine-Denkens erlaubt.
+    // gameId++ invalidiert verspätete Antworten zusätzlich, cancelBot() terminiert
+    // den Worker hart und räumt den Hard-Timeout mit ab.
+    gameId++;
+    cancelBot();
+    closePromo();
+    var revived = resigned;
+    // "Zug zurück" nach Aufgabe = Partie EXPLIZIT fortsetzen (bewusste Nutzeraktion,
+    // kein Fortlaufen im Hintergrund wie beim alten Bug).
+    resigned = false;
+
+    // Wir wollen nach Undo wieder am Zug sein.
+    // Strategie: Undo so oft, bis der MENSCH wieder am Zug ist (max 2 Züge).
+    var undone = 0;
+    while (game.history().length > 0 && undone < 2) {
+      var last = game.history({ verbose:true }).slice(-1)[0];
+      game.undo();
+      redoStack.push(last);
+      undone++;
+      if (game.turn() === humanColor && !game.game_over()) break;
+    }
+
+    selected = null;
+    legalTargets = [];
+    lastMove = null;
+    var h = game.history({ verbose:true });
+    if (h.length) { var m = h[h.length-1]; lastMove = { from:m.from, to:m.to }; }
+    setInfo(null);
+    updateAll();
+    if (revived) showToast('Partie fortgesetzt – Zug zurückgenommen.');
+  }
+
+  function redoMove() {
+    if (thinking || redoStack.length === 0 || resigned) return;
+    gameId++;
+    closePromo();
+    var m = redoStack.pop();
+    var made = game.move({ from:m.from, to:m.to, promotion:m.promotion || 'q' });
+    if (made) lastMove = { from: made.from, to: made.to };
+    selected = null;
+    legalTargets = [];
+    setInfo(null);
+    updateAll();
+    // Falls nach Redo die Engine am Zug ist, Engine starten
+    if (!game.game_over() && game.turn() !== humanColor) {
+      botTurn();
+    }
+  }
+
+  /* ============================================================
+     PGN-Import / -Export
+     ============================================================ */
+  function buildPgn() {
+    var hist = game.history();
+    var lines = [];
+    var result = '*';
+    // FIX (Aufgeben): Aufgabe geht als reguläres Ergebnis in den PGN-Export ein.
+    if (resigned) result = (humanColor === 'w') ? '0-1' : '1-0';
+    else if (game.in_checkmate()) result = (game.turn() === 'w') ? '0-1' : '1-0';
+    else if (game.game_over()) result = '1/2-1/2';
+
+    var header = [
+      '[Event "Schach-Web-App"]',
+      '[Site "Local"]',
+      '[Date "' + new Date().toISOString().slice(0,10).replace(/-/g,'.') + '"]',
+      '[White "' + (humanColor === 'w' ? 'Spieler' : 'Engine') + '"]',
+      '[Black "' + (humanColor === 'b' ? 'Spieler' : 'Engine') + '"]',
+      '[Result "' + result + '"]'
+    ];
+    var moves = [];
+    for (var i=0; i<hist.length; i += 2) {
+      var num = (i/2 + 1) + '.';
+      var w = hist[i] || '';
+      var b = hist[i+1] || '';
+      if (b) moves.push(num + ' ' + w + ' ' + b);
+      else moves.push(num + ' ' + w);
+    }
+    moves.push(result);
+    return header.join('\n') + '\n\n' + moves.join(' ');
+  }
+
+  function openPgnExport() {
+    pgnTitleEl.textContent = 'Partie exportieren (PGN)';
+    pgnHintEl.textContent = 'Kopiere den PGN-Text oder schließe das Fenster.';
+    pgnTextEl.value = buildPgn();
+    pgnTextEl.readOnly = true;
+    pgnModalEl.classList.add('show');
+    pgnTextEl.focus();
+    pgnTextEl.select();
+  }
+
+  function openPgnImport() {
+    if (thinking) { showToast('Bitte warte, bis die Engine fertig ist.'); return; }
+    pgnTitleEl.textContent = 'Partie laden (PGN)';
+    pgnHintEl.textContent = 'Füge hier eine Partie im PGN-Format ein und klicke „Übernehmen“.';
+    pgnTextEl.value = '';
+    pgnTextEl.readOnly = false;
+    pgnModalEl.classList.add('show');
+    setTimeout(function(){ pgnTextEl.focus(); }, 50);
+  }
+
+  // FIX (PGN ohne Header): dreistufiger Import —
+  //   1) load_pgn direkt (sloppy, toleranter SAN-Parser)
+  //   2) load_pgn mit ergänzten Minimal-Headern ("Quick-Share"-PGNs)
+  //   3) manuelles SAN-Replay (Zugnummern/Kommentare/NAGs/Ergebnis werden entfernt)
+  function tryLoadPgn(g, text) {
+    try { if (g.load_pgn(text, { sloppy: true })) return true; } catch (e1) {}
+    try { if (g.load_pgn(text)) return true; } catch (e2) {}
+    return false;
+  }
+
+  function importPgnText(text) {
+    var g = new Chess();
+    if (tryLoadPgn(g, text)) return g;
+    var withHeaders = '[Event "?"]\n[Site "?"]\n[Date "????.??.??"]\n[Round "?"]\n[White "?"]\n[Black "?"]\n[Result "*"]\n\n' + text;
+    g = new Chess();
+    if (tryLoadPgn(g, withHeaders)) return g;
+    // Fallback: manuelles SAN-Replay
+    var clean = text
+      .replace(/\{[^}]*\}/g, ' ')               // {Kommentare}
+      .replace(/;[^\n]*/g, ' ')                  // ;Restzeilen-Kommentare
+      .replace(/\([^()]*\)/g, ' ')               // (Varianten, eine Ebene)
+      .replace(/\$\d+/g, ' ')                    // NAGs
+      .replace(/\b(1-0|0-1|1\/2-1\/2|\*)\b/g, ' ') // Ergebnis
+      .replace(/\d+\s*\.(?:\.\.)?/g, ' ')       // Zugnummern ("1." / "1...")
+      .trim();
+    if (!clean) return null;
+    var toks = clean.split(/[\s\n]+/);
+    g = new Chess();
+    for (var i=0; i<toks.length; i++) {
+      var t = toks[i].replace(/[!?]+$/, '');     // Annotationen (!?) entfernen
+      if (!t) continue;
+      var mv = null;
+      try { mv = g.move(t, { sloppy: true }); } catch (e3) { mv = null; }
+      if (!mv) return null; // illegaler/unklarer Zug → Import scheitert bewusst
+    }
+    return g;
+  }
+
+  function applyPgnImport() {
+    var text = pgnTextEl.value.trim();
+    if (!text) { showToast('Leere Eingabe.'); return; }
+    try {
+      var g = importPgnText(text);
+      if (!g) {
+        showToast('PGN konnte nicht gelesen werden (auch nicht ohne Header).');
+        return;
+      }
+      gameId++;
+      cancelBot();
+      closePromo();
+      thinking = false;
+      resigned = false; // importierte Partie ersetzt auch einen resignierten Zustand
+      game = g;
+      selected = null;
+      legalTargets = [];
+      redoStack = [];
+      var h = game.history({ verbose:true });
+      lastMove = h.length ? { from:h[h.length-1].from, to:h[h.length-1].to } : null;
+      // Falls die Seite am Zug ist, die nicht der Mensch ist → Engine starten
+      pgnModalEl.classList.remove('show');
+      setInfo(null);
+      updateAll();
+      if (!game.game_over() && game.turn() !== humanColor) {
+        botTurn();
+      }
+      showToast('Partie geladen.');
+    } catch (err) {
+      showToast('PGN-Fehler: ' + (err.message || err));
+    }
+  }
+
+  /* ============================================================
+     Interaktion: Klick + Drag&Drop
+     ============================================================ */
+  function squareFromPoint(clientX, clientY) {
+    var rect = boardEl.getBoundingClientRect();
+    var x = clientX - rect.left;
+    var y = clientY - rect.top;
+    if (x < 0 || y < 0 || x >= rect.width || y >= rect.height) return null;
+    var fileIdx = Math.floor(x / (rect.width / 8));
+    var rankIdx = Math.floor(y / (rect.height / 8));
+    if (flipped) { fileIdx = 7 - fileIdx; rankIdx = 7 - rankIdx; }
+    return FILES[fileIdx] + (8 - rankIdx);
+  }
+
+  function selectSquare(sq) {
+    var piece = game.get(sq);
+    if (piece && piece.color === humanColor && isHumanTurn()) {
+      selected = sq;
+      legalTargets = game.moves({ square: sq, verbose: true }).map(function(m){ return m.to; });
+    } else {
+      selected = null;
+      legalTargets = [];
+    }
+    render();
+  }
+
+  function tryMove(fromSq, toSq) {
+    if (!isHumanTurn()) return false;
+    var candidates = game.moves({ square: fromSq, verbose: true })
+                          .filter(function(m){ return m.to === toSq; });
+    if (candidates.length === 0) return false;
+    if (candidates.length > 1) {
+      // Umwandlung → Dialog
+      askPromotion(fromSq, toSq);
+      return true;
+    }
+    playHumanMove(candidates[0]);
+    return true;
+  }
+
+  function onSquareClick(sq) {
+    if (pendingPromo) return; // Dialog offen
+    if (!isHumanTurn()) return;
+    if (selected) {
+      if (sq === selected) {
+        selected = null; legalTargets = []; render(); return;
+      }
+      // Versuch Zug
+      if (tryMove(selected, sq)) return;
+      // Kein legaler Zug → evtl. andere eigene Figur wählen
+      selectSquare(sq);
+      return;
+    }
+    selectSquare(sq);
+  }
+
+  function closePromo() {
+    // FIX (Promo-Modal): EIN einziger Aufräum-Punkt für ALLE Wege (Escape, Hintergrund-
+    // Klick, Undo, Neue Partie, Aufgeben, Import). Vorher setzten verschiedene Stellen
+    // pendingPromo/Klasse einzeln — bei schnellen Eingaben konnte der Zustand
+    // auseinanderlaufen (Modal zu, pendingPromo noch gesetzt oder umgekehrt).
+    pendingPromo = null;
+    promoEl.classList.remove('show');
+  }
+
+  function askPromotion(from, to) {
+    if (!isHumanTurn()) return;
+    pendingPromo = { from: from, to: to };
+    promoRowEl.innerHTML = '';
+    ['q','r','b','n'].forEach(function(p) {
+      var b = document.createElement('button');
+      b.className = 'promo-btn';
+      b.textContent = GLYPH[p];
+      b.addEventListener('click', function() {
+        var pp = pendingPromo;
+        closePromo();
+        if (pp) playHumanMove({ from: pp.from, to: pp.to, promotion: p });
+      });
+      promoRowEl.appendChild(b);
+    });
+    promoEl.classList.add('show');
+  }
+
+  /* ============================================================
+     Interaktion: EIN einheitlicher Eingabepfad (Tap vs. Drag)
+     ------------------------------------------------------------
+     FIX (Touch/Click-Doppeltrigger): Vorher selektierte der
+     mousedown/touchstart-Handler sofort UND der danach feuernde
+     'click'-Handler togglelte dieselbe Figur wieder ab — auf Mobilgeräten
+     (und je nach Browser auch am Desktop) wurde ein Tippen damit zu
+     "auswählen → sofort wieder abwählen". Jetzt gibt es GENAU EINEN
+     Entscheidungspunkt: pointerup unterscheidet Tap (kein Bewegung > 6px)
+     von Drag. Ein separater click-Listener existiert bewusst NICHT mehr.
+     ============================================================ */
+  var DRAG_THRESHOLD = 6; // px — darunter gilt ein Pointer als Tipp
+  var input = null;       // { from, ownPiece, wasSelected, startX, startY, moved, id, visual }
+
+  function posOf(e) {
+    if (typeof e.clientX === 'number') return { x: e.clientX, y: e.clientY };
+    var t = (e.changedTouches && e.changedTouches[0]) || (e.touches && e.touches[0]);
+    return t ? { x: t.clientX, y: t.clientY } : { x: 0, y: 0 };
+  }
+
+  function samePointer(e, st) {
+    return st.id === null || e.pointerId === undefined || e.pointerId === st.id;
+  }
+
+  function clearDragVisual(st) {
+    if (st && st.visual) { st.visual.classList.remove('dragging'); st.visual = null; }
+  }
+
+  function inputDown(pos, e) {
+    if (input) return;                    // zweiter Finger / zweite Taste ignorieren
+    if (pendingPromo) return;             // Umwandlungsdialog offen
+    if (!isHumanTurn()) return;
+    var sq = squareFromPoint(pos.x, pos.y);
+    if (!sq) return;
+    var piece = game.get(sq);
+    var own = !!(piece && piece.color === humanColor);
+    if (!own && !selected) return;        // nichts zu tun (leeres Feld ohne Auswahl)
+    input = {
+      from: sq,
+      ownPiece: own,
+      wasSelected: (selected === sq),
+      startX: pos.x, startY: pos.y,
+      moved: false,
+      id: (e && e.pointerId !== undefined) ? e.pointerId : null,
+      visual: null
+    };
+    if (e && e.cancelable) e.preventDefault(); // kein Scroll/Textauswahl/Kompatibilitäts-Click
+  }
+
+  function inputMove(pos, e) {
+    if (!input || !samePointer(e, input)) return;
+    var dx = pos.x - input.startX, dy = pos.y - input.startY;
+    if (!input.moved && (dx * dx + dy * dy) > DRAG_THRESHOLD * DRAG_THRESHOLD) {
+      input.moved = true;
+      if (input.ownPiece) {
+        var el = boardEl.querySelector('.square[data-square="' + input.from + '"] .piece');
+        if (el) { el.classList.add('dragging'); input.visual = el; }
+      }
+    }
+    if (input.moved && e.cancelable) e.preventDefault();
+  }
+
+  function inputUp(pos, e) {
+    if (!input || !samePointer(e, input)) return;
+    var st = input;
+    input = null;
+    clearDragVisual(st);
+    var toSq = squareFromPoint(pos.x, pos.y);
+
+    if (!st.moved) {                       // --- TIPP ---
+      onSquareClick(st.from);
+      return;
+    }
+    if (!st.ownPiece) return;              // Drag ohne eigene Figur → kein Zug
+    if (!toSq) return;                     // außerhalb abgelegt → Auswahl bleibt
+    if (toSq === st.from) {                // zurückgelegt → Auswahlzustand wie vorher
+      if (!st.wasSelected) selectSquare(st.from);
+      return;
+    }
+    // --- DRAG-ZUG ---
+    if (!tryMove(st.from, toSq)) {
+      var pc = game.get(toSq);
+      if (pc && pc.color === humanColor) selectSquare(toSq); // eigene Figur → neu wählen
+      else { selected = null; legalTargets = []; render(); } // ungültig → abwählen
+    }
+  }
+
+  function inputCancel(e) {
+    if (!input || !samePointer(e, input)) return;
+    var st = input;
+    input = null;
+    clearDragVisual(st);
+  }
+
+  if (window.PointerEvent) {
+    // Moderner Pfad: Pointer Events decken Maus UND Touch ab (kein Doppel-Dispatch).
+    boardEl.addEventListener('pointerdown', function (e) { inputDown(posOf(e), e); });
+    window.addEventListener('pointermove', function (e) { inputMove(posOf(e), e); }, { passive: false });
+    window.addEventListener('pointerup', function (e) { inputUp(posOf(e), e); });
+    window.addEventListener('pointercancel', inputCancel);
+  } else {
+    // Legacy-Fallback (sehr alte Browser ohne Pointer Events) — ebenfalls OHNE
+    // separaten click-Handler, damit kein Doppel-Dispatch entstehen kann.
+    boardEl.addEventListener('touchstart', function (e) { inputDown(posOf(e), e); }, { passive: false });
+    window.addEventListener('touchmove', function (e) { inputMove(posOf(e), e); }, { passive: false });
+    window.addEventListener('touchend', function (e) { inputUp(posOf(e), e); });
+    window.addEventListener('touchcancel', inputCancel);
+    boardEl.addEventListener('mousedown', function (e) { inputDown(posOf(e), e); });
+    window.addEventListener('mousemove', function (e) { inputMove(posOf(e), e); });
+    window.addEventListener('mouseup', function (e) { inputUp(posOf(e), e); });
+  }
+
+  // Verhindere Kontextmenü & langes Gedrückthalten auf dem Brett
+  boardEl.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+  /* ============================================================
+     Buttons & Steuerung
+     ============================================================ */
+  document.getElementById('newGame').addEventListener('click', function(){ newGame(false); });
+  document.getElementById('undo').addEventListener('click', undoMove);
+  document.getElementById('redo').addEventListener('click', redoMove);
+  document.getElementById('flip').addEventListener('click', function(){
+    flipped = !flipped;
+    updateAll();
+  });
+  document.getElementById('resign').addEventListener('click', function(){
+    if (resigned || game.game_over()) return;
+    confirmDialog('Aufgeben', 'Möchtest du wirklich aufgeben? Die Partie wird als Niederlage gewertet.', function(){
+      // FIX (Aufgeben wirkungslos): resigned ist jetzt ein ECHTER Spielzustand:
+      // isHumanTurn() sperrt das Brett (vorher: Klicks auf eigene Figuren
+      // funktionierten einfach weiter), cancelBot() stoppt die Engine hart und
+      // räumt den Hard-Timeout ab, und updateStatus() respektiert resigned, sodass
+      // die Meldung stabil bleibt statt beim nächsten updateAll() überschrieben
+      // zu werden. Rückkehr ins Spiel bewusst nur über "Zurück" (Zug zurücknehmen)
+      // oder "Neue Partie".
+      resigned = true;
+      cancelBot();
+      closePromo();
+      selected = null;
+      legalTargets = [];
+      updateAll();
+    });
+  });
+  document.getElementById('copyPgn').addEventListener('click', function(){
+    var pgn = buildPgn();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(pgn).then(function(){
+        showToast('PGN in die Zwischenablage kopiert.');
+      }).catch(function(){
+        openPgnExport();
+      });
+    } else {
+      openPgnExport();
+    }
+  });
+  document.getElementById('importPgn').addEventListener('click', openPgnImport);
+  document.getElementById('pgnCancel').addEventListener('click', function(){
+    pgnModalEl.classList.remove('show');
+  });
+  document.getElementById('pgnOk').addEventListener('click', function(){
+    if (pgnTextEl.readOnly) {
+      pgnModalEl.classList.remove('show');
+    } else {
+      applyPgnImport();
+    }
+  });
+  promoEl.addEventListener('click', function(e){
+    if (e.target === promoEl) closePromo();
+  });
+
+  // Schwierigkeit
+  levelEl.addEventListener('change', function(){
+    levelIndex = parseInt(levelEl.value, 10) || 0;
+    showToast('Schwierigkeit: ' + levelEl.options[levelEl.selectedIndex].text);
+  });
+
+  // Farbauswahl
+  colorPickerEl.addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    // FIX (Zufallsfarbe + Konsistenz): Wahl wird sofort aufgelöst — nie 'r' speichern.
+    chooseColor(btn.dataset.color);
+  });
+
+  // Tastatur
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') {
+      closePromo();
+      pgnModalEl.classList.remove('show');
+      confirmModalEl.classList.remove('show');
+      selected = null; legalTargets = []; render();
+    }
+    if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault(); if (e.shiftKey) redoMove(); else undoMove();
+    }
+    if (e.key === 'f' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      var tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      flipped = !flipped; updateAll();
+    }
+  });
+
+  // Aufräumen
+  window.addEventListener('beforeunload', function(){
+    cancelBot();
+    if (workerUrl) { try { URL.revokeObjectURL(workerUrl); } catch(e) {} }
+  });
+
+  /* ============================================================
+     Start
+     ============================================================ */
+  // Standard: Weiß, neue Partie → Mensch ist am Zug
+  colorChoice = 'w';
+  humanColor = 'w';
+  setActiveColorButton('w');
+  game = new Chess();
+  updateAll();
+
+})();
 </script>
 </body>
 </html>
-
-
-
