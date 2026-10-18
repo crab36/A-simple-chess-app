@@ -40,6 +40,7 @@
   }
 
   *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   html,body{height:100%}
   body{
     margin:0;
@@ -61,6 +62,7 @@
     max-width:1180px;
     margin:0 auto;
     padding:18px 18px 28px;
+    padding-bottom:calc(28px + env(safe-area-inset-bottom,28px));
   }
   .app-header{
     display:flex;align-items:center;justify-content:space-between;
@@ -74,6 +76,7 @@
     box-shadow:0 6px 16px rgba(79,157,255,.35);
   }
   .top-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .top-actions button{width:auto;padding:9px 16px}
 
   main{
     display:grid;
@@ -81,8 +84,8 @@
     gap:22px;
     align-items:start;
   }
-  @media(max-width:920px){
-    main{grid-template-columns:1fr}
+  @media(max-width:720px){
+    main{grid-template-columns:1fr;gap:14px}
   }
 
   /* ============================================================
@@ -92,7 +95,7 @@
     display:flex;flex-direction:column;align-items:center;gap:10px;
   }
   .captured-row{
-    width:var(--board-size,min(78vh,640px));
+    width:min(78vh,640px,calc(100vw - 430px));
     max-width:100%;
     min-height:42px;
     display:flex;align-items:center;justify-content:space-between;
@@ -126,7 +129,7 @@
     box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,.05) inset;
   }
   .board{
-    --size:min(78vh,640px,92vw);
+    --size:min(78vh,640px,calc(100vw - 430px));
     width:var(--size);height:var(--size);
     display:grid;
     grid-template-columns:repeat(8,1fr);
@@ -188,7 +191,7 @@
     display:flex;flex-direction:column;gap:14px;
     position:sticky;top:18px;
   }
-  @media(max-width:920px){
+  @media(max-width:720px){
     .panel{position:static}
   }
   .panel-section{display:flex;flex-direction:column;gap:7px}
@@ -244,6 +247,7 @@
     font:inherit;width:100%;padding:10px 12px;border-radius:var(--radius-sm);
     border:1px solid var(--border);background:#222b3c;color:var(--text);
     cursor:pointer;transition:.15s;font-family:inherit;
+    touch-action:manipulation;
   }
   select:hover,button:hover{background:#2a3547;border-color:var(--border-strong)}
   select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -325,14 +329,28 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
 
-  /* Small screens */
+  /* ============================================================
+     Handy / kleine Screens
+     ============================================================ */
+  @media(max-width:720px){
+    .board{--size:min(78vh,640px,calc(100vw - 68px))}
+    .captured-row{width:min(78vh,640px,calc(100vw - 68px))}
+  }
   @media(max-width:560px){
-    .app{padding:10px 10px 18px}
+    .app{padding:10px 10px 18px;padding-bottom:calc(18px + env(safe-area-inset-bottom,18px))}
     .app-title{font-size:1.05rem}
+    .app-title .logo{width:30px;height:30px;font-size:17px}
     .top-actions{width:100%;justify-content:stretch}
-    .top-actions button{flex:1}
+    .top-actions button{flex:1;padding:12px 16px}
     .panel{padding:13px}
-    .captured-row{font-size:18px;min-height:38px;padding:5px 9px}
+    .board-wrap{padding:8px;border-radius:11px}
+    .board{--size:min(78vh,calc(100vw - 48px))}
+    .captured-row{width:min(78vh,calc(100vw - 48px));font-size:18px;min-height:38px;padding:5px 9px}
+    select,button{padding:12px}
+    .btn-row button,.btn-grid button,.color-picker button{padding:13px 8px;font-size:.9rem}
+    .moves{height:120px}
+    .modal{padding:12px}
+    .modal-box{padding:18px 16px}
   }
 </style>
 </head>
@@ -344,7 +362,7 @@
       <span>Schach <span style="color:var(--text-mute);font-weight:400">vs. Engine</span></span>
     </div>
     <div class="top-actions">
-      <button id="newGame" class="primary" style="width:auto;padding:9px 16px">Neue Partie</button>
+      <button id="newGame" class="primary" style="width:auto">Neue Partie</button>
     </div>
   </header>
 
@@ -2970,3 +2988,4 @@ self.onmessage = function (e) {
 </script>
 </body>
 </html>
+
