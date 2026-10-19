@@ -35,9 +35,6 @@ simple random-move AI. This app takes a different approach:
 
 - **Platform**: Android WebView (no native engine, by design)
 - **Engine**: 0x88 board, Zobrist hashing (2×32 bit), incremental evaluation
-- **License**: [MIT / GPL-3.0 – fill in]
-- **Source code**: [link to repository]
-
 ## Why WebView?
 
 The app is intentionally built as a WebView app because the engine is written
