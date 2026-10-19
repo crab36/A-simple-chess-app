@@ -37,6 +37,7 @@
     --shadow:0 18px 50px rgba(0,0,0,.55);
     --font:"Inter","Segoe UI",-apple-system,system-ui,Roboto,sans-serif;
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    color-scheme:dark;
   }
 
   *{box-sizing:border-box}
@@ -125,7 +126,7 @@
   .board-wrap{
     padding:14px;
     border-radius:var(--radius);
-    background:linear-gradient(160deg,#3a2f26,#1d1612);
+    background:linear-gradient(160deg,var(--frame-a,#3a2f26),var(--frame-b,#1d1612));
     box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,.05) inset;
   }
   .board{
@@ -330,6 +331,68 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
 
   /* ============================================================
+     Batch 6: Uhr, Tipp-Markierung, Themen, Brett-Paletten
+     ============================================================ */
+  .clocks{display:flex;gap:8px}
+  .clock{
+    flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:8px 12px;border-radius:var(--radius-sm);
+    background:rgba(0,0,0,.22);border:1px solid var(--border);
+    font-family:var(--mono);
+  }
+  .clock .clock-label{
+    font-size:.66rem;color:var(--text-mute);text-transform:uppercase;
+    letter-spacing:.08em;font-family:var(--font);font-weight:600;
+  }
+  .clock .clock-time{font-size:1.02rem;font-weight:700}
+  .clock.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+  .clock.low .clock-time{color:var(--danger)}
+  .square.hint-move{box-shadow:inset 0 0 0 3px var(--accent)}
+  .theme-row{display:flex;gap:8px}
+  .theme-row select{flex:1}
+  .panel-section.disabled{opacity:.45;pointer-events:none}
+
+  /* Brett-Paletten: Brett + Rahmen über Variablen */
+  body.board-walnut{--light-sq:#ead9b8;--dark-sq:#a87b54;--frame-a:#3a2f26;--frame-b:#1d1612}
+  body.board-green{--light-sq:#eef0d5;--dark-sq:#77956a;--frame-a:#3f4c39;--frame-b:#232b20}
+  body.board-blue{--light-sq:#dfe8f0;--dark-sq:#6b8cab;--frame-a:#3c4a58;--frame-b:#222c36}
+
+  /* Helles Theme (überschreibt die dunklen Hardcodierungen) */
+  body.theme-light{
+    color-scheme:light;
+    --panel:#ffffff;--panel-2:#f2f5f9;
+    --border:rgba(15,25,40,.12);--border-strong:rgba(15,25,40,.22);
+    --text:#1a2230;--text-dim:#4a586c;--text-mute:#7b879a;
+    --sel:rgba(60,140,255,.42);--last:rgba(255,190,0,.5);--check:rgba(230,60,60,.6);
+    background:
+      radial-gradient(1100px 700px at 18% -10%, #dfe7f2 0%, transparent 60%),
+      radial-gradient(900px 600px at 110% 110%, #e8eef8 0%, transparent 55%),
+      linear-gradient(180deg,#f4f6fa,#e7ebf2);
+  }
+  body.theme-light select,body.theme-light button{background:#e6eaf1;border-color:rgba(15,25,40,.14)}
+  body.theme-light select:hover,body.theme-light button:hover{background:#dde3ec;border-color:var(--border-strong)}
+  body.theme-light .color-picker button{background:#e6eaf1}
+  body.theme-light .color-picker button.active,
+  body.theme-light button.primary{background:linear-gradient(180deg,#2f7cf6,#215ec4);border-color:#2f7cf6;color:#fff}
+  body.theme-light .info-cell,body.theme-light .clock,body.theme-light .moves{background:#e9edf3}
+  body.theme-light .moves::-webkit-scrollbar-thumb{background:rgba(15,25,40,.2)}
+  body.theme-light .mv-row:nth-child(odd){background:rgba(15,25,40,.04)}
+  body.theme-light .mv-row.current{background:rgba(79,157,255,.18);outline:1px solid rgba(79,157,255,.45)}
+  body.theme-light .pgn-textarea{background:#f6f8fb}
+  body.theme-light .toast{background:rgba(250,251,253,.97)}
+  body.theme-light .modal{background:rgba(205,215,230,.6)}
+  body.theme-light .modal-box{background:#fff}
+  body.theme-light .status{background:rgba(15,25,40,.04)}
+  body.theme-light .status.win{background:rgba(95,207,128,.1)}
+  body.theme-light .status.lose{background:rgba(255,107,107,.08)}
+  body.theme-light .status.draw{background:rgba(240,192,80,.1)}
+  body.theme-light .board-wrap{box-shadow:0 18px 50px rgba(30,40,60,.28),0 0 0 1px rgba(255,255,255,.6) inset}
+  body.theme-light .captured-row{background:linear-gradient(180deg,rgba(15,25,40,.035),rgba(15,25,40,.012))}
+  body.theme-light .captured-row .advantage{background:rgba(15,25,40,.06)}
+  body.theme-light button.ghost{background:transparent}
+  body.theme-light button.ghost:hover{background:rgba(15,25,40,.05)}
+
+  /* ============================================================
      Handy / kleine Screens
      ============================================================ */
   @media(max-width:720px){
@@ -359,10 +422,10 @@
   <header class="app-header">
     <div class="app-title">
       <span class="logo">♞</span>
-      <span>Schach <span style="color:var(--text-mute);font-weight:400">vs. Engine</span></span>
+      <span><span data-i18n="appTitle">Schach</span> <span style="color:var(--text-mute);font-weight:400" data-i18n="appVs">vs. Engine</span></span>
     </div>
     <div class="top-actions">
-      <button id="newGame" class="primary" style="width:auto">Neue Partie</button>
+      <button id="newGame" class="primary" style="width:auto" data-i18n="newGame">Neue Partie</button>
     </div>
   </header>
 
@@ -373,7 +436,7 @@
         <div class="advantage" id="advantageTop" style="visibility:hidden">+0</div>
       </div>
       <div class="board-wrap">
-        <div id="board" class="board" role="grid" aria-label="Schachbrett"></div>
+        <div id="board" class="board" role="grid" data-i18n-aria="boardAria" aria-label="Schachbrett"></div>
       </div>
       <div class="captured-row" id="capturedBottom">
         <div class="side empty" id="capturedBottomSide"></div>
@@ -384,50 +447,101 @@
     <aside class="panel">
       <div id="status" class="status">
         <span class="dot"></span>
-        <span id="statusText">Bereit. Wähle eine Farbe und starte eine Partie.</span>
+        <span id="statusText" data-i18n="ready">Bereit. Wähle eine Farbe und starte eine Partie.</span>
       </div>
 
       <div class="info-grid">
-        <div class="info-cell"><div class="k">Tiefe</div><div class="v" id="infoDepth">–</div></div>
-        <div class="info-cell"><div class="k">Knoten</div><div class="v" id="infoNodes">–</div></div>
-        <div class="info-cell"><div class="k">Zeit</div><div class="v" id="infoTime">–</div></div>
-        <div class="info-cell"><div class="k">Bewertung</div><div class="v" id="infoScore">–</div></div>
+        <div class="info-cell"><div class="k" data-i18n="infoDepth">Tiefe</div><div class="v" id="infoDepth">–</div></div>
+        <div class="info-cell"><div class="k" data-i18n="infoNodes">Knoten</div><div class="v" id="infoNodes">–</div></div>
+        <div class="info-cell"><div class="k" data-i18n="infoTime">Zeit</div><div class="v" id="infoTime">–</div></div>
+        <div class="info-cell"><div class="k" data-i18n="infoScore">Bewertung</div><div class="v" id="infoScore">–</div></div>
+      </div>
+
+      <div class="clocks" id="clockBar" hidden>
+        <div class="clock" id="clockW"><span class="clock-label" data-i18n="white">Weiß</span><span class="clock-time" id="clockTimeW">–</span></div>
+        <div class="clock" id="clockB"><span class="clock-label" data-i18n="black">Schwarz</span><span class="clock-time" id="clockTimeB">–</span></div>
       </div>
 
       <div class="panel-section">
-        <label>Spielfarbe</label>
+        <label for="mode" data-i18n="mode">Modus</label>
+        <select id="mode">
+          <option value="pve" selected data-i18n="modePve">Gegen Engine</option>
+          <option value="pvp" data-i18n="modePvp">Zwei Spieler (PvP)</option>
+        </select>
+      </div>
+
+      <div class="panel-section">
+        <label data-i18n="side">Spielfarbe</label>
         <div class="color-picker" id="colorPicker">
-          <button data-color="w" class="active">Weiß</button>
-          <button data-color="b">Schwarz</button>
-          <button data-color="r">Zufällig</button>
+          <button data-color="w" class="active" data-i18n="white">Weiß</button>
+          <button data-color="b" data-i18n="black">Schwarz</button>
+          <button data-color="r" data-i18n="random">Zufällig</button>
         </div>
       </div>
 
       <div class="panel-section">
-        <label for="level">Schwierigkeit</label>
+        <label for="level" data-i18n="skill">Schwierigkeit</label>
         <select id="level">
-          <option value="0">Anfänger</option>
-          <option value="1">Leicht</option>
-          <option value="2" selected>Mittel</option>
-          <option value="3">Schwer</option>
-          <option value="4">Meister</option>
+          <option value="0" data-i18n="level0">Anfänger</option>
+          <option value="1" data-i18n="level1">Leicht</option>
+          <option value="2" selected data-i18n="level2">Mittel</option>
+          <option value="3" data-i18n="level3">Schwer</option>
+          <option value="4" data-i18n="level4">Meister</option>
+        </select>
+      </div>
+
+      <div class="panel-section">
+        <label for="tcSelect" data-i18n="clock">Schachuhr</label>
+        <select id="tcSelect">
+          <option value="0" selected data-i18n="tc0">Ohne Uhr</option>
+          <option value="180000|2000" data-i18n="tc1">Blitz 3+2</option>
+          <option value="300000|3000" data-i18n="tc2">Blitz 5+3</option>
+          <option value="600000|0" data-i18n="tc3">Schnellschach 10+0</option>
         </select>
       </div>
 
       <div class="btn-grid">
-        <button id="undo">↶ Zurück</button>
-        <button id="redo">↷ Wiederholen</button>
-        <button id="flip">⇅ Drehen</button>
-        <button id="resign" class="ghost">Aufgeben</button>
+        <button id="undo" data-i18n="undo">↶ Zurück</button>
+        <button id="redo" data-i18n="redo">↷ Wiederholen</button>
+        <button id="flip" data-i18n="flip">⇅ Drehen</button>
+        <button id="resign" class="ghost" data-i18n="resign">Aufgeben</button>
       </div>
 
       <div class="btn-grid">
-        <button id="copyPgn" class="ghost">PGN kopieren</button>
-        <button id="importPgn" class="ghost">PGN laden</button>
+        <button id="hint" data-i18n="hint">💡 Tipp</button>
+        <button id="soundBtn" class="ghost">🔊 Sound</button>
+      </div>
+
+      <div class="btn-grid">
+        <button id="copyPgn" class="ghost" data-i18n="copyPgn">PGN kopieren</button>
+        <button id="importPgn" class="ghost" data-i18n="loadPgn">PGN laden</button>
       </div>
 
       <div class="panel-section">
-        <label>Züge</label>
+        <label for="langSelect" data-i18n="language">Sprache</label>
+        <select id="langSelect" aria-label="Sprache / Language">
+          <option value="de" selected>Deutsch</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      <div class="panel-section">
+        <label data-i18n="appearance">Darstellung</label>
+        <div class="theme-row">
+          <select id="themeSelect" data-i18n-aria="schemeAria" aria-label="Farbschema">
+            <option value="dark" selected data-i18n="themeDark">Dunkel</option>
+            <option value="light" data-i18n="themeLight">Hell</option>
+          </select>
+          <select id="boardSelect" data-i18n-aria="paletteAria" aria-label="Brettfarben">
+            <option value="walnut" selected data-i18n="boardWalnut">Walnuß</option>
+            <option value="green" data-i18n="boardGreen">Grün</option>
+            <option value="blue" data-i18n="boardBlue">Blau</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <label data-i18n="moves">Züge</label>
         <div id="moves" class="moves"></div>
       </div>
     </aside>
@@ -437,8 +551,8 @@
 <!-- Promotion modal -->
 <div id="promo" class="modal">
   <div class="modal-box">
-    <h3>Umwandlung</h3>
-    <p>Wähle die Figur, in die der Bauer umgewandelt werden soll.</p>
+    <h3 data-i18n="promoTitle">Umwandlung</h3>
+    <p data-i18n="promoText">Wähle die Figur, in die der Bauer umgewandelt werden soll.</p>
     <div class="promo-row" id="promoRow"></div>
   </div>
 </div>
@@ -462,8 +576,8 @@
     <h3 id="confirmTitle">Bestätigen</h3>
     <p id="confirmText">Sicher?</p>
     <div class="modal-actions">
-      <button id="confirmNo" class="ghost" style="width:auto">Abbrechen</button>
-      <button id="confirmYes" class="primary" style="width:auto">Bestätigen</button>
+      <button id="confirmNo" class="ghost" style="width:auto" data-i18n="cancel">Abbrechen</button>
+      <button id="confirmYes" class="primary" style="width:auto" data-i18n="confirm">Bestätigen</button>
     </div>
   </div>
 </div>
@@ -480,6 +594,7 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
      ENGINE — runs inside a Web Worker
      ============================================================ -->
 <script id="engineSrc" type="text/js-worker">
+var createEngine = self.createEngine; /* Brücke: Browser-Worker + Test-Shim */
 'use strict';
 /* ============================================================
    Schach-Engine "Meister" — nativer 0x88-Suchkern (Änderung 3)
@@ -510,8 +625,10 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
   var MAX_PLY = 96;
   var VAL_T = [0, 100, 320, 330, 500, 900, 20000];        // MVV-LVA / Delta
   var PH_UNIT = [0, 0, 1, 1, 2, 4, 0];                    // Phaseneinheiten
-  var PASS_MG = [0, 4, 8, 14, 24, 44, 80];
-  var PASS_EG = [0, 12, 22, 36, 60, 100, 160];
+  var PASS_MG = [0, -4, -28, -30, -3, 44, 85];   // Texel-getunt (quiet-labeled.epd, 40k)
+  var PASS_EG = [0, 8, 19, 37, 58, 76, 122];     // Texel-getunt: PeSTO-eg-Bauerntabelle
+                                                 // kodiert Freibauern bereits stark,
+                                                 // Zusatzbonus daher reduziert
   var CHAR_CODE = { P: 1, N: 2, B: 3, R: 4, Q: 5, K: 6, p: 9, n: 10, b: 11, r: 12, q: 13, k: 14 };
   var PROMO_CH = { 2: 'n', 3: 'b', 4: 'r', 5: 'q' };
   var PROMO_CODE = { n: 2, b: 3, r: 4, q: 5 };
@@ -521,6 +638,26 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
   var ROOK_OPEN_MG = 28, ROOK_OPEN_EG = 10, ROOK_SEMI_MG = 11, ROOK_SEMI_EG = 5;
   var SHIELD_FULL = 12, SHIELD_HALF = 6, SHIELD_MISS = 16, SHIELD_OPP = 8;
   var TEMPO = 10;
+  /* ---------- Batch 4: Eval-/Such-Parameter ---------- */
+  var MOB_W = [0, 0, 4, 3, 2, 1, 0];          // Mobilitätsgewicht je Typ
+  var MOB_BASE = [0, 0, 4, 6, 7, 13, 0];      // erwartete Mobilität
+  var PROTECTED_MG = 8, PROTECTED_EG = 14;    // geschützter Freibauer
+  var CONNECTED_MG = 6, CONNECTED_EG = 10;    // verbundener Freibauer
+  var OUTPOST_MG = 14, OUTPOST_EG = 10, OUTPOST_CENTRAL = 4;
+  var ROOK7_MG = 14;                          // Turm auf der 7. Reihe
+  var KN_NEAR_MG = 6, B_NEAR_MG = 4;          // Leichtfigur nahe am feindl. König
+  var Q_NEAR_UNIT = 3;                        // Dame-Nähe pro Feld (≤3)
+  var BAD_BISHOP_MG = 6, BAD_BISHOP_EG = 6;   // pro eigenem Bauern auf Läuferfarbe über 3
+  var PASS_KING_W = 8, PASS_KING_O = 10;      // eg: Königsnähe zu Freibauern
+
+  /* ---------- Batch 6: Endspiel-Wissen ---------- */
+  var KPK_WIN_BASE = 480;                     // KPK nachweislich gewonnen: eg-Antrieb
+  var KRK_BASE = 380, KRK_KING = 10, KRK_CUT2 = 12, KRK_CUT3 = 6;   // K+T vs K
+  var KQK_BASE = 420, KQK_KING = 10, KQK_Q = 4;                     // K+D vs K
+  var KBNK_BASE = 340, KBNK_CORNER = 20, KBNK_KING = 10, KBNK_SHEP = 8;   // K+L+S vs K
+  // KBNK_SHEP: eigener König führt zur richtigen Ecke — bricht das flache
+  // Plateau auf der Grundreihe (a8/h8 haben beide Chebyshev-Distanz 7 zu a1)
+  var UNSTOPPABLE_EG = 380;                   // Quadrate-Regel: Freibauer nicht aufzuhalten
 
   /* ---------- Zobrist (2×32 Bit, verschiedene Seeds!) ---------- */
   function makeZobrist(seed) {
@@ -544,49 +681,114 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
   }
   var Z = makeZobrist(0x9E3779B9), Z2 = makeZobrist(0x85EBCA6B);
 
-  /* ---------- Piece-Square-Tabellen (a8-first, klassische Werte) ---------- */
+  /* ---------- Piece-Square-Tabellen: PeSTO (RofChade, Texel-getunt) ----------
+     Quelle: chessprogramming.org/PeSTO's_Evaluation_Function (Werte Rofchade).
+     Konvention identisch zum bisherigen Aufbau: Zeile 0 = a8-first aus Weiß-Sicht,
+     Weiß liest Index (7-r)*8+f, Schwarz den vertikal gespiegelten Index r*8+f —
+     exakt äquivalent zu PeSTO's FLIP(sq)=sq^56. mg/eg-Materialwerte inklusive. */
   var PST_SRC_MG = {
-    p: [0,0,0,0,0,0,0,0, 50,50,50,50,50,50,50,50, 10,10,20,30,30,20,10,10,
-        5,5,10,25,25,10,5,5, 0,0,0,20,20,0,0,0, 5,-5,-10,0,0,-10,-5,5,
-        5,10,10,-20,-20,10,10,5, 0,0,0,0,0,0,0,0],
-    n: [-50,-40,-30,-30,-30,-30,-40,-50, -40,-20,0,0,0,0,-20,-40, -30,0,10,15,15,10,0,-30,
-        -30,5,15,20,20,15,5,-30, -30,0,15,20,20,15,0,-30, -30,5,10,15,15,10,5,-30,
-        -40,-20,0,5,5,0,-20,-40, -50,-40,-30,-30,-30,-30,-40,-50],
-    b: [-20,-10,-10,-10,-10,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,10,10,5,0,-10,
-        -10,5,5,10,10,5,5,-10, -10,0,10,10,10,10,0,-10, -10,10,10,10,10,10,10,-10,
-        -10,5,0,0,0,0,5,-10, -20,-10,-10,-10,-10,-10,-10,-20],
-    r: [0,0,0,0,0,0,0,0, 5,10,10,10,10,10,10,5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5,
-        -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, 0,0,0,5,5,0,0,0],
-    q: [-20,-10,-10,-5,-5,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,5,5,5,0,-10,
-        -5,0,5,5,5,5,0,-5, 0,0,5,5,5,5,0,-5, -10,5,5,5,5,5,0,-10,
-        -10,0,5,0,0,0,0,-10, -20,-10,-10,-5,-5,-10,-10,-20],
-    k: [-30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30,
-        -30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30,
-        -20,-30,-30,-40,-40,-30,-30,-20, -10,-20,-20,-20,-20,-20,-20,-10,
-        20,20,0,0,0,0,20,20, 20,30,10,0,0,10,30,20]
+    p: [0,   0,   0,   0,   0,   0,  0,   0,
+        98, 134,  61,  95,  68, 126, 34, -11,
+        -6,   7,  26,  31,  65,  56, 25, -20,
+        -14,  13,   6,  21,  23,  12, 17, -23,
+        -27,  -2,  -5,  12,  17,   6, 10, -25,
+        -26,  -4,  -4, -10,   3,   3, 33, -12,
+        -35,  -1, -20, -23, -15,  24, 38, -22,
+        0,   0,   0,   0,   0,   0,  0,   0],
+    n: [-167, -89, -34, -49,  61, -97, -15, -107,
+        -73, -41,  72,  36,  23,  62,   7,  -17,
+        -47,  60,  37,  65,  84, 129,  73,   44,
+        -9,  17,  19,  53,  37,  69,  18,   22,
+        -13,   4,  16,  13,  28,  19,  21,   -8,
+        -23,  -9,  12,  10,  19,  17,  25,  -16,
+        -29, -53, -12,  -3,  -1,  18, -14,  -19,
+        -105, -21, -58, -33, -17, -28, -19,  -23],
+    b: [-29,   4, -82, -37, -25, -42,   7,  -8,
+        -26,  16, -18, -13,  30,  59,  18, -47,
+        -16,  37,  43,  40,  35,  50,  37,  -2,
+        -4,   5,  19,  50,  37,  37,   7,  -2,
+        -6,  13,  13,  26,  34,  12,  10,   4,
+        0,  15,  15,  15,  14,  27,  18,  10,
+        4,  15,  16,   0,   7,  21,  33,   1,
+        -33,  -3, -14, -21, -13, -12, -39, -21],
+    r: [32,  42,  32,  51, 63,  9,  31,  43,
+        27,  32,  58,  62, 80, 67,  26,  44,
+        -5,  19,  26,  36, 17, 45,  61,  16,
+        -24, -11,   7,  26, 24, 35,  -8, -20,
+        -36, -26, -12,  -1,  9, -7,   6, -23,
+        -45, -25, -16, -17,  3,  0,  -5, -33,
+        -44, -16, -20,  -9, -1, 11,  -6, -71,
+        -19, -13,   1,  17, 16,  7, -37, -26],
+    q: [-28,   0,  29,  12,  59,  44,  43,  45,
+        -24, -39,  -5,   1, -16,  57,  28,  54,
+        -13, -17,   7,   8,  29,  56,  47,  57,
+        -27, -27, -16, -16,  -1,  17,  -2,   1,
+        -9, -26,  -9, -10,  -2,  -4,   3,  -3,
+        -14,   2, -11,  -2,  -5,   2,  14,   5,
+        -35,  -8,  11,   2,   8,  15,  -3,   1,
+        -1, -18,  -9,  10, -15, -25, -31, -50],
+    k: [-65,  23,  16, -15, -56, -34,   2,  13,
+        29,   -1, -20,  -7,  -8,  -4, -38, -29,
+        -9,  24,   2, -16, -20,   6,  22, -22,
+        -17, -20, -12, -27, -30, -25, -14, -36,
+        -49,  -1, -27, -39, -46, -44, -33, -51,
+        -14, -14, -22, -46, -44, -30, -15, -27,
+        1,   7,  -8, -64, -43, -16,   9,   8,
+        -15,  36,  12, -54,   8, -28,  24,  14]
   };
   var PST_SRC_EG = {
-    p: [0,0,0,0,0,0,0,0, 50,50,50,50,50,50,50,50, 30,30,30,30,30,30,30,30,
-        25,25,25,25,25,25,25,25, 15,15,15,15,15,15,15,15, 5,5,5,5,5,5,5,5,
-        0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0],
-    n: [-50,-40,-30,-30,-30,-30,-40,-50, -30,-20,-10,-10,-10,-10,-20,-30, -30,-10,0,0,0,0,-10,-30,
-        -30,-10,10,15,15,10,-10,-30, -30,-10,15,20,20,15,-10,-30, -30,-10,10,15,15,10,-10,-30,
-        -30,-30,0,0,0,0,-30,-30, -50,-30,-30,-30,-30,-30,-30,-50],
-    b: [-20,-10,-10,-10,-10,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,10,10,5,0,-10,
-        -10,5,5,10,10,5,5,-10, -10,0,5,10,10,5,0,-10, -10,5,5,10,10,5,5,-10,
-        -10,0,5,0,0,5,0,-10, -20,-10,-10,-10,-10,-10,-10,-20],
-    r: [-15,-10,-5,0,0,-5,-10,-15, -15,-5,0,5,5,0,-5,-15, -15,-5,5,10,10,5,-5,-15,
-        -15,-5,5,10,10,5,-5,-15, -15,-5,5,10,10,5,-5,-15, -15,-5,5,10,10,5,-5,-15,
-        -15,-5,0,5,5,0,-5,-15, -15,-10,-5,0,0,-5,-10,-15],
-    q: [-10,-5,-5,-5,-5,-5,-5,-10, -5,0,0,0,0,0,0,-5, -5,0,5,5,5,5,0,-5,
-        -5,0,5,5,5,5,0,-5, -5,0,5,5,5,5,0,-5, -5,0,5,5,5,5,0,-5,
-        -5,0,0,0,0,0,0,-5, -10,-5,-5,-5,-5,-5,-5,-10],
-    k: [-50,-40,-30,-20,-20,-30,-40,-50, -30,-20,-10,0,0,-10,-20,-30, -30,-10,20,30,30,20,-10,-30,
-        -30,-10,30,40,40,30,-10,-30, -30,-10,30,40,40,30,-10,-30, -30,-10,20,30,30,20,-10,-30,
-        -30,-30,0,0,0,0,-30,-30, -50,-30,-30,-30,-30,-30,-30,-50]
+    p: [0,   0,   0,   0,   0,   0,   0,   0,
+        178, 173, 158, 134, 147, 132, 165, 187,
+        94, 100,  85,  67,  56,  53,  82,  84,
+        32,  24,  13,   5,  -2,   4,  17,  17,
+        13,   9,  -3,  -7,  -7,  -8,   3,  -1,
+        4,   7,  -6,   1,   0,  -5,  -1,  -8,
+        13,   8,   8,  10,  13,   0,   2,  -7,
+        0,   0,   0,   0,   0,   0,   0,   0],
+    n: [-58, -38, -13, -28, -31, -27, -63, -99,
+        -25,  -8, -25,  -2,  -9, -25, -24, -52,
+        -24, -20,  10,   9,  -1,  -9, -19, -41,
+        -17,   3,  22,  22,  22,  11,   8, -18,
+        -18,  -6,  16,  25,  16,  17,   4, -18,
+        -23,  -3,  -1,  15,  10,  -3, -20, -22,
+        -42, -20, -10,  -5,  -2, -20, -23, -44,
+        -29, -51, -23, -15, -22, -18, -50, -64],
+    b: [-14, -21, -11,  -8, -7,  -9, -17, -24,
+        -8,  -4,   7, -12, -3, -13,  -4, -14,
+        2,  -8,   0,  -1, -2,   6,   0,   4,
+        -3,   9,  12,   9, 14,  10,   3,   2,
+        -6,   3,  13,  19,  7,  10,  -3,  -9,
+        -12,  -3,   8,  10, 13,   3,  -7, -15,
+        -14, -18,  -7,  -1,  4,  -9, -15, -27,
+        -23,  -9, -23,  -5, -9, -16,  -5, -17],
+    r: [13, 10, 18, 15, 12,  12,   8,   5,
+        11, 13, 13, 11, -3,   3,   8,   3,
+        7,  7,  7,  5,  4,  -3,  -5,  -3,
+        4,  3, 13,  1,  2,   1,  -1,   2,
+        3,  5,  8,  4, -5,  -6,  -8, -11,
+        -4,  0, -5, -1, -7, -12,  -8, -16,
+        -6, -6,  0,  2, -9,  -9, -11,  -3,
+        -9,  2,  3, -1, -5, -13,   4, -20],
+    q: [-9,  22,  22,  27,  27,  19,  10,  20,
+        -17,  20,  32,  41,  58,  25,  30,   0,
+        -20,   6,   9,  49,  47,  35,  19,   9,
+        3,  22,  24,  45,  57,  40,  57,  36,
+        -18,  28,  19,  47,  31,  34,  39,  23,
+        -16, -27,  15,   6,   9,  17,  10,   5,
+        -22, -23, -30, -16, -16, -23, -36, -32,
+        -33, -28, -22, -43,  -5, -32, -20, -41],
+    k: [-74, -35, -18, -18, -11,  15,   4, -17,
+        -12,  17,  14,  17,  17,  38,  23,  11,
+        10,  17,  23,  15,  20,  45,  44,  13,
+        -8,  22,  24,  27,  26,  33,  26,   3,
+        -18,  -4,  21,  24,  27,  23,   9, -11,
+        -19,  -3,  11,  21,  23,  16,   7,  -9,
+        -27, -11,   4,  13,  14,   4,  -5, -17,
+        -53, -34, -21, -11, -28, -14, -24, -43]
   };
-  var VAL_MG_T = [0, 100, 320, 330, 500, 900, 0];
-  var VAL_EG_T = [0, 130, 290, 320, 540, 880, 0];
+  /* PeSTO-Materialwerte (mg/eg) — getrennt von VAL_T (MVV-LVA/Delta/SEE) */
+  var VAL_MG_T = [0, 82, 337, 365, 477, 1025, 0];
+  var VAL_EG_T = [0, 94, 281, 297, 512, 936, 0];
   var PST_MG_BYT = [null, PST_SRC_MG.p, PST_SRC_MG.n, PST_SRC_MG.b, PST_SRC_MG.r, PST_SRC_MG.q, PST_SRC_MG.k];
   var PST_EG_BYT = [null, PST_SRC_EG.p, PST_SRC_EG.n, PST_SRC_EG.b, PST_SRC_EG.r, PST_SRC_EG.q, PST_SRC_EG.k];
   // Flache Tabellen inkl. Material, Vorzeichen je Farbe eingebacken:
@@ -605,31 +807,50 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
     }
   })();
 
-  /* ---------- Angriffs-Tabellen ---------- */
-  var KNIGHT_TO = [], KING_TO = [], RAY_B = [], RAY_R = [], RAY_Q = [];
+  /* ---------- Angriffs-Tabellen (flach, typisiert) ----------
+     attacked() ist die heißeste Funktion des Kerns (Legalitäts- + Schachtests
+     pro Knoten). Flache Int8-Strahlen mit Präfix-Offsets ersetzen die
+     Array-of-Arrays-Indirektion (KNIGHT_TO[sq][i] / RAY_B[sq][d][j]) —
+     weniger Hol-Operationen, monomorphe typisierte Zugriffe, V8-freundlich. */
+  var KN_FLAT = new Int8Array(336), KN_OFF = new Int32Array(129);
+  var KG_FLAT = new Int8Array(420), KG_OFF = new Int32Array(129);
+  var RAYB = new Int8Array(560), RAYR = new Int8Array(896), RAYQ = new Int8Array(1456);
+  var RAYB_IDX = new Int32Array(513), RAYR_IDX = new Int32Array(513), RAYQ_IDX = new Int32Array(1025);
   var SQ64 = new Int16Array(64);
   (function buildTables() {
     var KN = [33, 31, 18, 14, -33, -31, -18, -14];
     var KG = [16, -16, 1, -1, 17, 15, -15, -17];
-    for (var sq = 0; sq < 128; sq++) {
-      if (sq & 0x88) continue;
-      var r = sq >> 4, f = sq & 7;
-      SQ64[r * 8 + f] = sq;
-      var kn = [], kg = [];
-      for (var i = 0; i < 8; i++) {
-        var t1 = sq + KN[i]; if (!(t1 & 0x88)) kn.push(t1);
-        var t2 = sq + KG[i]; if (!(t2 & 0x88)) kg.push(t2);
+    var BD = [17, 15, -15, -17], RD = [16, -16, 1, -1];
+    var knL = [], kgL = [], kbL = [], krL = [], kqL = [];
+    for (var idx = 0; idx < 64; idx++) {
+      var sq = (idx >> 3) * 16 + (idx & 7);   // a8..h1, damit Offsets zusammenhängend bleiben
+      SQ64[idx] = sq;
+      var i, j;
+      var n0 = knL.length, g0 = kgL.length, b0 = kbL.length, r0 = krL.length, q0 = kqL.length;
+      for (i = 0; i < 8; i++) {
+        var t1 = sq + KN[i]; if (!(t1 & 0x88)) knL.push(t1);
+        var t2 = sq + KG[i]; if (!(t2 & 0x88)) kgL.push(t2);
       }
-      KNIGHT_TO[sq] = kn; KING_TO[sq] = kg;
-      function ray(d) {
-        var out = [], t = sq + d;
-        while (!(t & 0x88)) { out.push(t); t += d; }
-        return out;
+      for (i = 0; i < 4; i++) {
+        var d1 = sq + BD[i], rB = [];
+        while (!(d1 & 0x88)) { rB.push(d1); d1 += BD[i]; }
+        for (j = 0; j < rB.length; j++) { kbL.push(rB[j]); kqL.push(rB[j]); }
+        RAYB_IDX[sq * 4 + i + 1] = kbL.length;
+        RAYQ_IDX[sq * 8 + i + 1] = kqL.length;       // Ende Diagonalstrahl i (Slots 0-3)
       }
-      RAY_B[sq] = [ray(17), ray(15), ray(-15), ray(-17)];
-      RAY_R[sq] = [ray(16), ray(-16), ray(1), ray(-1)];
-      RAY_Q[sq] = RAY_B[sq].concat(RAY_R[sq]);
+      for (i = 0; i < 4; i++) {
+        var d2 = sq + RD[i], rR = [];
+        while (!(d2 & 0x88)) { rR.push(d2); d2 += RD[i]; }
+        for (j = 0; j < rR.length; j++) { krL.push(rR[j]); kqL.push(rR[j]); }
+        RAYR_IDX[sq * 4 + i + 1] = krL.length;
+        RAYQ_IDX[sq * 8 + 4 + i + 1] = kqL.length;   // Ende Linienstrahl i (Slots 4-7)
+      }
+      KN_OFF[sq] = n0; KN_OFF[sq + 1] = knL.length;
+      KG_OFF[sq] = g0; KG_OFF[sq + 1] = kgL.length;
+      RAYB_IDX[sq * 4] = b0; RAYR_IDX[sq * 4] = r0; RAYQ_IDX[sq * 8] = q0;
     }
+    KN_FLAT.set(knL); KG_FLAT.set(kgL);
+    RAYB.set(kbL); RAYR.set(krL); RAYQ.set(kqL);
   })();
 
   var POPCNT = new Uint8Array(256);
@@ -639,6 +860,225 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
   CASTLE_MASK.fill(15);
   CASTLE_MASK[0] = 13; CASTLE_MASK[4] = 12; CASTLE_MASK[7] = 14;
   CASTLE_MASK[112] = 7; CASTLE_MASK[116] = 3; CASTLE_MASK[119] = 11;
+
+  /* ============================================================
+     Batch 6: KPK-Bitbase (lazy, einmalig, prozessweit geteilt)
+     ------------------------------------------------------------
+     Perfekte K+Bauer-gegen-König-Wertung über Fixpunkt-Propagation.
+     Speicher: nur Bauer auf den Dateien a-d (Datei-Spiegel halbiert den
+     Raum) und Reihen 2-7 -> 64*24*64*2 = 196.608 Flags (192 KB).
+     Der Bauernseite-eigenes Indexformat: Schachkoordinaten a1=0..h8=63,
+     Bauer weiß und auf a-d normalisiert. Wird erst erzeugt, wenn im Spiel
+     tatsächlich eine KPK-Stellung auftritt (ein Bauer, keine Figuren).
+     Zustände: 0 = unbekannt (-> Remis), 1 = Gewinn für die Bauernseite,
+               2 = Remis/illegal (patt, Könige benachbart, Bauer schlagbar
+               führt nicht zu Gewinn usw.).
+     ============================================================ */
+  var KPK_FLAGS = null;
+  var KPK_FAILED = false;
+  var KMV64 = new Int8Array(513);       // König-Ziele pro 64er-Feld (flach)
+  var KMV_OFF = new Int32Array(65);
+  var KADJ = new Uint8Array(64 * 64);   // Königs-Nachbarschaft
+  var WATK = new Int8Array(128);        // weiße Bauern-Attacken pro Feld (bis 2)
+  (function buildKPKTables() {
+    var idx = 0, s, r, f, dr, df, r2, f2;
+    for (s = 0; s < 64; s++) {
+      KMV_OFF[s] = idx;
+      r = s >> 3; f = s & 7;
+      for (dr = -1; dr <= 1; dr++) for (df = -1; df <= 1; df++) {
+        if (dr === 0 && df === 0) continue;
+        r2 = r + dr; f2 = f + df;
+        if (r2 < 0 || r2 > 7 || f2 < 0 || f2 > 7) continue;
+        KMV64[idx++] = r2 * 8 + f2;
+      }
+    }
+    KMV_OFF[64] = idx;
+    for (s = 0; s < 64; s++) {
+      WATK[s * 2] = -1; WATK[s * 2 + 1] = -1;
+      r = s >> 3; f = s & 7;
+      if (r < 7) {
+        if (f > 0) WATK[s * 2] = (r + 1) * 8 + (f - 1);
+        if (f < 7) WATK[s * 2 + 1] = (r + 1) * 8 + (f + 1);
+      }
+    }
+    for (var a = 0; a < 64; a++) for (var b = 0; b < 64; b++) {
+      var dr2 = (a >> 3) - (b >> 3), df2 = (a & 7) - (b & 7);
+      KADJ[a * 64 + b] = (dr2 >= -1 && dr2 <= 1 && df2 >= -1 && df2 <= 1) ? 1 : 0;
+    }
+  })();
+
+  /* Umwandlung gewinnbringend? Neue Figur (Dame diag=true / Turm diag=false)
+     darf nicht schlagbar sein und darf nicht pattsetzen (Schach = Matt ok). */
+  function kpkPromoWins(wk, bk, promoSq, diag) {
+    if (KADJ[promoSq * 64 + bk] && !KADJ[wk * 64 + promoSq]) return false; // schlagbar
+    var hasMove = false;
+    for (var j = KMV_OFF[bk]; j < KMV_OFF[bk + 1]; j++) {
+      var t = KMV64[j];
+      if (t === promoSq) continue;              // Schlagen ist hier illegal (gedeckt)
+      if (KADJ[t * 64 + wk]) continue;          // neben weißem König verboten
+      var dr = (t >> 3) - (promoSq >> 3), df = (t & 7) - (promoSq & 7);
+      var attacked = false;
+      if (diag) {
+        if (dr === df || dr === -df) {
+          attacked = true;
+          var sR = dr > 0 ? 1 : (dr < 0 ? -1 : 0), sF = df > 0 ? 1 : (df < 0 ? -1 : 0);
+          var rr = (promoSq >> 3) + sR, ff = (promoSq & 7) + sF;
+          while (rr !== (t >> 3) || ff !== (t & 7)) {
+            if (rr * 8 + ff === wk) { attacked = false; break; }
+            rr += sR; ff += sF;
+          }
+        }
+      } else {
+        if (dr === 0 || df === 0) {
+          attacked = true;
+          var sR2 = dr > 0 ? 1 : (dr < 0 ? -1 : 0), sF2 = df > 0 ? 1 : (df < 0 ? -1 : 0);
+          var rr2 = (promoSq >> 3) + sR2, ff2 = (promoSq & 7) + sF2;
+          while (rr2 !== (t >> 3) || ff2 !== (t & 7)) {
+            if (rr2 * 8 + ff2 === wk) { attacked = false; break; }
+            rr2 += sR2; ff2 += sF2;
+          }
+        }
+      }
+      if (!attacked) { hasMove = true; break; }
+    }
+    if (hasMove) return true;                   // kein Patt -> Gewinn
+    // Schwarz hat keinen Zug: Matt (Schach) ok, Patt -> keine Gewinn-Umwandlung
+    var drB = (bk >> 3) - (promoSq >> 3), dfB = (bk & 7) - (promoSq & 7);
+    var inChk = false;
+    if (diag) { if (drB === dfB || drB === -dfB) inChk = true; }
+    else { if (drB === 0 || dfB === 0) inChk = true; }
+    if (inChk) {
+      var sR3 = drB > 0 ? 1 : (drB < 0 ? -1 : 0), sF3 = dfB > 0 ? 1 : (dfB < 0 ? -1 : 0);
+      var rr3 = (promoSq >> 3) + sR3, ff3 = (promoSq & 7) + sF3;
+      while (rr3 !== (bk >> 3) || ff3 !== (bk & 7)) {
+        if (rr3 * 8 + ff3 === wk) { inChk = false; break; }
+        rr3 += sR3; ff3 += sF3;
+      }
+    }
+    return inChk;
+  }
+
+  function buildKPK() {
+    var fl = new Uint8Array(64 * 24 * 64 * 2);
+    var i, wk, p, bk, stm, pr, pf, pawnSq;
+    // Vorpass: illegale Stellungen markieren
+    for (wk = 0; wk < 64; wk++) for (p = 0; p < 24; p++) {
+      pr = 1 + (p >> 2); pf = p & 3; pawnSq = pr * 8 + pf;
+      for (bk = 0; bk < 64; bk++) for (stm = 0; stm < 2; stm++) {
+        i = ((wk * 24 + p) * 64 + bk) * 2 + stm;
+        if (KADJ[wk * 64 + bk] || wk === pawnSq || bk === pawnSq) { fl[i] = 2; continue; }
+        var w0 = WATK[pawnSq * 2], w1 = WATK[pawnSq * 2 + 1];
+        if ((w0 >= 0 && bk === w0) || (w1 >= 0 && bk === w1)) fl[i] = 2;
+      }
+    }
+    var changed = true, guard = 0;
+    while (changed && guard++ < 80) {
+      changed = false;
+      for (wk = 0; wk < 64; wk++) {
+        for (p = 0; p < 24; p++) {
+          pr = 1 + (p >> 2); pf = p & 3; pawnSq = pr * 8 + pf;
+          var dblFrom = (pr === 1);
+          for (bk = 0; bk < 64; bk++) {
+            if (KADJ[wk * 64 + bk]) continue;
+            var a0 = WATK[pawnSq * 2], a1 = WATK[pawnSq * 2 + 1];
+            for (stm = 0; stm < 2; stm++) {
+              i = ((wk * 24 + p) * 64 + bk) * 2 + stm;
+              if (fl[i]) continue;
+              var outcome = 0;
+              if (stm === 0) {
+                // Bauernseite am Zug: Gewinn, wenn EIN Zug zu Gewinn führt
+                var any = false, hasW = false;
+                for (var j2 = KMV_OFF[wk]; j2 < KMV_OFF[wk + 1]; j2++) {
+                  var tw = KMV64[j2];
+                  if (tw === pawnSq) continue;
+                  if (KADJ[tw * 64 + bk]) continue;
+                  hasW = true;
+                  if (fl[((tw * 24 + p) * 64 + bk) * 2 + 1] === 1) { any = true; break; }
+                }
+                if (pr < 6) {
+                  var up = pawnSq + 8;
+                  if (up !== bk && up !== wk) {
+                    hasW = true;
+                    if (fl[((wk * 24 + (p + 4)) * 64 + bk) * 2 + 1] === 1) any = true;
+                    else if (!any && dblFrom) {
+                      var up2 = pawnSq + 16;
+                      if (up2 !== bk && up2 !== wk) {
+                        hasW = true;
+                        if (fl[((wk * 24 + (p + 8)) * 64 + bk) * 2 + 1] === 1) any = true;
+                      }
+                    }
+                  }
+                } else {
+                  // Umwandlung (Reihe 7): Zielfeld frei? sicher? nicht pattsetzend?
+                  // (König direkt davor = blockiert — klassischer Remis-Randfall)
+                  var promoSq = 7 * 8 + pf;
+                  if (bk !== promoSq && wk !== promoSq) {
+                    hasW = true; // Umwandlungszug ist verfügbar
+                    if (kpkPromoWins(wk, bk, promoSq, true) || kpkPromoWins(wk, bk, promoSq, false)) any = true;
+                  }
+                }
+                if (any) outcome = 1;
+                else if (!hasW) outcome = 2;   // Patt
+              } else {
+                // Verteidiger am Zug: Gewinn, wenn ALLE Züge zu Gewinn führen
+                var all = true, hasB = false;
+                for (var j4 = KMV_OFF[bk]; j4 < KMV_OFF[bk + 1]; j4++) {
+                  var tb = KMV64[j4];
+                  if (tb === pawnSq) {
+                    if (!KADJ[wk * 64 + pawnSq]) { all = false; hasB = true; } // Bauer schlagbar -> Remis
+                    continue;
+                  }
+                  if (KADJ[tb * 64 + wk]) continue;
+                  if ((a0 >= 0 && tb === a0) || (a1 >= 0 && tb === a1)) continue; // ins Schach
+                  hasB = true;
+                  if (fl[((wk * 24 + p) * 64 + tb) * 2] !== 1) { all = false; break; }
+                }
+                if (!hasB) outcome = 2;        // Patt
+                else if (all) outcome = 1;
+              }
+              if (outcome) { fl[i] = outcome; changed = true; }
+            }
+          }
+        }
+      }
+    }
+    return fl;
+  }
+
+  function ensureKPK() {
+    if (KPK_FAILED) return false;
+    if (!KPK_FLAGS) {
+      try { KPK_FLAGS = buildKPK(); }
+      catch (e) { KPK_FAILED = true; return false; }
+    }
+    return true;
+  }
+
+  /* Ergebnis: 1 = Bauernseite gewinnt, 0 = Remis, -1 = nicht bestimmbar.
+     sqs in 0x88; pawnIsWhite normalisiert (vertikaler Spiegel sq^0x70),
+     Bauer auf a-d via Datei-Spiegel (sq^7). */
+  function kpkResult(wk0x88, wp0x88, bk0x88, pawnIsWhite, whiteToMove) {
+    var wk, wp, bk, stm;
+    if (pawnIsWhite) {
+      wk = wk0x88; wp = wp0x88; bk = bk0x88;
+      stm = whiteToMove ? 0 : 1;
+    } else {
+      /* Vertikaler Spiegel TAUSCHT die Rollen: der schwarze König (und Bauer)
+         wird im normalisierten Frame zur Bauernseite (weiß), der weiße König
+         zum schwarzen. */
+      wk = bk0x88 ^ 0x70; wp = wp0x88 ^ 0x70; bk = wk0x88 ^ 0x70;
+      stm = whiteToMove ? 1 : 0;
+    }
+    if ((wp & 7) > 3) { wk ^= 7; wp ^= 7; bk ^= 7; }
+    /* Engine-0x88-Konvention: a1=0 -> Schachreihe-0-basiert = wp>>4 direkt */
+    var pr = wp >> 4;                            // 0 (Rang1) .. 6 (Rang7)
+    if (pr < 1 || pr > 6) return -1;
+    var P = (pr - 1) * 4 + (wp & 7);
+    var wk64 = (wk >> 4) * 8 + (wk & 7);
+    var bk64 = (bk >> 4) * 8 + (bk & 7);
+    var f = KPK_FLAGS[((wk64 * 24 + P) * 64 + bk64) * 2 + stm];
+    return f === 1 ? 1 : 0;
+  }
 
   /* ============================================================
      createEngine(): eine Instanz = ein Brett + Suche + TT
@@ -673,12 +1113,21 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
     var TT_USED = new Uint8Array(TT_N);
     var TT_KEYLO = new Uint32Array(TT_N), TT_KEYHI = new Uint32Array(TT_N);
     var TT_MOVE = new Int32Array(TT_N), TT_SCORE = new Int16Array(TT_N);
-    var TT_META = new Int32Array(TT_N); // (depth << 2) | flag
+    var TT_META = new Int32Array(TT_N); // ((age & 255) << 10) | (depth << 2) | flag
+    var ttAge = 0;
 
     // Suchzustand
     var nodes = 0, aborted = false, hardDeadline = Infinity;
     var killer0 = new Int32Array(MAX_PLY + 8), killer1 = new Int32Array(MAX_PLY + 8);
     var histTable = new Int32Array(16384);
+    var histHigh = 0;                            // höchster History-Wert (für relative LMR-Schwelle)
+    var counterTable = new Int32Array(16384);   // Countermove-Heuristik [prevFrom<<7|prevTo]
+    /* Batch 6: Capture-History [fig*128+to]*8+Opfer-Typ — winzig (16k Einträge) */
+    var capHist = new Int32Array(16384);
+    /* Continuation-History wurde A/B-GETESTET und ENTFERNT: +23→+58 Elo /
+       LOS 70→90% ohne sie — bei ~2M Knoten/Suche überstieg der NPS-Preis
+       (Cache-Misses + Lookups) den Ordnungsgewinn. Nicht wieder einbauen
+       ohne erneute Arena-Messung. */
     var MBUFS = [], SBUFS = [];
     function moveBuf(ply) { var b = MBUFS[ply]; if (!b) { b = new Int32Array(256); MBUFS[ply] = b; } return b; }
     function scoreBuf(ply) { var b = SBUFS[ply]; if (!b) { b = new Int32Array(256); SBUFS[ply] = b; } return b; }
@@ -702,27 +1151,25 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
         t = sq + 15; if (!(t & 0x88) && b[t] === 9) return true;
         t = sq + 17; if (!(t & 0x88) && b[t] === 9) return true;
       }
-      var kl = KNIGHT_TO[sq];
-      for (i = 0; i < kl.length; i++) { p = b[kl[i]]; if (p && (p >> 3) === by && (p & 7) === KNIGHT) return true; }
-      var kk = KING_TO[sq];
-      for (i = 0; i < kk.length; i++) { p = b[kk[i]]; if (p && (p >> 3) === by && (p & 7) === KING) return true; }
-      var rb = RAY_B[sq];
+      // Springer/König: direkte Figuren-Code-Vergleiche statt Shift/Mask-Paar
+      var kn = by === 0 ? 2 : 10, kg = by === 0 ? 6 : 14;
+      for (i = KN_OFF[sq]; i < KN_OFF[sq + 1]; i++) { if (b[KN_FLAT[i]] === kn) return true; }
+      for (i = KG_OFF[sq]; i < KG_OFF[sq + 1]; i++) { if (b[KG_FLAT[i]] === kg) return true; }
+      var dg = by === 0 ? 3 : 11, qu = by === 0 ? 5 : 13, ln = by === 0 ? 4 : 12;
+      var b4 = sq << 2;
       for (i = 0; i < 4; i++) {
-        var ray1 = rb[i];
-        for (var j = 0; j < ray1.length; j++) {
-          p = b[ray1[j]];
+        for (var j = RAYB_IDX[b4 + i]; j < RAYB_IDX[b4 + i + 1]; j++) {
+          p = b[RAYB[j]];
           if (!p) continue;
-          if ((p >> 3) === by) { var q1 = p & 7; if (q1 === BISHOP || q1 === QUEEN) return true; }
+          if (p === dg || p === qu) return true;
           break;
         }
       }
-      var rr = RAY_R[sq];
       for (i = 0; i < 4; i++) {
-        var ray2 = rr[i];
-        for (var j2 = 0; j2 < ray2.length; j2++) {
-          p = b[ray2[j2]];
+        for (var j2 = RAYR_IDX[b4 + i]; j2 < RAYR_IDX[b4 + i + 1]; j2++) {
+          p = b[RAYR[j2]];
           if (!p) continue;
-          if ((p >> 3) === by) { var q2 = p & 7; if (q2 === ROOK || q2 === QUEEN) return true; }
+          if (p === ln || p === qu) return true;
           break;
         }
       }
@@ -775,9 +1222,10 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
             } else if (q === 0 && t2 === epSq) out[n++] = mv(sq, t2, 0, 2, PAWN | (them << 3));
           }
         } else if (pt === KNIGHT || pt === KING) {
-          var list = pt === KNIGHT ? KNIGHT_TO[sq] : KING_TO[sq];
-          for (i = 0; i < list.length; i++) {
-            t = list[i]; q = board[t];
+          var fFlat = pt === KNIGHT ? KN_FLAT : KG_FLAT;
+          var fOff = pt === KNIGHT ? KN_OFF : KG_OFF;
+          for (i = fOff[sq]; i < fOff[sq + 1]; i++) {
+            t = fFlat[i]; q = board[t];
             if (q === 0) { if (!capsOnly) out[n++] = mv(sq, t, 0, 0, 0); }
             else if ((q >> 3) !== us) out[n++] = mv(sq, t, 0, 0, q);
           }
@@ -794,12 +1242,14 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
                   !attacked(116, 0) && !attacked(115, 0) && !attacked(114, 0)) out[n++] = mv(116, 114, 0, 3, 0);
             }
           }
-        } else { // Läufer, Turm, Dame
-          var dirs = pt === BISHOP ? RAY_B[sq] : pt === ROOK ? RAY_R[sq] : RAY_Q[sq];
-          for (i = 0; i < dirs.length; i++) {
-            var ray = dirs[i];
-            for (var j = 0; j < ray.length; j++) {
-              t = ray[j]; q = board[t];
+        } else { // Läufer, Turm, Dame (flache Strahlen: [Feld*Strahlenzahl + Richtung])
+          var rFlat = pt === BISHOP ? RAYB : pt === ROOK ? RAYR : RAYQ;
+          var rIdx = pt === BISHOP ? RAYB_IDX : pt === ROOK ? RAYR_IDX : RAYQ_IDX;
+          var nd = pt === QUEEN ? 8 : 4;
+          var b0 = sq * nd;
+          for (i = 0; i < nd; i++) {
+            for (var j = rIdx[b0 + i]; j < rIdx[b0 + i + 1]; j++) {
+              t = rFlat[j]; q = board[t];
               if (q === 0) { if (!capsOnly) out[n++] = mv(sq, t, 0, 0, 0); continue; }
               if ((q >> 3) !== us) out[n++] = mv(sq, t, 0, 0, q);
               break;
@@ -974,6 +1424,13 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
     }
 
     /* ---------- Bewertung (getapert, allokationsfrei) ---------- */
+    function cheb(a, b) {
+      var dr = (a >> 4) - (b >> 4), df = (a & 7) - (b & 7);
+      if (dr < 0) dr = -dr;
+      if (df < 0) df = -df;
+      return dr > df ? dr : df;
+    }
+
     function kingShield(c) {
       var ks = kingSq[c];
       var f = ks & 7, r = ks >> 4;
@@ -1000,49 +1457,248 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
       if (bishops[0] >= 2) { mg += BISHOP_PAIR_MG; eg += BISHOP_PAIR_EG; }
       if (bishops[1] >= 2) { mg -= BISHOP_PAIR_MG; eg -= BISHOP_PAIR_EG; }
       var wM = pawnMask[0], bM = pawnMask[1], f, r, w, b;
+      /* Batch 6: in reinen Bauernendspielen (keine Figuren) Merker für die
+         Quadrate-Regel (Gegner = nackter König) + KPK-Vorarbeit. Im Normal-
+         spiel (phaseUnits > 0) bleibt der Block komplett aus (0 Kosten). */
+      var raceWhite = false, raceBlack = false, pwTotal = 0, pbTotal = 0, wpSqW = -1, wpSqB = -1;
+      if (phaseUnits === 0) {
+        for (var f0 = 0; f0 < 8; f0++) {
+          if (wM[f0]) {
+            pwTotal += POPCNT[wM[f0]];
+            if (wpSqW < 0) for (var r0 = 1; r0 < 7; r0++) if (wM[f0] & (1 << r0)) { wpSqW = r0 * 16 + f0; break; }
+          }
+          if (bM[f0]) {
+            pbTotal += POPCNT[bM[f0]];
+            if (wpSqB < 0) for (var r0b = 1; r0b < 7; r0b++) if (bM[f0] & (1 << r0b)) { wpSqB = r0b * 16 + f0; break; }
+          }
+        }
+        if (pbTotal === 0 && pwTotal > 0) raceWhite = true;   // Schwarz nur König
+        if (pwTotal === 0 && pbTotal > 0) raceBlack = true;   // Weiß nur König
+      }
+      var wLight = 0, wDark = 0, bLight = 0, bDark = 0;
       for (f = 0; f < 8; f++) {
         w = wM[f]; b = bM[f];
         if (w) {
           var wc = POPCNT[w];
           if (wc > 1) { mg -= (wc - 1) * DOUBLED_MG; eg -= (wc - 1) * DOUBLED_EG; }
           if (!((f > 0 ? wM[f - 1] : 0) || (f < 7 ? wM[f + 1] : 0))) { mg -= wc * ISOLATED_MG; eg -= wc * ISOLATED_EG; }
-          for (r = 0; r < 7; r++) if (w & (1 << r)) {
+          for (r = 1; r < 7; r++) if (w & (1 << r)) {
+            if ((f + r) & 1) wLight++; else wDark++;
             var blk = bM[f];
             if (f > 0) blk |= bM[f - 1];
             if (f < 7) blk |= bM[f + 1];
             blk &= (0xFE << r) & 0xFF;
-            if (!blk) { mg += PASS_MG[r]; eg += PASS_EG[r]; }
+            if (!blk) {
+              mg += PASS_MG[r]; eg += PASS_EG[r];
+              /* Batch 6: blockierter Freibauer (auch durch König) = halber Bonus */
+              if (board[(r + 1) * 16 + f]) { mg -= PASS_MG[r] >> 1; eg -= PASS_EG[r] >> 1; }
+              /* Batch 6: Quadrate-Regel — Gegner hat nur den König, Weg frei,
+                 König erreicht das Umwandlungsfeld nicht mehr -> nicht aufzuhalten */
+              if (raceWhite) {
+                var clearW = true;
+                for (var rrW = r + 1; rrW <= 7; rrW++) if (board[rrW * 16 + f]) { clearW = false; break; }
+                if (clearW) {
+                  var effW = (7 - r) - (side === 0 ? 1 : 0);   // Bauer am Zug: Quadrat schrumpft
+                  if (cheb(kingSq[1], 112 + f) > effW) eg += UNSTOPPABLE_EG;
+                }
+              }
+              // geschützt: eigener Bauer diagonal dahinter
+              if ((f > 0 && r > 1 && (wM[f - 1] & (1 << (r - 1)))) ||
+                  (f < 7 && r > 1 && (wM[f + 1] & (1 << (r - 1))))) { mg += PROTECTED_MG; eg += PROTECTED_EG; }
+              // verbunden: eigener Bauer auf Nachbarlinie gleicher Reihe
+              if ((f > 0 && (wM[f - 1] & (1 << r))) || (f < 7 && (wM[f + 1] & (1 << r)))) { mg += CONNECTED_MG; eg += CONNECTED_EG; }
+              // Königsnähe (nur Endspiel-Wichtung): eigener König nahe, feindlicher nahe am Umwandlungsfeld
+              var pw = 112 + f;
+              eg += PASS_KING_W * (7 - cheb(kingSq[0], r * 16 + f)) - PASS_KING_O * (7 - cheb(kingSq[1], pw));
+            } else {
+              // Kandidat: keine Gegner-Bauern auf eigener Linie vorn und
+              // benachbarte Linien erst ≥3 Reihen weiter vorn blockierend
+              var sameF = bM[f] & ((0xFE << r) & 0xFF);
+              if (!sameF) {
+                var nearB = 0, farB = 0;
+                if (f > 0) { nearB |= bM[f - 1] & ((0x3 << (r + 1)) & 0xFF); farB |= bM[f - 1] & ((0xFF << (r + 3)) & 0xFF); }
+                if (f < 7) { nearB |= bM[f + 1] & ((0x3 << (r + 1)) & 0xFF); farB |= bM[f + 1] & ((0xFF << (r + 3)) & 0xFF); }
+                if (!nearB && !farB) { mg += PASS_MG[r] >> 1; eg += PASS_EG[r] >> 1; }
+              }
+            }
           }
         }
         if (b) {
           var bc = POPCNT[b];
           if (bc > 1) { mg += (bc - 1) * DOUBLED_MG; eg += (bc - 1) * DOUBLED_EG; }
           if (!((f > 0 ? bM[f - 1] : 0) || (f < 7 ? bM[f + 1] : 0))) { mg += bc * ISOLATED_MG; eg += bc * ISOLATED_EG; }
-          for (r = 0; r < 7; r++) if (b & (1 << r)) {
+          for (r = 1; r < 7; r++) if (b & (1 << r)) {
+            if ((f + r) & 1) bLight++; else bDark++;
             var blk2 = wM[f];
             if (f > 0) blk2 |= wM[f - 1];
             if (f < 7) blk2 |= wM[f + 1];
             blk2 &= (1 << r) - 1;
-            if (!blk2) { mg -= PASS_MG[7 - r]; eg -= PASS_EG[7 - r]; }
+            if (!blk2) {
+              mg -= PASS_MG[7 - r]; eg -= PASS_EG[7 - r];
+              /* Batch 6: blockierter Freibauer (auch durch König) = halber Bonus */
+              if (board[(r - 1) * 16 + f]) { mg += PASS_MG[7 - r] >> 1; eg += PASS_EG[7 - r] >> 1; }
+              /* Batch 6: Quadrate-Regel für schwarze Freibauern */
+              if (raceBlack) {
+                var clearB = true;
+                for (var rrB = r - 1; rrB >= 0; rrB--) if (board[rrB * 16 + f]) { clearB = false; break; }
+                if (clearB) {
+                  var effB = r - (side === 1 ? 1 : 0);
+                  if (cheb(kingSq[0], f) > effB) eg -= UNSTOPPABLE_EG;
+                }
+              }
+              if ((f > 0 && r < 6 && (bM[f - 1] & (1 << (r + 1)))) ||
+                  (f < 7 && r < 6 && (bM[f + 1] & (1 << (r + 1))))) { mg -= PROTECTED_MG; eg -= PROTECTED_EG; }
+              if ((f > 0 && (bM[f - 1] & (1 << r))) || (f < 7 && (bM[f + 1] & (1 << r)))) { mg -= CONNECTED_MG; eg -= CONNECTED_EG; }
+              var pb = f;
+              eg -= PASS_KING_W * (7 - cheb(kingSq[1], r * 16 + f)) - PASS_KING_O * (7 - cheb(kingSq[0], pb));
+            } else {
+              var sameF2 = wM[f] & ((1 << r) - 1);
+              if (!sameF2) {
+                var nearW = 0, farW = 0;
+                var nbMask = r >= 2 ? ((0x3 << (r - 2)) & 0xFF) : (r === 1 ? 1 : 0);
+                var fwMask = r >= 3 ? ((1 << (r - 2)) - 1) : 0;
+                if (f > 0) { nearW |= wM[f - 1] & nbMask; farW |= wM[f - 1] & fwMask; }
+                if (f < 7) { nearW |= wM[f + 1] & nbMask; farW |= wM[f + 1] & fwMask; }
+                if (!nearW && !farW) { mg -= PASS_MG[7 - r] >> 1; eg -= PASS_EG[7 - r] >> 1; }
+              }
+            }
           }
         }
       }
       for (var i = 0; i < 64; i++) {
         var sq = SQ64[i], p = board[sq];
+        if (!p) continue;
+        var pt = p & 7, pc2 = p >> 3;
         if (p === 4) {
           var ff2 = sq & 7;
           if (!wM[ff2] && !bM[ff2]) { mg += ROOK_OPEN_MG; eg += ROOK_OPEN_EG; }
           else if (!wM[ff2]) { mg += ROOK_SEMI_MG; eg += ROOK_SEMI_EG; }
+          if ((sq >> 4) === 6 && (kingSq[1] >> 4) === 7) mg += ROOK7_MG;
         } else if (p === 12) {
           var ff3 = sq & 7;
           if (!wM[ff3] && !bM[ff3]) { mg -= ROOK_OPEN_MG; eg -= ROOK_OPEN_EG; }
           else if (!bM[ff3]) { mg -= ROOK_SEMI_MG; eg -= ROOK_SEMI_EG; }
+          if ((sq >> 4) === 1 && (kingSq[0] >> 4) === 0) mg -= ROOK7_MG;
+        }
+        // Mobilität — nur Leichtfiguren (Sprung-Tabelle = billig, hoher Aussagewert).
+        // Turm/Dame-Mobilität war im A/B-Turnier zu teuer (NPS-Verlust > Eval-Gewinn).
+        if (pt === KNIGHT || pt === BISHOP) {
+          var mob = 0, t2, q2, j2;
+          if (pt === KNIGHT) {
+            for (j2 = KN_OFF[sq]; j2 < KN_OFF[sq + 1]; j2++) { q2 = board[KN_FLAT[j2]]; if (!q2 || (q2 >> 3) !== pc2) mob++; }
+          } else {
+            var bi0 = sq << 2;
+            for (j2 = 0; j2 < 4; j2++) {
+              for (var k3 = RAYB_IDX[bi0 + j2]; k3 < RAYB_IDX[bi0 + j2 + 1]; k3++) {
+                t2 = RAYB[k3]; q2 = board[t2];
+                if (!q2) { mob++; continue; }
+                if ((q2 >> 3) !== pc2) mob++;
+                break;
+              }
+            }
+          }
+          var sc2 = (mob - MOB_BASE[pt]) * MOB_W[pt];
+          if (pc2 === 0) { mg += sc2; eg += sc2; } else { mg -= sc2; eg -= sc2; }
+        }
+        // Springer-Außenposten (verteidigt, von Bauern nicht angreifbar)
+        if (p === 2) {
+          var r3 = sq >> 4, f4 = sq & 7, aheadM = (0xFF << (r3 + 1)) & 0xFF;
+          if (r3 >= 3 && r3 <= 5 &&
+              ((f4 > 0 && (wM[f4 - 1] & (1 << (r3 - 1)))) || (f4 < 7 && (wM[f4 + 1] & (1 << (r3 - 1))))) &&
+              !((f4 > 0 ? bM[f4 - 1] & aheadM : 0) || (f4 < 7 ? bM[f4 + 1] & aheadM : 0))) {
+            var ob = OUTPOST_MG + ((f4 >= 2 && f4 <= 5) ? OUTPOST_CENTRAL : 0);
+            mg += ob; eg += OUTPOST_EG;
+          }
+        } else if (p === 10) {
+          var r4 = sq >> 4, f5 = sq & 7, behindM = (1 << r4) - 1;
+          if (r4 >= 2 && r4 <= 4 &&
+              ((f5 > 0 && (bM[f5 - 1] & (1 << (r4 + 1)))) || (f5 < 7 && (bM[f5 + 1] & (1 << (r4 + 1))))) &&
+              !((f5 > 0 ? wM[f5 - 1] & behindM : 0) || (f5 < 7 ? wM[f5 + 1] & behindM : 0))) {
+            var ob2 = OUTPOST_MG + ((f5 >= 2 && f5 <= 5) ? OUTPOST_CENTRAL : 0);
+            mg -= ob2; eg -= OUTPOST_EG;
+          }
+        }
+        // schlechter Läufer: viele eigene Bauern auf seiner Feldfarbe
+        if (p === 3) {
+          var ownOn = (((sq >> 4) + (sq & 7)) & 1) ? wLight : wDark;
+          if (ownOn >= 4) { mg -= (ownOn - 3) * BAD_BISHOP_MG; eg -= (ownOn - 3) * BAD_BISHOP_EG; }
+        } else if (p === 11) {
+          var ownOn2 = (((sq >> 4) + (sq & 7)) & 1) ? bLight : bDark;
+          if (ownOn2 >= 4) { mg += (ownOn2 - 3) * BAD_BISHOP_MG; eg += (ownOn2 - 3) * BAD_BISHOP_EG; }
+        }
+        // Angreifer-Nähe zum feindlichen König (nur Eröffnung/Mittelspiel via mg)
+        if (pt >= KNIGHT && pt <= QUEEN) {
+          var ek = kingSq[pc2 ^ 1], d2 = cheb(sq, ek);
+          if (pt === QUEEN) {
+            if (d2 <= 3) { var qu = (4 - d2) * Q_NEAR_UNIT; if (pc2 === 0) mg += qu; else mg -= qu; }
+          } else if (d2 <= 2) {
+            var nu = pt === KNIGHT ? KN_NEAR_MG : B_NEAR_MG;
+            if (pc2 === 0) mg += nu; else mg -= nu;
+          }
         }
       }
       mg += kingShield(0) - kingShield(1);
       mg += side === 0 ? TEMPO : -TEMPO;
       var ph = phaseUnits;
       if (ph > 24) ph = 24;
+      /* ---------- Batch 6: reine Figuren-Endspiele (Matt-Antrieb) ----------
+         K+T/K+D vs K und K+L+S vs K sind zwingend gewonnen — die Bewertung
+         treibt Königsnähe + Absperrung/Ecke, damit die Suche konvertiert. */
+      if (phaseUnits === 2 || phaseUnits === 4) {
+        var nRk = 0, nQu = 0, nMi = 0, nKn = 0, nBi = 0, rkSq = 0, quSq = 0, biSq = 0, hasPawn = false;
+        for (var iE = 0; iE < 64; iE++) {
+          var sqE = SQ64[iE], pE = board[sqE];
+          if (!pE) continue;
+          var tE = pE & 7;
+          if (tE === PAWN) { hasPawn = true; break; }
+          if (tE === ROOK) { nRk++; rkSq = sqE; }
+          else if (tE === QUEEN) { nQu++; quSq = sqE; }
+          else if (tE === BISHOP) { nMi++; nBi++; biSq = sqE; }
+          else if (tE === KNIGHT) { nMi++; nKn++; }
+        }
+        if (!hasPawn) {
+          var scEnd = null;
+          if (nRk === 1 && nQu === 0 && nMi === 0) {
+            var cR = board[rkSq] >> 3, wkR = kingSq[cR], wkrW = kingSq[cR ^ 1];
+            var mdR = Math.abs((rkSq >> 4) - (wkrW >> 4)) + Math.abs((rkSq & 7) - (wkrW & 7));
+            var vR = KRK_BASE + KRK_KING * (7 - cheb(wkR, wkrW)) +
+                     (mdR === 2 ? KRK_CUT2 : (mdR === 3 ? KRK_CUT3 : 0));
+            scEnd = (cR === 0) ? vR : -vR;
+          } else if (nQu === 1 && nRk === 0 && nMi === 0) {
+            var cQ = board[quSq] >> 3, wkQ = kingSq[cQ], wkQW = kingSq[cQ ^ 1];
+            var vQ = KQK_BASE + KQK_KING * (7 - cheb(wkQ, wkQW)) + KQK_Q * (7 - cheb(quSq, wkQW));
+            scEnd = (cQ === 0) ? vQ : -vQ;
+          } else if (nBi === 1 && nKn === 1 && nRk === 0 && nQu === 0 && nMi === 2) {
+            var cB = board[biSq] >> 3, wkB = kingSq[cB], wkBW = kingSq[cB ^ 1];
+            // Matt-Ecke = Ecke in Lauferfarbe (Parität konsistent zu 0x88)
+            var parB = (((biSq >> 4) + (biSq & 7)) & 1), bestD = 99, corB = 0;
+            var cE0 = [0, 7, 112, 119];
+            for (var cI = 0; cI < 4; cI++) {
+              var cE = cE0[cI];
+              if ((((cE >> 4) + (cE & 7)) & 1) === parB) {
+                var dE = cheb(wkBW, cE);
+                if (dE < bestD) { bestD = dE; corB = cE; }
+              }
+            }
+            var vB = KBNK_BASE + KBNK_CORNER * (7 - bestD) + KBNK_KING * (7 - cheb(wkB, wkBW)) +
+                     KBNK_SHEP * (7 - cheb(wkB, corB));   // Hüte-Term: eigener König zur Ecke
+            scEnd = (cB === 0) ? vB : -vB;
+          }
+          if (scEnd !== null) return scEnd;
+        }
+      }
+      /* ---------- Batch 6: KPK — perfekte Wertung via Bitbase ---------- */
+      if (phaseUnits === 0 && pwTotal + pbTotal === 1 && ensureKPK()) {
+        if (pwTotal === 1) {
+          var kpkW = kpkResult(kingSq[0], wpSqW, kingSq[1], true, side === 0);
+          if (kpkW === 1) return KPK_WIN_BASE + 20 * (wpSqW >> 4);
+          if (kpkW === 0) return 0;                  // nachweislich Remis
+        } else {
+          var kpkB = kpkResult(kingSq[0], wpSqB, kingSq[1], false, side === 0);
+          if (kpkB === 1) return -(KPK_WIN_BASE + 20 * (7 - (wpSqB >> 4)));
+          if (kpkB === 0) return 0;
+        }
+      }
       return ((mg * ph + eg * (24 - ph)) / 24) | 0;
     }
     function evalSide() { var e = evaluate(); return side === 0 ? e : -e; }
@@ -1057,30 +1713,27 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
         t = sq + 15; if (!(t & 0x88) && b[t] === 9) return t;
         t = sq + 17; if (!(t & 0x88) && b[t] === 9) return t;
       }
-      var kl = KNIGHT_TO[sq];
-      for (i = 0; i < kl.length; i++) { p = b[kl[i]]; if (p && (p >> 3) === by && (p & 7) === KNIGHT) return kl[i]; }
-      var rb = RAY_B[sq];
+      var kn = by === 0 ? 2 : 10, kg = by === 0 ? 6 : 14;
+      var dg = by === 0 ? 3 : 11, qu = by === 0 ? 5 : 13, ln = by === 0 ? 4 : 12;
+      for (i = KN_OFF[sq]; i < KN_OFF[sq + 1]; i++) { t = KN_FLAT[i]; if (b[t] === kn) return t; }
+      var b4 = sq << 2;
       for (i = 0; i < 4; i++) {
-        var ray1 = rb[i];
-        for (j = 0; j < ray1.length; j++) {
-          p = b[ray1[j]];
+        for (j = RAYB_IDX[b4 + i]; j < RAYB_IDX[b4 + i + 1]; j++) {
+          t = RAYB[j]; p = b[t];
           if (!p) continue;
-          if ((p >> 3) === by) { var q1 = p & 7; if (q1 === BISHOP || q1 === QUEEN) return ray1[j]; }
+          if (p === dg || p === qu) return t;
           break;
         }
       }
-      var rr = RAY_R[sq];
       for (i = 0; i < 4; i++) {
-        var ray2 = rr[i];
-        for (j = 0; j < ray2.length; j++) {
-          p = b[ray2[j]];
+        for (j = RAYR_IDX[b4 + i]; j < RAYR_IDX[b4 + i + 1]; j++) {
+          t = RAYR[j]; p = b[t];
           if (!p) continue;
-          if ((p >> 3) === by) { var q2 = p & 7; if (q2 === ROOK || q2 === QUEEN) return ray2[j]; }
+          if (p === ln || p === qu) return t;
           break;
         }
       }
-      var kk = KING_TO[sq];
-      for (i = 0; i < kk.length; i++) { p = b[kk[i]]; if (p && (p >> 3) === by && (p & 7) === KING) return kk[i]; }
+      for (i = KG_OFF[sq]; i < KG_OFF[sq + 1]; i++) { t = KG_FLAT[i]; if (b[t] === kg) return t; }
       return -1;
     }
 
@@ -1118,9 +1771,20 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
       return v;
     }
 
-    /* ---------- gibt der Zug Schach? (Approximation fürs Pruning) ---------- */
+    /* ---------- gibt der Zug Schach? (konservativ-korrekt fürs Pruning) ----------
+       Direkte Schachs exakt (Springer/Bauer geometrisch, Slider mit Blockade-Prüfung,
+       das verlassene Feld `from` korrekt übergangen), entdeckte Schachs über den Ray
+       hinter `from`. INVARIANTE: Die Funktion darf NIE falsch verneinen — sonst würden
+       echte Schachzüge gefutility-pruned, SEE-gepruned oder reduziert. Falsche
+       Bejahungen kosten nur Suchzeit, nie Stärke. Deshalb: Rochade (Turm landet neu,
+       kann direkt schachgeben) und en passant (der geschlagene Bauer kann Linien
+       freigeben) werden als potentielles Schach behandelt — vorher FALSE NEGATIVES.
+       Einzige verbleibende Fehlbejahung: das Zielfeld blockiert die eigene
+       Entdeckungslinie wieder (selten, harmlos). */
     function givesCheck(m) {
       var from = m & 127, to = (m >>> 7) & 127;
+      var flag = (m >>> 17) & 7;
+      if (flag === 3 || flag === 2) return true; // Rochade / en passant: nie verneinen
       var ksq = kingSq[side ^ 1];
       var pt = (m >>> 14) & 7;
       if (!pt) pt = board[from] & 7;
@@ -1138,12 +1802,8 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
         var rr = kr > (to >> 4) ? 1 : (kr < (to >> 4) ? -1 : 0);
         var ff = kf > (to & 7) ? 1 : (kf < (to & 7) ? -1 : 0);
         var r2 = (to >> 4) + rr, f2 = (to & 7) + ff;
-        // FIX (redundante Boundary-Prüfung): Der Lauf von `to` zum König ist bei
-        // ausgerichteten Feldern (gleiche Reihe/Linie/Diagonale) IMMER komplett auf
-        // dem Brett — beide Endpunkte liegen auf dem Brett und r2/f2 laufen monoton
-        // dazwischen. Die Prüfung war toter Code (historisches Sicherheitsnetz nach
-        // dem früheren Ray-Walk-Bug) und ist deshalb entfernt.
         while (!(r2 === kr && f2 === kf)) {
+          if (r2 < 0 || r2 > 7 || f2 < 0 || f2 > 7) { aligned = false; break; } // Sicherheitsnetz
           var s = r2 * 16 + f2;
           if (s !== from && board[s]) { aligned = false; break; }
           r2 += rr; f2 += ff;
@@ -1169,28 +1829,40 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
       return false;
     }
 
-    /* ---------- TT ---------- */
+    /* ---------- TT (depth-preferred + Aging) ---------- */
     function ttIndex() {
       return ((H_LO ^ Math.imul(H_HI, 0x9E3779B1)) >>> 0) & TT_MASK;
     }
     function ttStoreIdx(idx, depth, score, flag, move) {
+      if (TT_USED[idx] && (TT_KEYLO[idx] !== H_LO || TT_KEYHI[idx] !== H_HI)) {
+        // Kollisionsfall: frische Generation ersetzt immer, sonst nur bei >= Tiefe
+        var oldMeta = TT_META[idx];
+        if (((oldMeta >>> 10) & 255) === ttAge && ((oldMeta & 1023) >> 2) > depth) return;
+      }
       TT_USED[idx] = 1;
       TT_KEYLO[idx] = H_LO; TT_KEYHI[idx] = H_HI;
       TT_MOVE[idx] = move;
       TT_SCORE[idx] = score;
-      TT_META[idx] = (depth << 2) | flag;
+      TT_META[idx] = ((ttAge & 255) << 10) | (depth << 2) | flag;
     }
 
-    /* ---------- Zugbewertung (Ordering) ---------- */
+    /* ---------- Zugbewertung (Ordering, inkl. Countermove/CapHist) ---------- */
     function scoreMoves(buf, n, sc, ttMove, ply) {
+      var prev = hp > 0 ? UNDO_MOVE[hp - 1] : 0;
+      var cm = prev ? counterTable[((prev & 127) << 7) | ((prev >>> 7) & 127)] : 0;
       for (var i = 0; i < n; i++) {
         var m = buf[i];
         if (m === ttMove) { sc[i] = 1000000000; continue; }
         var cap = (m >>> 20) & 255, promo = (m >>> 14) & 7;
-        if (cap) sc[i] = 800000 + VAL_T[cap & 7] * 16 - (board[m & 127] & 7) + (promo ? 5000 : 0);
+        if (cap) {
+          // Capture-History dominiert innerhalb der Schlagzüge, MVV-LVA als Anker
+          var chv = capHist[((board[m & 127] * 128 + ((m >>> 7) & 127)) << 3) | (cap & 7)];
+          sc[i] = 800000 + (chv > 60000 ? 60000 : chv) + VAL_T[cap & 7] * 2 - (board[m & 127] & 7) + (promo ? 5000 : 0);
+        }
         else if (promo) sc[i] = 700000 + promo;
         else if (killer0[ply] === m) sc[i] = 600000;
         else if (killer1[ply] === m) sc[i] = 590000;
+        else if (cm && m === cm) sc[i] = 580000;
         else sc[i] = histTable[((m & 127) << 7) | ((m >>> 7) & 127)];
       }
     }
@@ -1216,17 +1888,23 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
       if (ply >= MAX_PLY - 2) return evalSide();
       var inChk = attacked(kingSq[side], side ^ 1);
       var best = -INF, stand = -INF;
+      var buf = moveBuf(ply), sc = scoreBuf(ply);
+      var n = genMoves(buf, !inChk);
+      // Batch 6: Patt-Erkennung in Figuren-Endspielen (Vollgenerierung dort billig).
+      // Ohne diesen Guard bewertet der Stand-Pat ein Patt als +Matt-Antrieb.
+      if (!inChk && n === 0 && phaseUnits <= 4 && genMoves(buf, false) === 0) return 0;
       if (!inChk) {
         stand = evalSide();
         if (stand >= beta) return stand;
         if (stand > alpha) alpha = stand;
         best = stand;
       }
-      var buf = moveBuf(ply), sc = scoreBuf(ply);
-      var n = genMoves(buf, !inChk);
       for (var s0 = 0; s0 < n; s0++) {
         var m0 = buf[s0];
         var cap0 = (m0 >>> 20) & 255, promo0 = (m0 >>> 14) & 7;
+        // Bewusst KEIN capHist hier: qsearch ist der Node-Hotpath (~80% der
+        // Knoten) — die History-Lookups kosteten ~15% NPS für wenig Ordnungs-
+        // gewinn bei flacher Tiefe. Reines MVV-LVA ist dort der bessere Deal.
         if (cap0) sc[s0] = 800000 + VAL_T[cap0 & 7] * 16 - (board[m0 & 127] & 7);
         else if (promo0) sc[s0] = 700000 + promo0;
         else sc[s0] = histTable[((m0 & 127) << 7) | ((m0 >>> 7) & 127)];
@@ -1281,11 +1959,13 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
       var ttMove = 0;
       if (TT_USED[idx] && TT_KEYLO[idx] === H_LO && TT_KEYHI[idx] === H_HI) {
         ttMove = TT_MOVE[idx];
-        if ((TT_META[idx] >> 2) >= depth) {
+        // META = ((age & 255) << 10) | (depth << 2) | flag  ->  Tiefe = (META & 1023) >> 2
+        var meta0 = TT_META[idx];
+        if (((meta0 & 1023) >> 2) >= depth) {
           var s0 = TT_SCORE[idx];
           if (s0 > MATE_BOUND) s0 -= ply;
           else if (s0 < -MATE_BOUND) s0 += ply;
-          var fl0 = TT_META[idx] & 3;
+          var fl0 = meta0 & 3;
           if (fl0 === 0) return s0;
           if (fl0 === 1 && s0 >= beta) return s0;
           if (fl0 === 2 && s0 <= alpha) return s0;
@@ -1295,6 +1975,13 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
       // Reverse Futility Pruning
       if (!pv && !inChk && depth <= 3 && staticEval - (90 + 70 * depth) >= beta && staticEval < MATE_BOUND) {
         return staticEval;
+      }
+      // Batch 6: Razoring — statisch weit unter Alpha -> QSearch verifizieren
+      if (!pv && !inChk && depth <= 2 && phaseUnits >= 4 &&
+          staticEval + (depth === 1 ? 220 : 320) < alpha &&
+          alpha > -MATE_BOUND + MAX_PLY && alpha < MATE_BOUND) {
+        var vRz = qsearch(alpha, beta, ply);
+        if (vRz < alpha) return vRz;
       }
       // Nullzug-Pruning
       if (allowNull && !pv && !inChk && depth >= 3 && phaseUnits >= 8 && staticEval >= beta && beta < MATE_BOUND) {
@@ -1316,10 +2003,17 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
         var quiet = !cap && !promo;
         var chk = quiet ? givesCheck(m) : false;
         // Futility / Late-Move-Pruning für ruhige Züge
-        if (!pv && !inChk && quiet && !chk && best > -INF && depth <= 2) {
-          if (staticEval + (depth === 1 ? 130 : 260) <= alpha && legal > 2) continue;
-          if (quiets >= 4 + 3 * depth) continue;
+        // Batch 6: LMP auf Tiefe 5 erweitert (Standardformel 3 + d²)
+        if (!pv && !inChk && quiet && !chk && best > -INF && legal > 2) {
+          if (depth <= 2 && staticEval + (depth === 1 ? 130 : 260) <= alpha) continue; // Futility
+          if (depth <= 5 && quiets >= 3 + depth * depth) continue;                     // LMP
         }
+        // SEE-Pruning in der Hauptsuche: schlechte Schlagzüge früh kappen.
+        // Ausnahmen (wichtig gegen Falsch-Matt): PV-Knoten, Schach, Umwandlungen,
+        // Matt-Nähe im Suchfenster, und schachgebende Schlagzüge (zwangsweise).
+        if (!pv && !inChk && depth <= 3 && cap && !promo && best > -INF &&
+            alpha > -MATE_BOUND + MAX_PLY && beta < MATE_BOUND - MAX_PLY &&
+            seeOfMove(m) < 0 && !givesCheck(m)) continue;
         make(m);
         if (attacked(kingSq[side ^ 1], side)) { unmake(); continue; } // illegal
         legal++;
@@ -1332,6 +2026,11 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
           var red = 0;
           if (depth >= 3 && quiet && !chk && !inChk && legal >= 4) {
             red = 1 + (legal >= 14 ? 1 : 0) + (depth >= 6 ? 1 : 0);
+            // History-basierte Reduktion: NUR wenn bereits Suchdaten existieren
+            // (histHigh) und der Zug relativ dazu deutlich schlechte History hat —
+            // sonst werden zu Suchbeginn alle ruhigen Züge überreduziert.
+            var hIdx = ((m & 127) << 7) | ((m >>> 7) & 127);
+            if (depth >= 4 && histHigh >= 512 && histTable[hIdx] < (histHigh >> 3)) red += 1;
             if (red > nd - 1) red = nd - 1;
           }
           v = -search(nd - red, -alpha - 1, -alpha, ply + 1, true);
@@ -1348,9 +2047,22 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
                 if (killer0[ply] !== m) { killer1[ply] = killer0[ply]; killer0[ply] = m; }
                 var hI = ((m & 127) << 7) | ((m >>> 7) & 127);
                 histTable[hI] += depth * depth;
+                if (histTable[hI] > histHigh) histHigh = histTable[hI];
                 if (histTable[hI] > (1 << 17)) {
                   for (var hh = 0; hh < 16384; hh++) histTable[hh] >>= 1;
                 }
+                // Batch 6: Continuation-History wurde A/B-GETESTET und ENTFERNT
+                // (NPS-Preis > Ordnungsgewinn bei unseren Knotenzahlen)
+                // Countermove: ruhiger Cut-Zug als Antwort auf den vorherigen Zug
+                if (hp > 0) {
+                  var pmv = UNDO_MOVE[hp - 1];
+                  if (pmv) counterTable[((pmv & 127) << 7) | ((pmv >>> 7) & 127)] = m;
+                }
+              } else if (cap) {
+                // Batch 6: Capture-History für den schlagenden Cut-Zug
+                var ciB = ((board[m & 127] * 128 + ((m >>> 7) & 127)) << 3) | (cap & 7);
+                var cvB = capHist[ciB] + depth * depth;
+                capHist[ciB] = cvB > (1 << 20) ? (1 << 20) : cvB;
               }
               break;
             }
@@ -1399,7 +2111,10 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
       hardDeadline = t0 + timeMs;
       aborted = false;
       nodes = 0;
-      killer0.fill(0); killer1.fill(0); histTable.fill(0);
+      ttAge = (ttAge + 1) & 255;
+      histHigh = 0;
+      killer0.fill(0); killer1.fill(0); histTable.fill(0); counterTable.fill(0);
+      capHist.fill(0);                     // Batch 6: Capture-History pro Suche neu
       var buf = moveBuf(MAX_PLY + 1);
       var n = genMoves(buf, false);
       var rootArr = [];
@@ -1639,15 +2354,21 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
           : { over: true, result: '1/2-1/2', reason: 'Patt' };
       }
       if (fifty >= 100) return { over: true, result: '1/2-1/2', reason: '50-Züge-Regel' };
-      var minors = 0, heavy = 0;
+      var minors = 0, heavy = 0, knCnt = 0, wBi = -1, bBi = -1;
       for (var j = 0; j < 64; j++) {
         var p = board[SQ64[j]];
         if (!p) continue;
         var t = p & 7;
         if (t === PAWN || t === ROOK || t === QUEEN) { heavy++; break; }
-        if (t === KNIGHT || t === BISHOP) minors++;
+        if (t === KNIGHT) { minors++; knCnt++; }
+        else if (t === BISHOP) { minors++; if (p === 3) wBi = SQ64[j]; else bBi = SQ64[j]; }
       }
       if (heavy === 0 && minors <= 1) return { over: true, result: '1/2-1/2', reason: 'ungenügendes Material' };
+      // Batch 6: Läufer gegen Läufer gleicher Feldfarbe — zwingend Remis
+      if (heavy === 0 && minors === 2 && knCnt === 0 && wBi >= 0 && bBi >= 0 &&
+          ((((wBi >> 4) + (wBi & 7)) & 1) === (((bBi >> 4) + (bBi & 7)) & 1))) {
+        return { over: true, result: '1/2-1/2', reason: 'ungenügendes Material (Läufer gleicher Farbe)' };
+      }
       var cnt = 0;
       for (var k = 0; k < repI; k++) {
         if (REP_LO[k] === H_LO && REP_HI[k] === H_HI) cnt++;
@@ -1724,6 +2445,535 @@ var Chess=function(r){var u="b",s="w",l=-1,_="p",A="n",S="b",m="r",y="q",p="k",t
   return createEngine;
 });
 
+/* Automatisch erzeugtes Eröffnungsbuch (build_book.js) — 65 Hauptvarianten, 526 Stellungen. */
+var BOOK = {
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -":["e2e4","d2d4","c2c4","g1f3"],
+  "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq -":["e7e5","c7c5","c7c6","e7e6","d7d5","d7d6","g7g6","g8f6"],
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -":["g1f3","b1c3","f2f4","f1c4"],
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -":["b8c6","g8f6"],
+  "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq -":["f1b5","f1c4","d2d4"],
+  "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq -":["a7a6","g8f6"],
+  "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq -":["b5a4"],
+  "r1bqkbnr/1ppp1ppp/p1n5/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R b KQkq -":["g8f6"],
+  "r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R w KQkq -":["e1g1"],
+  "r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1 b kq -":["f8e7"],
+  "r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1 w kq -":["f1e1","h2h3"],
+  "r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQR1K1 b kq -":["b7b5"],
+  "r1bqk2r/2ppbppp/p1n2n2/1p2p3/B3P3/5N2/PPPP1PPP/RNBQR1K1 w kq -":["a4b3"],
+  "r1bqk2r/2ppbppp/p1n2n2/1p2p3/4P3/1B3N2/PPPP1PPP/RNBQR1K1 b kq -":["d7d6","e8g8"],
+  "r1bqk2r/2p1bppp/p1np1n2/1p2p3/4P3/1B3N2/PPPP1PPP/RNBQR1K1 w kq -":["c2c3"],
+  "r1bqk2r/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N2/PP1P1PPP/RNBQR1K1 b kq -":["e8g8"],
+  "r1bq1rk1/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N2/PP1P1PPP/RNBQR1K1 w - -":["h2h3"],
+  "r1bqkb1r/pppp1ppp/2n2n2/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq -":["e1g1"],
+  "r1bqkb1r/pppp1ppp/2n2n2/1B2p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 b kq -":["f6e4"],
+  "r1bqkb1r/pppp1ppp/2n5/1B2p3/4n3/5N2/PPPP1PPP/RNBQ1RK1 w kq -":["d2d4","f1e1"],
+  "r1bqkb1r/pppp1ppp/2n5/1B2p3/3Pn3/5N2/PPP2PPP/RNBQ1RK1 b kq -":["e4d6"],
+  "r1bqkb1r/pppp1ppp/2nn4/1B2p3/3P4/5N2/PPP2PPP/RNBQ1RK1 w kq -":["b5c6"],
+  "r1bqkb1r/pppp1ppp/2Bn4/4p3/3P4/5N2/PPP2PPP/RNBQ1RK1 b kq -":["d7c6"],
+  "r1bqkb1r/ppp2ppp/2pn4/4p3/3P4/5N2/PPP2PPP/RNBQ1RK1 w kq -":["d4e5"],
+  "r1bqkb1r/ppp2ppp/2pn4/4P3/8/5N2/PPP2PPP/RNBQ1RK1 b kq -":["d6f5"],
+  "r1bqkb1r/ppp2ppp/2p5/4Pn2/8/5N2/PPP2PPP/RNBQ1RK1 w kq -":["d1d8"],
+  "r1bQkb1r/ppp2ppp/2p5/4Pn2/8/5N2/PPP2PPP/RNB2RK1 b kq -":["e8d8"],
+  "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq -":["f8c5","g8f6"],
+  "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq -":["c2c3"],
+  "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R b KQkq -":["g8f6"],
+  "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R w KQkq -":["d2d3"],
+  "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2PP1N2/PP3PPP/RNBQK2R b KQkq -":["d7d6"],
+  "r1bqk2r/ppp2ppp/2np1n2/2b1p3/2B1P3/2PP1N2/PP3PPP/RNBQK2R w KQkq -":["e1g1"],
+  "r1bqk2r/ppp2ppp/2np1n2/2b1p3/2B1P3/2PP1N2/PP3PPP/RNBQ1RK1 b kq -":["e8g8"],
+  "r1bq1rk1/ppp2ppp/2np1n2/2b1p3/2B1P3/2PP1N2/PP3PPP/RNBQ1RK1 w - -":["f1e1"],
+  "r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq -":["e5d4"],
+  "r1bqkbnr/pppp1ppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq -":["f3d4"],
+  "r1bqkbnr/pppp1ppp/2n5/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq -":["g8f6"],
+  "r1bqkb1r/pppp1ppp/2n2n2/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq -":["d4c6"],
+  "r1bqkb1r/pppp1ppp/2N2n2/8/4P3/8/PPP2PPP/RNBQKB1R b KQkq -":["b7c6"],
+  "r1bqkb1r/p1pp1ppp/2p2n2/8/4P3/8/PPP2PPP/RNBQKB1R w KQkq -":["e4e5"],
+  "r1bqkb1r/p1pp1ppp/2p2n2/4P3/8/8/PPP2PPP/RNBQKB1R b KQkq -":["d8e7"],
+  "r1b1kb1r/p1ppqppp/2p2n2/4P3/8/8/PPP2PPP/RNBQKB1R w KQkq -":["d1e2"],
+  "r1b1kb1r/p1ppqppp/2p2n2/4P3/8/8/PPP1QPPP/RNB1KB1R b KQkq -":["f6d5"],
+  "r1b1kb1r/p1ppqppp/2p5/3nP3/8/8/PPP1QPPP/RNB1KB1R w KQkq -":["c2c4"],
+  "r1b1kb1r/p1ppqppp/2p5/3nP3/2P5/8/PP2QPPP/RNB1KB1R b KQkq -":["d5b6","c8a6"],
+  "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq -":["f3e5"],
+  "rnbqkb1r/pppp1ppp/5n2/4N3/4P3/8/PPPP1PPP/RNBQKB1R b KQkq -":["d7d6"],
+  "rnbqkb1r/ppp2ppp/3p1n2/4N3/4P3/8/PPPP1PPP/RNBQKB1R w KQkq -":["e5f3"],
+  "rnbqkb1r/ppp2ppp/3p1n2/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -":["f6e4"],
+  "rnbqkb1r/ppp2ppp/3p4/8/4n3/5N2/PPPP1PPP/RNBQKB1R w KQkq -":["d2d4"],
+  "rnbqkb1r/ppp2ppp/3p4/8/3Pn3/5N2/PPP2PPP/RNBQKB1R b KQkq -":["d6d5"],
+  "rnbqkb1r/ppp2ppp/8/3p4/3Pn3/5N2/PPP2PPP/RNBQKB1R w KQkq -":["f1d3"],
+  "rnbqkb1r/ppp2ppp/8/3p4/3Pn3/3B1N2/PPP2PPP/RNBQK2R b KQkq -":["f8e7"],
+  "rnbqk2r/ppp1bppp/8/3p4/3Pn3/3B1N2/PPP2PPP/RNBQK2R w KQkq -":["e1g1"],
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq -":["g8f6"],
+  "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR w KQkq -":["g2g3","f2f4"],
+  "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/2N3P1/PPPP1P1P/R1BQKBNR b KQkq -":["d7d5"],
+  "rnbqkb1r/ppp2ppp/5n2/3pp3/4P3/2N3P1/PPPP1P1P/R1BQKBNR w KQkq -":["e4d5"],
+  "rnbqkb1r/ppp2ppp/5n2/3Pp3/8/2N3P1/PPPP1P1P/R1BQKBNR b KQkq -":["f6d5"],
+  "rnbqkb1r/ppp2ppp/8/3np3/8/2N3P1/PPPP1P1P/R1BQKBNR w KQkq -":["f1g2"],
+  "rnbqkb1r/ppp2ppp/8/3np3/8/2N3P1/PPPP1PBP/R1BQK1NR b KQkq -":["d5b6"],
+  "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -":["g1f3"],
+  "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -":["d7d6","b8c6","e7e6"],
+  "rnbqkbnr/pp2pppp/3p4/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq -":["d2d4"],
+  "rnbqkbnr/pp2pppp/3p4/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq -":["c5d4"],
+  "rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq -":["f3d4"],
+  "rnbqkbnr/pp2pppp/3p4/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq -":["g8f6"],
+  "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq -":["b1c3"],
+  "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R b KQkq -":["a7a6","g7g6"],
+  "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq -":["c1e3"],
+  "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N1B3/PPP2PPP/R2QKB1R b KQkq -":["e7e5"],
+  "rnbqkb1r/1p3ppp/p2p1n2/4p3/3NP3/2N1B3/PPP2PPP/R2QKB1R w KQkq -":["d4b3"],
+  "rnbqkb1r/1p3ppp/p2p1n2/4p3/4P3/1NN1B3/PPP2PPP/R2QKB1R b KQkq -":["f8e7","c8e6"],
+  "rnbqk2r/1p2bppp/p2p1n2/4p3/4P3/1NN1B3/PPP2PPP/R2QKB1R w KQkq -":["f2f3"],
+  "rnbqk2r/1p2bppp/p2p1n2/4p3/4P3/1NN1BP2/PPP3PP/R2QKB1R b KQkq -":["e8g8"],
+  "rnbq1rk1/1p2bppp/p2p1n2/4p3/4P3/1NN1BP2/PPP3PP/R2QKB1R w KQ -":["d1d2"],
+  "r1bqkbnr/pp1ppppp/2n5/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq -":["d2d4"],
+  "r1bqkbnr/pp1ppppp/2n5/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq -":["c5d4"],
+  "r1bqkbnr/pp1ppppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq -":["f3d4"],
+  "r1bqkbnr/pp1ppppp/2n5/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq -":["g8f6","d8b6"],
+  "r1bqkb1r/pp1ppppp/2n2n2/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq -":["b1c3"],
+  "r1bqkb1r/pp1ppppp/2n2n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R b KQkq -":["e7e5"],
+  "r1bqkb1r/pp1p1ppp/2n2n2/4p3/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq -":["d4b5"],
+  "r1bqkb1r/pp1p1ppp/2n2n2/1N2p3/4P3/2N5/PPP2PPP/R1BQKB1R b KQkq -":["d7d6"],
+  "r1bqkb1r/pp3ppp/2np1n2/1N2p3/4P3/2N5/PPP2PPP/R1BQKB1R w KQkq -":["c1g5"],
+  "r1bqkb1r/pp3ppp/2np1n2/1N2p1B1/4P3/2N5/PPP2PPP/R2QKB1R b KQkq -":["a7a6"],
+  "r1bqkb1r/1p3ppp/p1np1n2/1N2p1B1/4P3/2N5/PPP2PPP/R2QKB1R w KQkq -":["b5a3"],
+  "r1bqkb1r/1p3ppp/p1np1n2/4p1B1/4P3/N1N5/PPP2PPP/R2QKB1R b KQkq -":["b7b5"],
+  "r1bqkb1r/5ppp/p1np1n2/1p2p1B1/4P3/N1N5/PPP2PPP/R2QKB1R w KQkq -":["c3d5"],
+  "rnbqkbnr/pp1p1ppp/4p3/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq -":["d2d4"],
+  "rnbqkbnr/pp1p1ppp/4p3/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq -":["c5d4"],
+  "rnbqkbnr/pp1p1ppp/4p3/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq -":["f3d4"],
+  "rnbqkbnr/pp1p1ppp/4p3/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq -":["b8c6"],
+  "r1bqkbnr/pp1p1ppp/2n1p3/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq -":["b1c3"],
+  "r1bqkbnr/pp1p1ppp/2n1p3/8/3NP3/2N5/PPP2PPP/R1BQKB1R b KQkq -":["d8c7"],
+  "r1b1kbnr/ppqp1ppp/2n1p3/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq -":["c1e3"],
+  "r1b1kbnr/ppqp1ppp/2n1p3/8/3NP3/2N1B3/PPP2PPP/R2QKB1R b KQkq -":["a7a6"],
+  "r1b1kbnr/1pqp1ppp/p1n1p3/8/3NP3/2N1B3/PPP2PPP/R2QKB1R w KQkq -":["d1d2"],
+  "r1b1kbnr/1pqp1ppp/p1n1p3/8/3NP3/2N1B3/PPPQ1PPP/R3KB1R b KQkq -":["g8f6"],
+  "r1b1kb1r/1pqp1ppp/p1n1pn2/8/3NP3/2N1B3/PPPQ1PPP/R3KB1R w KQkq -":["e1c1"],
+  "rnbqkb1r/pp2pp1p/3p1np1/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq -":["c1e3"],
+  "rnbqkb1r/pp2pp1p/3p1np1/8/3NP3/2N1B3/PPP2PPP/R2QKB1R b KQkq -":["f8g7"],
+  "rnbqk2r/pp2ppbp/3p1np1/8/3NP3/2N1B3/PPP2PPP/R2QKB1R w KQkq -":["f2f3"],
+  "rnbqk2r/pp2ppbp/3p1np1/8/3NP3/2N1BP2/PPP3PP/R2QKB1R b KQkq -":["e8g8"],
+  "rnbq1rk1/pp2ppbp/3p1np1/8/3NP3/2N1BP2/PPP3PP/R2QKB1R w KQ -":["d1d2"],
+  "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -":["d2d4"],
+  "rnbqkbnr/pp1ppppp/2p5/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq -":["d7d5"],
+  "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq -":["b1c3","e4e5","e4d5"],
+  "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/2N5/PPP2PPP/R1BQKBNR b KQkq -":["d5e4"],
+  "rnbqkbnr/pp2pppp/2p5/8/3Pp3/2N5/PPP2PPP/R1BQKBNR w KQkq -":["c3e4"],
+  "rnbqkbnr/pp2pppp/2p5/8/3PN3/8/PPP2PPP/R1BQKBNR b KQkq -":["c8f5"],
+  "rn1qkbnr/pp2pppp/2p5/5b2/3PN3/8/PPP2PPP/R1BQKBNR w KQkq -":["e4g3"],
+  "rn1qkbnr/pp2pppp/2p5/5b2/3P4/6N1/PPP2PPP/R1BQKBNR b KQkq -":["f5g6"],
+  "rn1qkbnr/pp2pppp/2p3b1/8/3P4/6N1/PPP2PPP/R1BQKBNR w KQkq -":["h2h4"],
+  "rn1qkbnr/pp2pppp/2p3b1/8/3P3P/6N1/PPP2PP1/R1BQKBNR b KQkq -":["h7h6"],
+  "rn1qkbnr/pp2ppp1/2p3bp/8/3P3P/6N1/PPP2PP1/R1BQKBNR w KQkq -":["g1f3"],
+  "rn1qkbnr/pp2ppp1/2p3bp/8/3P3P/5NN1/PPP2PP1/R1BQKB1R b KQkq -":["b8d7"],
+  "rnbqkbnr/pp2pppp/2p5/3pP3/3P4/8/PPP2PPP/RNBQKBNR b KQkq -":["c8f5"],
+  "rn1qkbnr/pp2pppp/2p5/3pPb2/3P4/8/PPP2PPP/RNBQKBNR w KQkq -":["g1f3"],
+  "rn1qkbnr/pp2pppp/2p5/3pPb2/3P4/5N2/PPP2PPP/RNBQKB1R b KQkq -":["e7e6"],
+  "rn1qkbnr/pp3ppp/2p1p3/3pPb2/3P4/5N2/PPP2PPP/RNBQKB1R w KQkq -":["f1e2"],
+  "rn1qkbnr/pp3ppp/2p1p3/3pPb2/3P4/5N2/PPP1BPPP/RNBQK2R b KQkq -":["c6c5"],
+  "rn1qkbnr/pp3ppp/4p3/2ppPb2/3P4/5N2/PPP1BPPP/RNBQK2R w KQkq -":["c1e3"],
+  "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -":["d2d4"],
+  "rnbqkbnr/pppp1ppp/4p3/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq -":["d7d5"],
+  "rnbqkbnr/ppp2ppp/4p3/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq -":["b1c3","b1d2"],
+  "rnbqkbnr/ppp2ppp/4p3/3p4/3PP3/2N5/PPP2PPP/R1BQKBNR b KQkq -":["f8b4","g8f6"],
+  "rnbqk1nr/ppp2ppp/4p3/3p4/1b1PP3/2N5/PPP2PPP/R1BQKBNR w KQkq -":["e4e5"],
+  "rnbqk1nr/ppp2ppp/4p3/3pP3/1b1P4/2N5/PPP2PPP/R1BQKBNR b KQkq -":["c7c5","g8e7"],
+  "rnbqk1nr/pp3ppp/4p3/2ppP3/1b1P4/2N5/PPP2PPP/R1BQKBNR w KQkq -":["a2a3"],
+  "rnbqk1nr/pp3ppp/4p3/2ppP3/1b1P4/P1N5/1PP2PPP/R1BQKBNR b KQkq -":["b4c3"],
+  "rnbqk1nr/pp3ppp/4p3/2ppP3/3P4/P1b5/1PP2PPP/R1BQKBNR w KQkq -":["b2c3"],
+  "rnbqk1nr/pp3ppp/4p3/2ppP3/3P4/P1P5/2P2PPP/R1BQKBNR b KQkq -":["g8e7"],
+  "rnbqk2r/pp2nppp/4p3/2ppP3/3P4/P1P5/2P2PPP/R1BQKBNR w KQkq -":["d1g4"],
+  "rnbqkbnr/ppp2ppp/4p3/3p4/3PP3/8/PPPN1PPP/R1BQKBNR b KQkq -":["g8f6"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/3PP3/8/PPPN1PPP/R1BQKBNR w KQkq -":["e4e5"],
+  "rnbqkb1r/ppp2ppp/4pn2/3pP3/3P4/8/PPPN1PPP/R1BQKBNR b KQkq -":["f6d7"],
+  "rnbqkb1r/pppn1ppp/4p3/3pP3/3P4/8/PPPN1PPP/R1BQKBNR w KQkq -":["f1d3"],
+  "rnbqkb1r/pppn1ppp/4p3/3pP3/3P4/3B4/PPPN1PPP/R1BQK1NR b KQkq -":["c7c5"],
+  "rnbqkb1r/pp1n1ppp/4p3/2ppP3/3P4/3B4/PPPN1PPP/R1BQK1NR w KQkq -":["c2c3"],
+  "rnbqkb1r/pp1n1ppp/4p3/2ppP3/3P4/2PB4/PP1N1PPP/R1BQK1NR b KQkq -":["b8c6"],
+  "r1bqkb1r/pp1n1ppp/2n1p3/2ppP3/3P4/2PB4/PP1N1PPP/R1BQK1NR w KQkq -":["g1e2"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/3PP3/2N5/PPP2PPP/R1BQKBNR w KQkq -":["c1g5"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p2B1/3PP3/2N5/PPP2PPP/R2QKBNR b KQkq -":["d5e4"],
+  "rnbqkb1r/ppp2ppp/4pn2/6B1/3Pp3/2N5/PPP2PPP/R2QKBNR w KQkq -":["c3e4"],
+  "rnbqkb1r/ppp2ppp/4pn2/6B1/3PN3/8/PPP2PPP/R2QKBNR b KQkq -":["f8e7"],
+  "rnbqk2r/ppp1bppp/4pn2/6B1/3PN3/8/PPP2PPP/R2QKBNR w KQkq -":["g5f6"],
+  "rnbqk2r/ppp1bppp/4pB2/8/3PN3/8/PPP2PPP/R2QKBNR b KQkq -":["e7f6"],
+  "rnbqk2r/ppp2ppp/4pb2/8/3PN3/8/PPP2PPP/R2QKBNR w KQkq -":["g1f3"],
+  "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -":["e4d5"],
+  "rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq -":["d8d5"],
+  "rnb1kbnr/ppp1pppp/8/3q4/8/8/PPPP1PPP/RNBQKBNR w KQkq -":["b1c3"],
+  "rnb1kbnr/ppp1pppp/8/3q4/8/2N5/PPPP1PPP/R1BQKBNR b KQkq -":["d5a5"],
+  "rnb1kbnr/ppp1pppp/8/q7/8/2N5/PPPP1PPP/R1BQKBNR w KQkq -":["d2d4"],
+  "rnb1kbnr/ppp1pppp/8/q7/3P4/2N5/PPP2PPP/R1BQKBNR b KQkq -":["g8f6"],
+  "rnb1kb1r/ppp1pppp/5n2/q7/3P4/2N5/PPP2PPP/R1BQKBNR w KQkq -":["g1f3"],
+  "rnb1kb1r/ppp1pppp/5n2/q7/3P4/2N2N2/PPP2PPP/R1BQKB1R b KQkq -":["c7c6"],
+  "rnb1kb1r/pp2pppp/2p2n2/q7/3P4/2N2N2/PPP2PPP/R1BQKB1R w KQkq -":["f1c4"],
+  "rnb1kb1r/pp2pppp/2p2n2/q7/2BP4/2N2N2/PPP2PPP/R1BQK2R b KQkq -":["c8f5"],
+  "rnbqkbnr/ppp1pppp/3p4/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -":["d2d4"],
+  "rnbqkbnr/ppp1pppp/3p4/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq -":["g8f6"],
+  "rnbqkb1r/ppp1pppp/3p1n2/8/3PP3/8/PPP2PPP/RNBQKBNR w KQkq -":["b1c3"],
+  "rnbqkb1r/ppp1pppp/3p1n2/8/3PP3/2N5/PPP2PPP/R1BQKBNR b KQkq -":["g7g6"],
+  "rnbqkb1r/ppp1pp1p/3p1np1/8/3PP3/2N5/PPP2PPP/R1BQKBNR w KQkq -":["g1f3"],
+  "rnbqkb1r/ppp1pp1p/3p1np1/8/3PP3/2N2N2/PPP2PPP/R1BQKB1R b KQkq -":["f8g7"],
+  "rnbqk2r/ppp1ppbp/3p1np1/8/3PP3/2N2N2/PPP2PPP/R1BQKB1R w KQkq -":["f1e2"],
+  "rnbqk2r/ppp1ppbp/3p1np1/8/3PP3/2N2N2/PPP1BPPP/R1BQK2R b KQkq -":["e8g8"],
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/3PP3/2N2N2/PPP1BPPP/R1BQK2R w KQ -":["e1g1"],
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/3PP3/2N2N2/PPP1BPPP/R1BQ1RK1 b - -":["c7c6"],
+  "rnbq1rk1/pp2ppbp/2pp1np1/8/3PP3/2N2N2/PPP1BPPP/R1BQ1RK1 w - -":["a2a4"],
+  "rnbqkbnr/pppppp1p/6p1/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -":["d2d4"],
+  "rnbqkbnr/pppppp1p/6p1/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq -":["f8g7"],
+  "rnbqk1nr/ppppppbp/6p1/8/3PP3/8/PPP2PPP/RNBQKBNR w KQkq -":["b1c3"],
+  "rnbqk1nr/ppppppbp/6p1/8/3PP3/2N5/PPP2PPP/R1BQKBNR b KQkq -":["d7d6"],
+  "rnbqk1nr/ppp1ppbp/3p2p1/8/3PP3/2N5/PPP2PPP/R1BQKBNR w KQkq -":["f2f4"],
+  "rnbqk1nr/ppp1ppbp/3p2p1/8/3PPP2/2N5/PPP3PP/R1BQKBNR b KQkq -":["g8f6"],
+  "rnbqk2r/ppp1ppbp/3p1np1/8/3PPP2/2N5/PPP3PP/R1BQKBNR w KQkq -":["g1f3"],
+  "rnbqk2r/ppp1ppbp/3p1np1/8/3PPP2/2N2N2/PPP3PP/R1BQKB1R b KQkq -":["e8g8"],
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/3PPP2/2N2N2/PPP3PP/R1BQKB1R w KQ -":["f1d3"],
+  "rnbqkb1r/pppppppp/5n2/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -":["e4e5"],
+  "rnbqkb1r/pppppppp/5n2/4P3/8/8/PPPP1PPP/RNBQKBNR b KQkq -":["f6d5"],
+  "rnbqkb1r/pppppppp/8/3nP3/8/8/PPPP1PPP/RNBQKBNR w KQkq -":["d2d4"],
+  "rnbqkb1r/pppppppp/8/3nP3/3P4/8/PPP2PPP/RNBQKBNR b KQkq -":["d7d6"],
+  "rnbqkb1r/ppp1pppp/3p4/3nP3/3P4/8/PPP2PPP/RNBQKBNR w KQkq -":["g1f3"],
+  "rnbqkb1r/ppp1pppp/3p4/3nP3/3P4/5N2/PPP2PPP/RNBQKB1R b KQkq -":["d6e5"],
+  "rnbqkb1r/ppp1pppp/8/3np3/3P4/5N2/PPP2PPP/RNBQKB1R w KQkq -":["f3e5"],
+  "rnbqkb1r/ppp1pppp/8/3nN3/3P4/8/PPP2PPP/RNBQKB1R b KQkq -":["c7c6"],
+  "rnbqkb1r/pp2pppp/2p5/3nN3/3P4/8/PPP2PPP/RNBQKB1R w KQkq -":["f1e2"],
+  "rnbqkb1r/pp2pppp/2p5/3nN3/3P4/8/PPP1BPPP/RNBQK2R b KQkq -":["c8f5"],
+  "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq -":["d7d5","g8f6"],
+  "rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq -":["c2c4","g1f3","c1f4"],
+  "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq -":["e7e6","c7c6","d5c4"],
+  "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/8/PP2PPPP/RNBQKBNR w KQkq -":["b1c3"],
+  "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq -":["g8f6","c7c5"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR w KQkq -":["c1g5"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p2B1/2PP4/2N5/PP2PPPP/R2QKBNR b KQkq -":["f8e7"],
+  "rnbqk2r/ppp1bppp/4pn2/3p2B1/2PP4/2N5/PP2PPPP/R2QKBNR w KQkq -":["e2e3"],
+  "rnbqk2r/ppp1bppp/4pn2/3p2B1/2PP4/2N1P3/PP3PPP/R2QKBNR b KQkq -":["e8g8"],
+  "rnbq1rk1/ppp1bppp/4pn2/3p2B1/2PP4/2N1P3/PP3PPP/R2QKBNR w KQ -":["g1f3"],
+  "rnbq1rk1/ppp1bppp/4pn2/3p2B1/2PP4/2N1PN2/PP3PPP/R2QKB1R b KQ -":["h7h6"],
+  "rnbq1rk1/ppp1bpp1/4pn1p/3p2B1/2PP4/2N1PN2/PP3PPP/R2QKB1R w KQ -":["g5h4"],
+  "rnbqkbnr/pp3ppp/4p3/2pp4/2PP4/2N5/PP2PPPP/R1BQKBNR w KQkq -":["c4d5"],
+  "rnbqkbnr/pp3ppp/4p3/2pP4/3P4/2N5/PP2PPPP/R1BQKBNR b KQkq -":["e6d5"],
+  "rnbqkbnr/pp3ppp/8/2pp4/3P4/2N5/PP2PPPP/R1BQKBNR w KQkq -":["g1f3"],
+  "rnbqkbnr/pp3ppp/8/2pp4/3P4/2N2N2/PP2PPPP/R1BQKB1R b KQkq -":["b8c6"],
+  "r1bqkbnr/pp3ppp/2n5/2pp4/3P4/2N2N2/PP2PPPP/R1BQKB1R w KQkq -":["g2g3"],
+  "r1bqkbnr/pp3ppp/2n5/2pp4/3P4/2N2NP1/PP2PP1P/R1BQKB1R b KQkq -":["g8f6"],
+  "r1bqkb1r/pp3ppp/2n2n2/2pp4/3P4/2N2NP1/PP2PP1P/R1BQKB1R w KQkq -":["f1g2"],
+  "r1bqkb1r/pp3ppp/2n2n2/2pp4/3P4/2N2NP1/PP2PPBP/R1BQK2R b KQkq -":["f8e7"],
+  "r1bqk2r/pp2bppp/2n2n2/2pp4/3P4/2N2NP1/PP2PPBP/R1BQK2R w KQkq -":["e1g1"],
+  "r1bqk2r/pp2bppp/2n2n2/2pp4/3P4/2N2NP1/PP2PPBP/R1BQ1RK1 b kq -":["e8g8"],
+  "rnbqkbnr/pp2pppp/2p5/3p4/2PP4/8/PP2PPPP/RNBQKBNR w KQkq -":["g1f3"],
+  "rnbqkbnr/pp2pppp/2p5/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq -":["g8f6"],
+  "rnbqkb1r/pp2pppp/2p2n2/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq -":["b1c3"],
+  "rnbqkb1r/pp2pppp/2p2n2/3p4/2PP4/2N2N2/PP2PPPP/R1BQKB1R b KQkq -":["d5c4"],
+  "rnbqkb1r/pp2pppp/2p2n2/8/2pP4/2N2N2/PP2PPPP/R1BQKB1R w KQkq -":["a2a4"],
+  "rnbqkb1r/pp2pppp/2p2n2/8/P1pP4/2N2N2/1P2PPPP/R1BQKB1R b KQkq -":["c8f5"],
+  "rn1qkb1r/pp2pppp/2p2n2/5b2/P1pP4/2N2N2/1P2PPPP/R1BQKB1R w KQkq -":["e2e3"],
+  "rn1qkb1r/pp2pppp/2p2n2/5b2/P1pP4/2N1PN2/1P3PPP/R1BQKB1R b KQkq -":["e7e6"],
+  "rn1qkb1r/pp3ppp/2p1pn2/5b2/P1pP4/2N1PN2/1P3PPP/R1BQKB1R w KQkq -":["f1c4"],
+  "rn1qkb1r/pp3ppp/2p1pn2/5b2/P1BP4/2N1PN2/1P3PPP/R1BQK2R b KQkq -":["f8b4"],
+  "rnbqkbnr/ppp1pppp/8/8/2pP4/8/PP2PPPP/RNBQKBNR w KQkq -":["g1f3"],
+  "rnbqkbnr/ppp1pppp/8/8/2pP4/5N2/PP2PPPP/RNBQKB1R b KQkq -":["g8f6"],
+  "rnbqkb1r/ppp1pppp/5n2/8/2pP4/5N2/PP2PPPP/RNBQKB1R w KQkq -":["e2e3"],
+  "rnbqkb1r/ppp1pppp/5n2/8/2pP4/4PN2/PP3PPP/RNBQKB1R b KQkq -":["e7e6"],
+  "rnbqkb1r/ppp2ppp/4pn2/8/2pP4/4PN2/PP3PPP/RNBQKB1R w KQkq -":["f1c4"],
+  "rnbqkb1r/ppp2ppp/4pn2/8/2BP4/4PN2/PP3PPP/RNBQK2R b KQkq -":["c7c5"],
+  "rnbqkb1r/pp3ppp/4pn2/2p5/2BP4/4PN2/PP3PPP/RNBQK2R w KQkq -":["e1g1"],
+  "rnbqkb1r/pp3ppp/4pn2/2p5/2BP4/4PN2/PP3PPP/RNBQ1RK1 b kq -":["a7a6"],
+  "rnbqkb1r/1p3ppp/p3pn2/2p5/2BP4/4PN2/PP3PPP/RNBQ1RK1 w kq -":["d1e2","d4c5"],
+  "rnbqkb1r/pppppppp/5n2/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq -":["c2c4"],
+  "rnbqkb1r/pppppppp/5n2/8/2PP4/8/PP2PPPP/RNBQKBNR b KQkq -":["e7e6","g7g6"],
+  "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/8/PP2PPPP/RNBQKBNR w KQkq -":["g1f3","b1c3","g2g3"],
+  "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq -":["b7b6"],
+  "rnbqkb1r/p1pp1ppp/1p2pn2/8/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq -":["g2g3"],
+  "rnbqkb1r/p1pp1ppp/1p2pn2/8/2PP4/5NP1/PP2PP1P/RNBQKB1R b KQkq -":["c8b7"],
+  "rn1qkb1r/pbpp1ppp/1p2pn2/8/2PP4/5NP1/PP2PP1P/RNBQKB1R w KQkq -":["f1g2"],
+  "rn1qkb1r/pbpp1ppp/1p2pn2/8/2PP4/5NP1/PP2PPBP/RNBQK2R b KQkq -":["f8e7"],
+  "rn1qk2r/pbppbppp/1p2pn2/8/2PP4/5NP1/PP2PPBP/RNBQK2R w KQkq -":["e1g1"],
+  "rn1qk2r/pbppbppp/1p2pn2/8/2PP4/5NP1/PP2PPBP/RNBQ1RK1 b kq -":["e8g8"],
+  "rn1q1rk1/pbppbppp/1p2pn2/8/2PP4/5NP1/PP2PPBP/RNBQ1RK1 w - -":["b1c3"],
+  "rn1q1rk1/pbppbppp/1p2pn2/8/2PP4/2N2NP1/PP2PPBP/R1BQ1RK1 b - -":["f6e4"],
+  "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq -":["f8b4"],
+  "rnbqk2r/pppp1ppp/4pn2/8/1bPP4/2N5/PP2PPPP/R1BQKBNR w KQkq -":["e2e3","d1c2"],
+  "rnbqk2r/pppp1ppp/4pn2/8/1bPP4/2N1P3/PP3PPP/R1BQKBNR b KQkq -":["e8g8"],
+  "rnbq1rk1/pppp1ppp/4pn2/8/1bPP4/2N1P3/PP3PPP/R1BQKBNR w KQ -":["f1d3"],
+  "rnbq1rk1/pppp1ppp/4pn2/8/1bPP4/2NBP3/PP3PPP/R1BQK1NR b KQ -":["d7d5"],
+  "rnbq1rk1/ppp2ppp/4pn2/3p4/1bPP4/2NBP3/PP3PPP/R1BQK1NR w KQ -":["g1f3"],
+  "rnbq1rk1/ppp2ppp/4pn2/3p4/1bPP4/2NBPN2/PP3PPP/R1BQK2R b KQ -":["c7c5"],
+  "rnbq1rk1/pp3ppp/4pn2/2pp4/1bPP4/2NBPN2/PP3PPP/R1BQK2R w KQ -":["e1g1"],
+  "rnbq1rk1/pp3ppp/4pn2/2pp4/1bPP4/2NBPN2/PP3PPP/R1BQ1RK1 b - -":["b8c6"],
+  "rnbqk2r/pppp1ppp/4pn2/8/1bPP4/2N5/PPQ1PPPP/R1B1KBNR b KQkq -":["e8g8"],
+  "rnbq1rk1/pppp1ppp/4pn2/8/1bPP4/2N5/PPQ1PPPP/R1B1KBNR w KQ -":["e2e3"],
+  "rnbq1rk1/pppp1ppp/4pn2/8/1bPP4/2N1P3/PPQ2PPP/R1B1KBNR b KQ -":["d7d5"],
+  "rnbq1rk1/ppp2ppp/4pn2/3p4/1bPP4/2N1P3/PPQ2PPP/R1B1KBNR w KQ -":["a2a3"],
+  "rnbq1rk1/ppp2ppp/4pn2/3p4/1bPP4/P1N1P3/1PQ2PPP/R1B1KBNR b KQ -":["b4c3"],
+  "rnbq1rk1/ppp2ppp/4pn2/3p4/2PP4/P1b1P3/1PQ2PPP/R1B1KBNR w KQ -":["c2c3"],
+  "rnbqkb1r/pppppp1p/5np1/8/2PP4/8/PP2PPPP/RNBQKBNR w KQkq -":["b1c3","g1f3"],
+  "rnbqkb1r/pppppp1p/5np1/8/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq -":["f8g7","d7d5"],
+  "rnbqk2r/ppppppbp/5np1/8/2PP4/2N5/PP2PPPP/R1BQKBNR w KQkq -":["e2e4"],
+  "rnbqk2r/ppppppbp/5np1/8/2PPP3/2N5/PP3PPP/R1BQKBNR b KQkq -":["d7d6"],
+  "rnbqk2r/ppp1ppbp/3p1np1/8/2PPP3/2N5/PP3PPP/R1BQKBNR w KQkq -":["g1f3"],
+  "rnbqk2r/ppp1ppbp/3p1np1/8/2PPP3/2N2N2/PP3PPP/R1BQKB1R b KQkq -":["e8g8"],
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/2PPP3/2N2N2/PP3PPP/R1BQKB1R w KQ -":["f1e2"],
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/2PPP3/2N2N2/PP2BPPP/R1BQK2R b KQ -":["e7e5"],
+  "rnbq1rk1/ppp2pbp/3p1np1/4p3/2PPP3/2N2N2/PP2BPPP/R1BQK2R w KQ -":["e1g1"],
+  "rnbq1rk1/ppp2pbp/3p1np1/4p3/2PPP3/2N2N2/PP2BPPP/R1BQ1RK1 b - -":["b8c6"],
+  "r1bq1rk1/ppp2pbp/2np1np1/4p3/2PPP3/2N2N2/PP2BPPP/R1BQ1RK1 w - -":["d4d5"],
+  "r1bq1rk1/ppp2pbp/2np1np1/3Pp3/2P1P3/2N2N2/PP2BPPP/R1BQ1RK1 b - -":["c6e7"],
+  "rnbqkb1r/ppp1pp1p/5np1/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR w KQkq -":["c4d5"],
+  "rnbqkb1r/ppp1pp1p/5np1/3P4/3P4/2N5/PP2PPPP/R1BQKBNR b KQkq -":["f6d5"],
+  "rnbqkb1r/ppp1pp1p/6p1/3n4/3P4/2N5/PP2PPPP/R1BQKBNR w KQkq -":["e2e4"],
+  "rnbqkb1r/ppp1pp1p/6p1/3n4/3PP3/2N5/PP3PPP/R1BQKBNR b KQkq -":["d5c3"],
+  "rnbqkb1r/ppp1pp1p/6p1/8/3PP3/2n5/PP3PPP/R1BQKBNR w KQkq -":["b2c3"],
+  "rnbqkb1r/ppp1pp1p/6p1/8/3PP3/2P5/P4PPP/R1BQKBNR b KQkq -":["f8g7"],
+  "rnbqk2r/ppp1ppbp/6p1/8/3PP3/2P5/P4PPP/R1BQKBNR w KQkq -":["g1f3"],
+  "rnbqk2r/ppp1ppbp/6p1/8/3PP3/2P2N2/P4PPP/R1BQKB1R b KQkq -":["c7c5"],
+  "rnbqk2r/pp2ppbp/6p1/2p5/3PP3/2P2N2/P4PPP/R1BQKB1R w KQkq -":["c1e3"],
+  "rnbqkbnr/ppp1pppp/8/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq -":["g8f6"],
+  "rnbqkb1r/ppp1pppp/5n2/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq -":["c1f4"],
+  "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/5N2/PPP1PPPP/RN1QKB1R b KQkq -":["e7e6"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/3P1B2/5N2/PPP1PPPP/RN1QKB1R w KQkq -":["e2e3"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/3P1B2/4PN2/PPP2PPP/RN1QKB1R b KQkq -":["c7c5"],
+  "rnbqkb1r/pp3ppp/4pn2/2pp4/3P1B2/4PN2/PPP2PPP/RN1QKB1R w KQkq -":["c2c3"],
+  "rnbqkb1r/pp3ppp/4pn2/2pp4/3P1B2/2P1PN2/PP3PPP/RN1QKB1R b KQkq -":["b8c6"],
+  "r1bqkb1r/pp3ppp/2n1pn2/2pp4/3P1B2/2P1PN2/PP3PPP/RN1QKB1R w KQkq -":["b1d2"],
+  "r1bqkb1r/pp3ppp/2n1pn2/2pp4/3P1B2/2P1PN2/PP1N1PPP/R2QKB1R b KQkq -":["f8d6"],
+  "rnbqkbnr/ppp1pppp/8/3p4/3P1B2/8/PPP1PPPP/RN1QKBNR b KQkq -":["g8f6"],
+  "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/8/PPP1PPPP/RN1QKBNR w KQkq -":["e2e3"],
+  "rnbqkb1r/ppp1pppp/5n2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR b KQkq -":["e7e6"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/3P1B2/4P3/PPP2PPP/RN1QKBNR w KQkq -":["g1f3"],
+  "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq -":["e7e5","g8f6"],
+  "rnbqkbnr/pppp1ppp/8/4p3/2P5/8/PP1PPPPP/RNBQKBNR w KQkq -":["b1c3"],
+  "rnbqkbnr/pppp1ppp/8/4p3/2P5/2N5/PP1PPPPP/R1BQKBNR b KQkq -":["g8f6"],
+  "rnbqkb1r/pppp1ppp/5n2/4p3/2P5/2N5/PP1PPPPP/R1BQKBNR w KQkq -":["g1f3"],
+  "rnbqkb1r/pppp1ppp/5n2/4p3/2P5/2N2N2/PP1PPPPP/R1BQKB1R b KQkq -":["b8c6"],
+  "r1bqkb1r/pppp1ppp/2n2n2/4p3/2P5/2N2N2/PP1PPPPP/R1BQKB1R w KQkq -":["g2g3"],
+  "r1bqkb1r/pppp1ppp/2n2n2/4p3/2P5/2N2NP1/PP1PPP1P/R1BQKB1R b KQkq -":["d7d5"],
+  "r1bqkb1r/ppp2ppp/2n2n2/3pp3/2P5/2N2NP1/PP1PPP1P/R1BQKB1R w KQkq -":["c4d5"],
+  "r1bqkb1r/ppp2ppp/2n2n2/3Pp3/8/2N2NP1/PP1PPP1P/R1BQKB1R b KQkq -":["f6d5"],
+  "r1bqkb1r/ppp2ppp/2n5/3np3/8/2N2NP1/PP1PPP1P/R1BQKB1R w KQkq -":["f1g2"],
+  "r1bqkb1r/ppp2ppp/2n5/3np3/8/2N2NP1/PP1PPPBP/R1BQK2R b KQkq -":["d5b6"],
+  "r1bqkb1r/ppp2ppp/1nn5/4p3/8/2N2NP1/PP1PPPBP/R1BQK2R w KQkq -":["e1g1"],
+  "r1bqkb1r/ppp2ppp/1nn5/4p3/8/2N2NP1/PP1PPPBP/R1BQ1RK1 b kq -":["f8e7"],
+  "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq -":["d7d5","g8f6"],
+  "rnbqkbnr/ppp1pppp/8/3p4/8/5N2/PPPPPPPP/RNBQKB1R w KQkq -":["g2g3"],
+  "rnbqkbnr/ppp1pppp/8/3p4/8/5NP1/PPPPPP1P/RNBQKB1R b KQkq -":["g8f6"],
+  "rnbqkb1r/ppp1pppp/5n2/3p4/8/5NP1/PPPPPP1P/RNBQKB1R w KQkq -":["f1g2"],
+  "rnbqkb1r/ppp1pppp/5n2/3p4/8/5NP1/PPPPPPBP/RNBQK2R b KQkq -":["e7e6"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/8/5NP1/PPPPPPBP/RNBQK2R w KQkq -":["e1g1"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/8/5NP1/PPPPPPBP/RNBQ1RK1 b kq -":["f8e7"],
+  "rnbqk2r/ppp1bppp/4pn2/3p4/8/5NP1/PPPPPPBP/RNBQ1RK1 w kq -":["d2d3"],
+  "r1bqkb1r/pppp1ppp/2n5/1B2p3/4n3/5N2/PPPP1PPP/RNBQR1K1 b kq -":["e4d6"],
+  "r1bqkb1r/pppp1ppp/2nn4/1B2p3/8/5N2/PPPP1PPP/RNBQR1K1 w kq -":["f3e5"],
+  "r1bqkb1r/pppp1ppp/2nn4/1B2N3/8/8/PPPP1PPP/RNBQR1K1 b kq -":["f8e7"],
+  "r1bqk2r/ppppbppp/2nn4/1B2N3/8/8/PPPP1PPP/RNBQR1K1 w kq -":["b5f1"],
+  "r1bqk2r/ppppbppp/2nn4/4N3/8/8/PPPP1PPP/RNBQRBK1 b kq -":["c6e5"],
+  "r1bqk2r/ppppbppp/3n4/4n3/8/8/PPPP1PPP/RNBQRBK1 w kq -":["e1e5"],
+  "r1bqk2r/ppppbppp/3n4/4R3/8/8/PPPP1PPP/RNBQ1BK1 b kq -":["e8g8"],
+  "r1bq1rk1/ppppbppp/3n4/4R3/8/8/PPPP1PPP/RNBQ1BK1 w - -":["d2d4"],
+  "r1bq1rk1/2ppbppp/p1n2n2/1p2p3/4P3/1B3N2/PPPP1PPP/RNBQR1K1 w - -":["c2c3"],
+  "r1bq1rk1/2ppbppp/p1n2n2/1p2p3/4P3/1BP2N2/PP1P1PPP/RNBQR1K1 b - -":["d7d5"],
+  "r1bq1rk1/2p1bppp/p1n2n2/1p1pp3/4P3/1BP2N2/PP1P1PPP/RNBQR1K1 w - -":["e4d5"],
+  "r1bq1rk1/2p1bppp/p1n2n2/1p1Pp3/8/1BP2N2/PP1P1PPP/RNBQR1K1 b - -":["f6d5"],
+  "r1bq1rk1/2p1bppp/p1n5/1p1np3/8/1BP2N2/PP1P1PPP/RNBQR1K1 w - -":["f3e5"],
+  "r1bq1rk1/2p1bppp/p1n5/1p1nN3/8/1BP5/PP1P1PPP/RNBQR1K1 b - -":["c6e5"],
+  "r1bq1rk1/2p1bppp/p7/1p1nn3/8/1BP5/PP1P1PPP/RNBQR1K1 w - -":["e1e5"],
+  "r1bq1rk1/2p1bppp/p7/1p1nR3/8/1BP5/PP1P1PPP/RNBQ2K1 b - -":["c7c6"],
+  "r1bq1rk1/4bppp/p1p5/1p1nR3/8/1BP5/PP1P1PPP/RNBQ2K1 w - -":["d2d4"],
+  "r1bq1rk1/4bppp/p1p5/1p1nR3/3P4/1BP5/PP3PPP/RNBQ2K1 b - -":["e7d6"],
+  "r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N1P/PPPP1PP1/RNBQ1RK1 b kq -":["b7b5"],
+  "r1bqk2r/2ppbppp/p1n2n2/1p2p3/B3P3/5N1P/PPPP1PP1/RNBQ1RK1 w kq -":["a4b3"],
+  "r1bqk2r/2ppbppp/p1n2n2/1p2p3/4P3/1B3N1P/PPPP1PP1/RNBQ1RK1 b kq -":["d7d6"],
+  "r1bqk2r/2p1bppp/p1np1n2/1p2p3/4P3/1B3N1P/PPPP1PP1/RNBQ1RK1 w kq -":["c2c3"],
+  "r1bqk2r/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N1P/PP1P1PP1/RNBQ1RK1 b kq -":["e8g8"],
+  "r1bq1rk1/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N1P/PP1P1PP1/RNBQ1RK1 w - -":["d2d4"],
+  "r1bq1rk1/2p1bppp/p1np1n2/1p2p3/3PP3/1BP2N1P/PP3PP1/RNBQ1RK1 b - -":["c6d4"],
+  "r1bq1rk1/ppp2ppp/2np1n2/2b1p3/2B1P3/2PP1N2/PP3PPP/RNBQR1K1 b - -":["a7a6"],
+  "r1bq1rk1/1pp2ppp/p1np1n2/2b1p3/2B1P3/2PP1N2/PP3PPP/RNBQR1K1 w - -":["b1d2","c4b3"],
+  "r1bq1rk1/1pp2ppp/p1np1n2/2b1p3/2B1P3/2PP1N2/PP1N1PPP/R1BQR1K1 b - -":["c5a7"],
+  "r1bq1rk1/bpp2ppp/p1np1n2/4p3/2B1P3/2PP1N2/PP1N1PPP/R1BQR1K1 w - -":["h2h3"],
+  "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq -":["d2d3","f3g5"],
+  "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R b KQkq -":["f8c5"],
+  "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R w KQkq -":["c2c3"],
+  "r1bq1rk1/1pp2ppp/p1np1n2/2b1p3/4P3/1BPP1N2/PP3PPP/RNBQR1K1 b - -":["c5a7"],
+  "r1bq1rk1/bpp2ppp/p1np1n2/4p3/4P3/1BPP1N2/PP3PPP/RNBQR1K1 w - -":["b1d2"],
+  "r3kb1r/p1ppqppp/b1p5/3nP3/2P5/8/PP2QPPP/RNB1KB1R w KQkq -":["b2b3"],
+  "rn1qkb1r/1p3ppp/p2pbn2/4p3/4P3/1NN1B3/PPP2PPP/R2QKB1R w KQkq -":["f2f3"],
+  "rn1qkb1r/1p3ppp/p2pbn2/4p3/4P3/1NN1BP2/PPP3PP/R2QKB1R b KQkq -":["f8e7"],
+  "rn1qk2r/1p2bppp/p2pbn2/4p3/4P3/1NN1BP2/PPP3PP/R2QKB1R w KQkq -":["d1d2"],
+  "rn1qk2r/1p2bppp/p2pbn2/4p3/4P3/1NN1BP2/PPPQ2PP/R3KB1R b KQkq -":["e8g8"],
+  "rn1q1rk1/1p2bppp/p2pbn2/4p3/4P3/1NN1BP2/PPPQ2PP/R3KB1R w KQ -":["e1c1"],
+  "rn1q1rk1/1p2bppp/p2pbn2/4p3/4P3/1NN1BP2/PPPQ2PP/2KR1B1R b - -":["b8d7"],
+  "r2q1rk1/1p1nbppp/p2pbn2/4p3/4P3/1NN1BP2/PPPQ2PP/2KR1B1R w - -":["g2g4"],
+  "r2q1rk1/1p1nbppp/p2pbn2/4p3/4P1P1/1NN1BP2/PPPQ3P/2KR1B1R b - -":["b7b5"],
+  "r1b1kb1r/1pqp1ppp/p1n1pn2/8/3NP3/2N1B3/PPPQ1PPP/2KR1B1R b kq -":["f8b4"],
+  "r1b1k2r/1pqp1ppp/p1n1pn2/8/1b1NP3/2N1B3/PPPQ1PPP/2KR1B1R w kq -":["f2f3"],
+  "r1b1k2r/1pqp1ppp/p1n1pn2/8/1b1NP3/2N1BP2/PPPQ2PP/2KR1B1R b kq -":["c6e5"],
+  "r1b1k2r/1pqp1ppp/p3pn2/4n3/1b1NP3/2N1BP2/PPPQ2PP/2KR1B1R w kq -":["d4b3"],
+  "r1b1kbnr/pp1ppppp/1qn5/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq -":["d4b3"],
+  "r1b1kbnr/pp1ppppp/1qn5/8/4P3/1N6/PPP2PPP/RNBQKB1R b KQkq -":["g8f6"],
+  "r1b1kb1r/pp1ppppp/1qn2n2/8/4P3/1N6/PPP2PPP/RNBQKB1R w KQkq -":["b1c3"],
+  "r1b1kb1r/pp1ppppp/1qn2n2/8/4P3/1NN5/PPP2PPP/R1BQKB1R b KQkq -":["e7e6"],
+  "r1b1kb1r/pp1p1ppp/1qn1pn2/8/4P3/1NN5/PPP2PPP/R1BQKB1R w KQkq -":["c1e3"],
+  "r1b1kb1r/pp1p1ppp/1qn1pn2/8/4P3/1NN1B3/PPP2PPP/R2QKB1R b KQkq -":["f8b4"],
+  "r1b1k2r/pp1p1ppp/1qn1pn2/8/1b2P3/1NN1B3/PPP2PPP/R2QKB1R w KQkq -":["d1d2"],
+  "r1b1k2r/pp1p1ppp/1qn1pn2/8/1b2P3/1NN1B3/PPPQ1PPP/R3KB1R b KQkq -":["e8g8"],
+  "r1b2rk1/pp1p1ppp/1qn1pn2/8/1b2P3/1NN1B3/PPPQ1PPP/R3KB1R w KQ -":["f1d3"],
+  "r2qkbnr/pp1nppp1/2p3bp/8/3P3P/5NN1/PPP2PP1/R1BQKB1R w KQkq -":["h4h5"],
+  "r2qkbnr/pp1nppp1/2p3bp/7P/3P4/5NN1/PPP2PP1/R1BQKB1R b KQkq -":["g6h7"],
+  "r2qkbnr/pp1npppb/2p4p/7P/3P4/5NN1/PPP2PP1/R1BQKB1R w KQkq -":["f1d3"],
+  "r2qkbnr/pp1npppb/2p4p/7P/3P4/3B1NN1/PPP2PP1/R1BQK2R b KQkq -":["h7d3"],
+  "r2qkbnr/pp1nppp1/2p4p/7P/3P4/3b1NN1/PPP2PP1/R1BQK2R w KQkq -":["d1d3"],
+  "r2qkbnr/pp1nppp1/2p4p/7P/3P4/3Q1NN1/PPP2PP1/R1B1K2R b KQkq -":["e7e6"],
+  "rnbqkbnr/pp2pppp/2p5/3P4/3P4/8/PPP2PPP/RNBQKBNR b KQkq -":["c6d5"],
+  "rnbqkbnr/pp2pppp/8/3p4/3P4/8/PPP2PPP/RNBQKBNR w KQkq -":["c2c4"],
+  "rnbqkbnr/pp2pppp/8/3p4/2PP4/8/PP3PPP/RNBQKBNR b KQkq -":["g8f6"],
+  "rnbqkb1r/pp2pppp/5n2/3p4/2PP4/8/PP3PPP/RNBQKBNR w KQkq -":["b1c3"],
+  "rnbqkb1r/pp2pppp/5n2/3p4/2PP4/2N5/PP3PPP/R1BQKBNR b KQkq -":["b8c6"],
+  "r1bqkb1r/pp2pppp/2n2n2/3p4/2PP4/2N5/PP3PPP/R1BQKBNR w KQkq -":["g1f3"],
+  "r1bqkb1r/pp2pppp/2n2n2/3p4/2PP4/2N2N2/PP3PPP/R1BQKB1R b KQkq -":["c8g4"],
+  "r2qkb1r/pp2pppp/2n2n2/3p4/2PP2b1/2N2N2/PP3PPP/R1BQKB1R w KQkq -":["c4d5"],
+  "r2qkb1r/pp2pppp/2n2n2/3P4/3P2b1/2N2N2/PP3PPP/R1BQKB1R b KQkq -":["f6d5"],
+  "r2qkb1r/pp2pppp/2n5/3n4/3P2b1/2N2N2/PP3PPP/R1BQKB1R w KQkq -":["d1b3"],
+  "r2qkb1r/pp2pppp/2n5/3n4/3P2b1/1QN2N2/PP3PPP/R1B1KB1R b KQkq -":["g4f3"],
+  "r2qkb1r/pp2pppp/2n5/3n4/3P4/1QN2b2/PP3PPP/R1B1KB1R w KQkq -":["g2f3"],
+  "r2qkb1r/pp2pppp/2n5/3n4/3P4/1QN2P2/PP3P1P/R1B1KB1R b KQkq -":["e7e6"],
+  "rnbqk2r/pp2nppp/4p3/2ppP3/3P2Q1/P1P5/2P2PPP/R1B1KBNR b KQkq -":["d8c7","e8g8"],
+  "rnb1k2r/ppq1nppp/4p3/2ppP3/3P2Q1/P1P5/2P2PPP/R1B1KBNR w KQkq -":["g1f3"],
+  "rnb1k2r/ppq1nppp/4p3/2ppP3/3P2Q1/P1P2N2/2P2PPP/R1B1KB1R b KQkq -":["b8c6"],
+  "r1b1k2r/ppq1nppp/2n1p3/2ppP3/3P2Q1/P1P2N2/2P2PPP/R1B1KB1R w KQkq -":["f1d3"],
+  "r1b1k2r/ppq1nppp/2n1p3/2ppP3/3P2Q1/P1PB1N2/2P2PPP/R1B1K2R b KQkq -":["e8g8"],
+  "rnbqk2r/ppp1nppp/4p3/3pP3/1b1P4/2N5/PPP2PPP/R1BQKBNR w KQkq -":["a2a3"],
+  "rnbqk2r/ppp1nppp/4p3/3pP3/1b1P4/P1N5/1PP2PPP/R1BQKBNR b KQkq -":["b4c3"],
+  "rnbqk2r/ppp1nppp/4p3/3pP3/3P4/P1b5/1PP2PPP/R1BQKBNR w KQkq -":["b2c3"],
+  "rnbqk2r/ppp1nppp/4p3/3pP3/3P4/P1P5/2P2PPP/R1BQKBNR b KQkq -":["c7c5"],
+  "rnbq1rk1/pp2nppp/4p3/2ppP3/3P2Q1/P1P5/2P2PPP/R1B1KBNR w KQ -":["g1f3"],
+  "rnbq1rk1/pp2nppp/4p3/2ppP3/3P2Q1/P1P2N2/2P2PPP/R1B1KB1R b KQ -":["b8c6"],
+  "r1bq1rk1/pp2nppp/2n1p3/2ppP3/3P2Q1/P1P2N2/2P2PPP/R1B1KB1R w KQ -":["f1d3"],
+  "rnbq1rk1/ppp1bpp1/4pn1p/3p4/2PP3B/2N1PN2/PP3PPP/R2QKB1R b KQ -":["b7b6"],
+  "rnbq1rk1/p1p1bpp1/1p2pn1p/3p4/2PP3B/2N1PN2/PP3PPP/R2QKB1R w KQ -":["c4d5"],
+  "rnbq1rk1/p1p1bpp1/1p2pn1p/3P4/3P3B/2N1PN2/PP3PPP/R2QKB1R b KQ -":["f6d5"],
+  "rnbq1rk1/p1p1bpp1/1p2p2p/3n4/3P3B/2N1PN2/PP3PPP/R2QKB1R w KQ -":["h4e7"],
+  "rnbq1rk1/p1p1Bpp1/1p2p2p/3n4/3P4/2N1PN2/PP3PPP/R2QKB1R b KQ -":["d8e7"],
+  "rnb2rk1/p1p1qpp1/1p2p2p/3n4/3P4/2N1PN2/PP3PPP/R2QKB1R w KQ -":["c3d5"],
+  "rnb2rk1/p1p1qpp1/1p2p2p/3N4/3P4/4PN2/PP3PPP/R2QKB1R b KQ -":["e6d5"],
+  "rn1qk2r/pp3ppp/2p1pn2/5b2/PbBP4/2N1PN2/1P3PPP/R1BQK2R w KQkq -":["e1g1"],
+  "rn1qk2r/pp3ppp/2p1pn2/5b2/PbBP4/2N1PN2/1P3PPP/R1BQ1RK1 b kq -":["b8d7"],
+  "r2qk2r/pp1n1ppp/2p1pn2/5b2/PbBP4/2N1PN2/1P3PPP/R1BQ1RK1 w kq -":["d1e2"],
+  "r2qk2r/pp1n1ppp/2p1pn2/5b2/PbBP4/2N1PN2/1P2QPPP/R1B2RK1 b kq -":["b7b5"],
+  "r2qk2r/p2n1ppp/2p1pn2/1p3b2/PbBP4/2N1PN2/1P2QPPP/R1B2RK1 w kq -":["e3e4"],
+  "rnbqkb1r/1p3ppp/p3pn2/2P5/2B5/4PN2/PP3PPP/RNBQ1RK1 b kq -":["f8c5"],
+  "rnbqk2r/1p3ppp/p3pn2/2b5/2B5/4PN2/PP3PPP/RNBQ1RK1 w kq -":["b1c3"],
+  "rnbqk2r/1p3ppp/p3pn2/2b5/2B5/2N1PN2/PP3PPP/R1BQ1RK1 b kq -":["b7b5"],
+  "r1bq1rk1/pp3ppp/2n1pn2/2pp4/1bPP4/2NBPN2/PP3PPP/R1BQ1RK1 w - -":["a2a3"],
+  "r1bq1rk1/pp3ppp/2n1pn2/2pp4/1bPP4/P1NBPN2/1P3PPP/R1BQ1RK1 b - -":["b4c3"],
+  "r1bq1rk1/pp3ppp/2n1pn2/2pp4/2PP4/P1bBPN2/1P3PPP/R1BQ1RK1 w - -":["b2c3"],
+  "r1bq1rk1/pp3ppp/2n1pn2/2pp4/2PP4/P1PBPN2/5PPP/R1BQ1RK1 b - -":["d5c4"],
+  "r1bq1rk1/pp3ppp/2n1pn2/2p5/2pP4/P1PBPN2/5PPP/R1BQ1RK1 w - -":["d3c4"],
+  "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/6P1/PP2PP1P/RNBQKBNR b KQkq -":["d7d5"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/6P1/PP2PP1P/RNBQKBNR w KQkq -":["f1g2"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/6P1/PP2PPBP/RNBQK1NR b KQkq -":["f8e7"],
+  "rnbqk2r/ppp1bppp/4pn2/3p4/2PP4/6P1/PP2PPBP/RNBQK1NR w KQkq -":["g1f3"],
+  "rnbqk2r/ppp1bppp/4pn2/3p4/2PP4/5NP1/PP2PPBP/RNBQK2R b KQkq -":["e8g8"],
+  "rnbq1rk1/ppp1bppp/4pn2/3p4/2PP4/5NP1/PP2PPBP/RNBQK2R w KQ -":["e1g1"],
+  "rnbq1rk1/ppp1bppp/4pn2/3p4/2PP4/5NP1/PP2PPBP/RNBQ1RK1 b - -":["d5c4"],
+  "rnbq1rk1/ppp1bppp/4pn2/8/2pP4/5NP1/PP2PPBP/RNBQ1RK1 w - -":["d1c2"],
+  "rnbq1rk1/ppp1bppp/4pn2/8/2pP4/5NP1/PPQ1PPBP/RNB2RK1 b - -":["a7a6"],
+  "rnbq1rk1/1pp1bppp/p3pn2/8/2pP4/5NP1/PPQ1PPBP/RNB2RK1 w - -":["c2c4"],
+  "rnbq1rk1/1pp1bppp/p3pn2/8/2QP4/5NP1/PP2PPBP/RNB2RK1 b - -":["b7b5"],
+  "rnbq1rk1/2p1bppp/p3pn2/1p6/2QP4/5NP1/PP2PPBP/RNB2RK1 w - -":["c4c2"],
+  "rnbq1rk1/2p1bppp/p3pn2/1p6/3P4/5NP1/PPQ1PPBP/RNB2RK1 b - -":["c8b7"],
+  "r1bq1rk1/ppp1npbp/3p1np1/3Pp3/2P1P3/2N2N2/PP2BPPP/R1BQ1RK1 w - -":["f3e1"],
+  "r1bq1rk1/ppp1npbp/3p1np1/3Pp3/2P1P3/2N5/PP2BPPP/R1BQNRK1 b - -":["f6d7"],
+  "r1bq1rk1/pppnnpbp/3p2p1/3Pp3/2P1P3/2N5/PP2BPPP/R1BQNRK1 w - -":["e1d3"],
+  "r1bq1rk1/pppnnpbp/3p2p1/3Pp3/2P1P3/2NN4/PP2BPPP/R1BQ1RK1 b - -":["f7f5"],
+  "r1bq1rk1/pppnn1bp/3p2p1/3Ppp2/2P1P3/2NN4/PP2BPPP/R1BQ1RK1 w - -":["f2f3"],
+  "rnbqkb1r/pppppp1p/5np1/8/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq -":["f8g7"],
+  "rnbqk2r/ppppppbp/5np1/8/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq -":["g2g3"],
+  "rnbqk2r/ppppppbp/5np1/8/2PP4/5NP1/PP2PP1P/RNBQKB1R b KQkq -":["e8g8"],
+  "rnbq1rk1/ppppppbp/5np1/8/2PP4/5NP1/PP2PP1P/RNBQKB1R w KQ -":["f1g2"],
+  "rnbq1rk1/ppppppbp/5np1/8/2PP4/5NP1/PP2PPBP/RNBQK2R b KQ -":["d7d6"],
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/2PP4/5NP1/PP2PPBP/RNBQK2R w KQ -":["e1g1"],
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/2PP4/5NP1/PP2PPBP/RNBQ1RK1 b - -":["b8c6"],
+  "r1bq1rk1/ppp1ppbp/2np1np1/8/2PP4/5NP1/PP2PPBP/RNBQ1RK1 w - -":["b1c3"],
+  "r1bq1rk1/ppp1ppbp/2np1np1/8/2PP4/2N2NP1/PP2PPBP/R1BQ1RK1 b - -":["a7a6"],
+  "r1bq1rk1/1pp1ppbp/p1np1np1/8/2PP4/2N2NP1/PP2PPBP/R1BQ1RK1 w - -":["d4d5"],
+  "r1bq1rk1/1pp1ppbp/p1np1np1/3P4/2P5/2N2NP1/PP2PPBP/R1BQ1RK1 b - -":["c6a5"],
+  "r1bq1rk1/1pp1ppbp/p2p1np1/n2P4/2P5/2N2NP1/PP2PPBP/R1BQ1RK1 w - -":["d1c2"],
+  "rnbqk2r/pp2ppbp/6p1/2p5/3PP3/2P1BN2/P4PPP/R2QKB1R b KQkq -":["e8g8"],
+  "rnbq1rk1/pp2ppbp/6p1/2p5/3PP3/2P1BN2/P4PPP/R2QKB1R w KQ -":["f1c4"],
+  "rnbq1rk1/pp2ppbp/6p1/2p5/2BPP3/2P1BN2/P4PPP/R2QK2R b KQ -":["b8c6"],
+  "r1bq1rk1/pp2ppbp/2n3p1/2p5/2BPP3/2P1BN2/P4PPP/R2QK2R w KQ -":["d1e2"],
+  "rnbqk2r/ppp1bppp/8/3p4/3Pn3/3B1N2/PPP2PPP/RNBQ1RK1 b kq -":["e8g8"],
+  "rnbq1rk1/ppp1bppp/8/3p4/3Pn3/3B1N2/PPP2PPP/RNBQ1RK1 w - -":["c2c4"],
+  "rnbqkb1r/pppp1ppp/5n2/4p3/4PP2/2N5/PPPP2PP/R1BQKBNR b KQkq -":["d7d5"],
+  "rnbqkb1r/ppp2ppp/5n2/3pp3/4PP2/2N5/PPPP2PP/R1BQKBNR w KQkq -":["f4e5"],
+  "rnbqkb1r/ppp2ppp/5n2/3pP3/4P3/2N5/PPPP2PP/R1BQKBNR b KQkq -":["f6e4"],
+  "rnbqkb1r/ppp2ppp/8/3pP3/4n3/2N5/PPPP2PP/R1BQKBNR w KQkq -":["g1f3"],
+  "rnbqkb1r/ppp2ppp/8/3pP3/4n3/2N2N2/PPPP2PP/R1BQKB1R b KQkq -":["c8g4"],
+  "rn1qkb1r/ppp2ppp/8/3pP3/4n1b1/2N2N2/PPPP2PP/R1BQKB1R w KQkq -":["d1e2"],
+  "rn1qkb1r/ppp2ppp/8/3pP3/4n1b1/2N2N2/PPPPQ1PP/R1B1KB1R b KQkq -":["e4c3"],
+  "rn1qkb1r/ppp2ppp/8/3pP3/6b1/2n2N2/PPPPQ1PP/R1B1KB1R w KQkq -":["d2c3"],
+  "rn1qkb1r/ppp2ppp/8/3pP3/6b1/2P2N2/PPP1Q1PP/R1B1KB1R b KQkq -":["d8e7"],
+  "r1bqk2r/ppp1bppp/1nn5/4p3/8/2N2NP1/PP1PPPBP/R1BQ1RK1 w kq -":["d2d3"],
+  "r1bqk2r/ppp1bppp/1nn5/4p3/8/2NP1NP1/PP2PPBP/R1BQ1RK1 b kq -":["e8g8"],
+  "r1bq1rk1/ppp1bppp/1nn5/4p3/8/2NP1NP1/PP2PPBP/R1BQ1RK1 w - -":["c1e3"],
+  "rnbqkb1r/pppppppp/5n2/8/2P5/8/PP1PPPPP/RNBQKBNR w KQkq -":["b1c3"],
+  "rnbqkb1r/pppppppp/5n2/8/2P5/2N5/PP1PPPPP/R1BQKBNR b KQkq -":["e7e5"],
+  "rnbqkb1r/pppppppp/5n2/8/8/5N2/PPPPPPPP/RNBQKB1R w KQkq -":["c2c4"],
+  "rnbqkb1r/pppppppp/5n2/8/2P5/5N2/PP1PPPPP/RNBQKB1R b KQkq -":["e7e6"],
+  "rnbqkb1r/pppp1ppp/4pn2/8/2P5/5N2/PP1PPPPP/RNBQKB1R w KQkq -":["g2g3"],
+  "rnbqkb1r/pppp1ppp/4pn2/8/2P5/5NP1/PP1PPP1P/RNBQKB1R b KQkq -":["d7d5"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/2P5/5NP1/PP1PPP1P/RNBQKB1R w KQkq -":["f1g2"],
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/2P5/5NP1/PP1PPPBP/RNBQK2R b KQkq -":["f8e7"],
+  "rnbqk2r/ppp1bppp/4pn2/3p4/2P5/5NP1/PP1PPPBP/RNBQK2R w KQkq -":["e1g1"],
+  "rnbqk2r/ppp1bppp/4pn2/3p4/2P5/5NP1/PP1PPPBP/RNBQ1RK1 b kq -":["e8g8"],
+  "rnbq1rk1/ppp1bppp/4pn2/3p4/2P5/5NP1/PP1PPPBP/RNBQ1RK1 w - -":["b2b3"],
+  "rnbq1rk1/ppp1bppp/4pn2/3p4/2P5/1P3NP1/P2PPPBP/RNBQ1RK1 b - -":["c7c5"],
+  "rnbq1rk1/pp2bppp/4pn2/2pp4/2P5/1P3NP1/P2PPPBP/RNBQ1RK1 w - -":["c1b2"],
+  "rnbq1rk1/pp2bppp/4pn2/2pp4/2P5/1P3NP1/PB1PPPBP/RN1Q1RK1 b - -":["b8c6"],
+  "r1bq1rk1/pp2bppp/2n1pn2/2pp4/2P5/1P3NP1/PB1PPPBP/RN1Q1RK1 w - -":["d2d3"],
+  "rn1qkb1r/pp2pppp/2p5/3nNb2/3P4/8/PPP1BPPP/RNBQK2R w KQkq -":["e5d3"],
+  "rn1qkb1r/pp2pppp/2p5/3n1b2/3P4/3N4/PPP1BPPP/RNBQK2R b KQkq -":["b8d7"],
+  "r2qkb1r/pp1npppp/2p5/3n1b2/3P4/3N4/PPP1BPPP/RNBQK2R w KQkq -":["f2f3"],
+  "rn2kb1r/pp2pppp/2p2n2/q4b2/2BP4/2N2N2/PPP2PPP/R1BQK2R w KQkq -":["c1d2"],
+  "rn2kb1r/pp2pppp/2p2n2/q4b2/2BP4/2N2N2/PPPB1PPP/R2QK2R b KQkq -":["e7e6"],
+  "rnbq1rk1/pp2ppbp/2pp1np1/8/P2PP3/2N2N2/1PP1BPPP/R1BQ1RK1 b - -":["b8d7"],
+  "r1bq1rk1/pp1nppbp/2pp1np1/8/P2PP3/2N2N2/1PP1BPPP/R1BQ1RK1 w - -":["h2h3"],
+  "r1bq1rk1/pp1nppbp/2pp1np1/8/P2PP3/2N2N1P/1PP1BPP1/R1BQ1RK1 b - -":["e7e5"],
+  "r1bqkb1r/pppp1ppp/2n2n2/4p1N1/2B1P3/8/PPPP1PPP/RNBQK2R b KQkq -":["d7d5"],
+  "r1bqkb1r/ppp2ppp/2n2n2/3pp1N1/2B1P3/8/PPPP1PPP/RNBQK2R w KQkq -":["e4d5"],
+  "r1bqkb1r/ppp2ppp/2n2n2/3Pp1N1/2B5/8/PPPP1PPP/RNBQK2R b KQkq -":["c6a5"],
+  "r1bqkb1r/ppp2ppp/5n2/n2Pp1N1/2B5/8/PPPP1PPP/RNBQK2R w KQkq -":["c4b5"],
+  "r1bqkb1r/ppp2ppp/5n2/nB1Pp1N1/8/8/PPPP1PPP/RNBQK2R b KQkq -":["c7c6"],
+  "r1bqkb1r/pp3ppp/2p2n2/nB1Pp1N1/8/8/PPPP1PPP/RNBQK2R w KQkq -":["d5c6"],
+  "r1bqkb1r/pp3ppp/2P2n2/nB2p1N1/8/8/PPPP1PPP/RNBQK2R b KQkq -":["b7c6"],
+  "r1bqkb1r/p4ppp/2p2n2/nB2p1N1/8/8/PPPP1PPP/RNBQK2R w KQkq -":["b5e2"],
+  "r1bqkb1r/p4ppp/2p2n2/n3p1N1/8/8/PPPPBPPP/RNBQK2R b KQkq -":["h7h6"],
+  "r1bqkb1r/p4pp1/2p2n1p/n3p1N1/8/8/PPPPBPPP/RNBQK2R w KQkq -":["g5f3"],
+  "r1bqkb1r/p4pp1/2p2n1p/n3p3/8/5N2/PPPPBPPP/RNBQK2R b KQkq -":["e5e4"],
+  "r1bqkb1r/p4pp1/2p2n1p/n7/4p3/5N2/PPPPBPPP/RNBQK2R w KQkq -":["f3e5"],
+  "rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq -":["e5f4"],
+  "rnbqkbnr/pppp1ppp/8/8/4Pp2/8/PPPP2PP/RNBQKBNR w KQkq -":["g1f3"],
+  "rnbqkbnr/pppp1ppp/8/8/4Pp2/5N2/PPPP2PP/RNBQKB1R b KQkq -":["g7g5","d7d5"],
+  "rnbqkbnr/pppp1p1p/8/6p1/4Pp2/5N2/PPPP2PP/RNBQKB1R w KQkq -":["h2h4"],
+  "rnbqkbnr/pppp1p1p/8/6p1/4Pp1P/5N2/PPPP2P1/RNBQKB1R b KQkq -":["g5g4"],
+  "rnbqkbnr/pppp1p1p/8/8/4PppP/5N2/PPPP2P1/RNBQKB1R w KQkq -":["f3g5"],
+  "rnbqkbnr/pppp1p1p/8/6N1/4PppP/8/PPPP2P1/RNBQKB1R b KQkq -":["h7h6"],
+  "rnbqkbnr/pppp1p2/7p/6N1/4PppP/8/PPPP2P1/RNBQKB1R w KQkq -":["g5f7"],
+  "rnbqkbnr/pppp1N2/7p/8/4PppP/8/PPPP2P1/RNBQKB1R b KQkq -":["e8f7"],
+  "rnbq1bnr/pppp1k2/7p/8/4PppP/8/PPPP2P1/RNBQKB1R w KQ -":["d1g4"],
+  "rnbqkbnr/pppp1ppp/8/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR b KQkq -":["g8f6"],
+  "rnbqkb1r/pppp1ppp/5n2/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq -":["d2d3"],
+  "rnbqkb1r/pppp1ppp/5n2/4p3/2B1P3/3P4/PPP2PPP/RNBQK1NR b KQkq -":["c7c6"],
+  "rnbqkb1r/pp1p1ppp/2p2n2/4p3/2B1P3/3P4/PPP2PPP/RNBQK1NR w KQkq -":["g1f3"],
+  "rnbqkb1r/pp1p1ppp/2p2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R b KQkq -":["d7d5"],
+  "rnbqkb1r/pp3ppp/2p2n2/3pp3/2B1P3/3P1N2/PPP2PPP/RNBQK2R w KQkq -":["e4d5"],
+  "rnbqkb1r/pp3ppp/2p2n2/3Pp3/2B5/3P1N2/PPP2PPP/RNBQK2R b KQkq -":["c6d5"],
+  "rnbqkb1r/pp3ppp/5n2/3pp3/2B5/3P1N2/PPP2PPP/RNBQK2R w KQkq -":["c4b3"],
+  "rnbqkbnr/ppp2ppp/8/3p4/4Pp2/5N2/PPPP2PP/RNBQKB1R w KQkq -":["e4d5"],
+  "rnbqkbnr/ppp2ppp/8/3P4/5p2/5N2/PPPP2PP/RNBQKB1R b KQkq -":["g8f6"],
+  "rnbqkb1r/ppp2ppp/5n2/3P4/5p2/5N2/PPPP2PP/RNBQKB1R w KQkq -":["f1c4"],
+  "rnbqkb1r/ppp2ppp/5n2/3P4/2B2p2/5N2/PPPP2PP/RNBQK2R b KQkq -":["f6d5"],
+  "rnbqkb1r/ppp2ppp/8/3n4/2B2p2/5N2/PPPP2PP/RNBQK2R w KQkq -":["e1g1"]
+};
 
 /* ============================================================
    Worker-Glue (Release) — protokollkompatibel zur bisherigen Engine
@@ -1760,6 +3010,43 @@ self.onmessage = function (e) {
     if (rootMoves.length === 0) {
       self.postMessage({ requestId: myRequest, gameOver: true });
       return;
+    }
+
+    // Tipp-Anfrage (Batch 6): echte Suche — kein Buch, keine Schwächung,
+    // feste ~1,2s. Antwort-Feld `hint` statt `move`, damit die UI es
+    // eindeutig von einem Engine-Zug unterscheiden kann.
+    if (data.hint) {
+      var rH = ENGINE.search(1200, 20);
+      var hMove = (rH && rH.move) ? rH.move : rootMoves[0];
+      self.postMessage({
+        requestId: myRequest,
+        hint: { from: hMove.from, to: hMove.to, promotion: hMove.promotion || null },
+        score: rH ? rH.score : 0,
+        depth: rH ? rH.depth : 0,
+        elapsed: rH ? rH.elapsed : 0
+      });
+      return;
+    }
+
+    // Eröffnungsbuch (nur Mittel/Schwer/Meister): Positionsschlüssel -> Züge.
+    // Buchzug wird gegen die eigene Legalitätsliste geprüft (doppelte Absicherung).
+    if (data.level >= 2 && typeof BOOK !== 'undefined' && BOOK) {
+      var bkMoves = BOOK[ENGINE.positionKey()];
+      if (bkMoves && bkMoves.length) {
+        var pick = bkMoves[Math.floor(Math.random() * bkMoves.length)];
+        for (var bi = 0; bi < rootMoves.length; bi++) {
+          var rb = rootMoves[bi];
+          if (rb.from + rb.to + (rb.promotion || '') === pick) {
+            self.postMessage({
+              requestId: myRequest,
+              move: { from: rb.from, to: rb.to, promotion: rb.promotion || null },
+              depth: 0, score: 0, nodes: 0, elapsed: 0,
+              book: true
+            });
+            return;
+          }
+        }
+      }
     }
 
     // Bewusste Schwächung (wie bisher): gelegentlich ein Zufallszug
@@ -1833,8 +3120,195 @@ self.onmessage = function (e) {
 (function(){
   'use strict';
 
+  /* ============================================================
+     i18n (Deutsch / English)
+     - Statische Texte: data-i18n="key" im Markup (applyI18n() setzt sie)
+     - Dynamische Texte: T('key') / TF('key', ersatz1, ...) im Code
+     - Auswahl: #langSelect, gespeichert in localStorage('schach_lang')
+     ============================================================ */
+  var I18N = {
+    de: {
+      title:'Schach – Du gegen die Engine', appTitle:'Schach', appVs:'vs. Engine',
+      ready:'Bereit. Wähle eine Farbe und starte eine Partie.',
+      infoDepth:'Tiefe', infoNodes:'Knoten', infoTime:'Zeit', infoScore:'Bewertung',
+      white:'Weiß', black:'Schwarz', random:'Zufällig',
+      mode:'Modus', modePve:'Gegen Engine', modePvp:'Zwei Spieler (PvP)',
+      side:'Spielfarbe', skill:'Schwierigkeit',
+      level0:'Anfänger', level1:'Leicht', level2:'Mittel', level3:'Schwer', level4:'Meister',
+      clock:'Schachuhr', tc0:'Ohne Uhr', tc1:'Blitz 3+2', tc2:'Blitz 5+3', tc3:'Schnellschach 10+0',
+      undo:'↶ Zurück', redo:'↷ Wiederholen', flip:'⇅ Drehen', resign:'Aufgeben', hint:'💡 Tipp',
+      soundOnLbl:'🔊 Sound', soundOffLbl:'🔇 Stumm',
+      copyPgn:'PGN kopieren', loadPgn:'PGN laden', language:'Sprache', appearance:'Darstellung',
+      themeDark:'Dunkel', themeLight:'Hell',
+      boardWalnut:'Walnuß', boardGreen:'Grün', boardBlue:'Blau', moves:'Züge',
+      promoTitle:'Umwandlung', promoText:'Wähle die Figur, in die der Bauer umgewandelt werden soll.',
+      cancel:'Abbrechen', confirm:'Bestätigen',
+      boardAria:'Schachbrett', schemeAria:'Farbschema', paletteAria:'Brettfarben',
+      thinking:'Engine denkt nach …',
+      yourTurn:'Du bist am Zug.', yourTurnCheck:'Schach! Du bist am Zug.',
+      colorTurn:'{0} ist am Zug.', colorTurnCheck:'Schach! {0} ist am Zug.',
+      engineTurn:'Engine ist am Zug.',
+      mateEngine:'Schachmatt – die Engine gewinnt.', mateYou:'Schachmatt – du gewinnst!',
+      matePvp:'Schachmatt – {0} gewinnt!',
+      stalemate:'Patt – Remis.',
+      repDraw:'Remis – dreifache Stellungswiederholung.',
+      materialDraw:'Remis – ungenügend Material.',
+      fiftyDraw:'Remis – 50-Züge-Regel.', over:'Partie beendet.',
+      flagPvp:'Zeitüberschreitung – {0} gewinnt!',
+      flagEngine:'Zeitüberschreitung – die Engine gewinnt.',
+      flagYou:'Zeitüberschreitung – du gewinnst!',
+      resignPvp:'Aufgegeben – Partie beendet.',
+      resignYou:'Du hast aufgegeben – die Engine gewinnt.',
+      chessFail:'chess.js konnte nicht geladen werden. Bitte Netzwerkverbindung prüfen.',
+      newGame:'Neue Partie',
+      engineInitFail:'Engine konnte nicht initialisiert werden.',
+      newGameTitle:'Neue Partie',
+      newGameConfirm:'Die aktuelle Partie ist noch nicht beendet. Wirklich neu starten?',
+      randColor:'mit zufälliger Farbe', asColor:'als {0}',
+      youPlay:'Du spielst {0}.', youPlayRand:'Du spielst {0} (ausgelost).',
+      colorSwitchTitle:'Farbwechsel',
+      colorSwitchConfirm:'Neue Partie {0} starten? Die laufende Partie wird dabei beendet.',
+      engineUnavailable:'Engine nicht verfügbar.', workerFail:'Worker konnte nicht gestartet werden.',
+      engineError:'Engine-Fehler: {0}', noEngineMove:'Engine lieferte keinen Zug.',
+      illegalEngineMove:'Engine lieferte illegalen Zug –Fallback.', workerError:'Worker-Fehler.',
+      fallbackMove:'Ersatzzug gespielt ({0}).',
+      resumed:'Partie fortgesetzt – Zug zurückgenommen.',
+      pgnExportTitle:'Partie exportieren (PGN)',
+      pgnExportHint:'Kopiere den PGN-Text oder schließe das Fenster.',
+      waitEngine:'Bitte warte, bis die Engine fertig ist.',
+      pgnImportTitle:'Partie laden (PGN)',
+      pgnImportHint:'Füge hier eine Partie im PGN-Format ein und klicke „Übernehmen“.',
+      emptyInput:'Leere Eingabe.',
+      pgnUnreadable:'PGN konnte nicht gelesen werden (auch nicht ohne Header).',
+      pgnLoaded:'Partie geladen.', pgnError:'PGN-Fehler: {0}',
+      pvpNewGame:'Im PvP-Modus bitte "Neue Partie" nutzen.',
+      resignTitle:'Aufgeben',
+      resignConfirm:'Möchtest du wirklich aufgeben? Die Partie wird als Niederlage gewertet.',
+      pgnCopied:'PGN in die Zwischenablage kopiert.',
+      skillToast:'Schwierigkeit: {0}',
+      noHintNow:'Tipp jetzt nicht möglich.', noHint:'Kein Tipp verfügbar.', hintFail:'Tipp fehlgeschlagen.',
+      modePvpToast:'Modus: Zwei Spieler – Weiß beginnt.', modePveToast:'Modus: Gegen Engine.',
+      modeSwitchTitle:'Modus wechseln',
+      modeSwitchConfirm:'Der Moduswechsel startet eine neue Partie. Fortsetzen?',
+      clockToast:'Uhr: {0}', clockOffToast:'Schachuhr ausgeschaltet.',
+      clockChangeTitle:'Schachuhr ändern',
+      clockChangeConfirm:'Die Änderung startet eine neue Partie. Fortsetzen?',
+      soundOnToast:'Sound an.', soundOffToast:'Sound aus.',
+      whiteNoTime:'Weiß hat keine Zeit mehr.', blackNoTime:'Schwarz hat keine Zeit mehr.',
+      playerName:'Spieler', player1:'Spieler 1', player2:'Spieler 2', engineName:'Engine',
+      pgnEvent:'Schach-Web-App',
+      reasonEngine:'Engine-Fehler', reasonIllegal:'Illegaler Engine-Zug',
+      reasonWorker:'Worker-Absturz', reasonTimeout:'Timeout', reasonPost:'postMessage',
+      langSetToast:'Sprache: Deutsch.'
+    },
+    en: {
+      title:'Chess – You vs. the Engine', appTitle:'Chess', appVs:'vs. Engine',
+      ready:'Ready. Pick a color and start a game.',
+      infoDepth:'Depth', infoNodes:'Nodes', infoTime:'Time', infoScore:'Eval',
+      white:'White', black:'Black', random:'Random',
+      mode:'Mode', modePve:'vs. Engine', modePvp:'Two Players (PvP)',
+      side:'Side', skill:'Skill',
+      level0:'Beginner', level1:'Easy', level2:'Medium', level3:'Hard', level4:'Master',
+      clock:'Chess Clock', tc0:'No clock', tc1:'Blitz 3+2', tc2:'Blitz 5+3', tc3:'Rapid 10+0',
+      undo:'↶ Undo', redo:'↷ Redo', flip:'⇅ Flip', resign:'Resign', hint:'💡 Hint',
+      soundOnLbl:'🔊 Sound', soundOffLbl:'🔇 Mute',
+      copyPgn:'Copy PGN', loadPgn:'Load PGN', language:'Language', appearance:'Appearance',
+      themeDark:'Dark', themeLight:'Light',
+      boardWalnut:'Walnut', boardGreen:'Green', boardBlue:'Blue', moves:'Moves',
+      promoTitle:'Promotion', promoText:'Choose the piece the pawn promotes to.',
+      cancel:'Cancel', confirm:'Confirm',
+      boardAria:'Chessboard', schemeAria:'Color scheme', paletteAria:'Board colors',
+      thinking:'Engine is thinking …',
+      yourTurn:'Your move.', yourTurnCheck:'Check! Your move.',
+      colorTurn:'{0} to move.', colorTurnCheck:'Check! {0} to move.',
+      engineTurn:'Engine to move.',
+      mateEngine:'Checkmate – the engine wins.', mateYou:'Checkmate – you win!',
+      matePvp:'Checkmate – {0} wins!',
+      stalemate:'Stalemate – draw.',
+      repDraw:'Draw – threefold repetition.',
+      materialDraw:'Draw – insufficient material.',
+      fiftyDraw:'Draw – fifty-move rule.', over:'Game over.',
+      flagPvp:'Time out – {0} wins!',
+      flagEngine:'Time out – the engine wins.',
+      flagYou:'Time out – you win!',
+      resignPvp:'Resigned – game over.',
+      resignYou:'You resigned – the engine wins.',
+      chessFail:'Could not load chess.js. Please check your connection.',
+      newGame:'New Game',
+      engineInitFail:'Engine could not be initialized.',
+      newGameTitle:'New Game',
+      newGameConfirm:'The current game is not finished yet. Really restart?',
+      randColor:'with a random color', asColor:'as {0}',
+      youPlay:'You play {0}.', youPlayRand:'You play {0} (randomized).',
+      colorSwitchTitle:'Switch Color',
+      colorSwitchConfirm:'Start a new game {0}? The running game will be ended.',
+      engineUnavailable:'Engine unavailable.', workerFail:'Worker could not be started.',
+      engineError:'Engine error: {0}', noEngineMove:'Engine returned no move.',
+      illegalEngineMove:'Engine returned an illegal move – fallback.', workerError:'Worker error.',
+      fallbackMove:'Fallback move played ({0}).',
+      resumed:'Game resumed – move taken back.',
+      pgnExportTitle:'Export game (PGN)',
+      pgnExportHint:'Copy the PGN text or close this window.',
+      waitEngine:'Please wait for the engine to finish.',
+      pgnImportTitle:'Load game (PGN)',
+      pgnImportHint:'Paste a game in PGN format and press “Apply”.',
+      emptyInput:'Empty input.',
+      pgnUnreadable:'Could not read the PGN (not even without headers).',
+      pgnLoaded:'Game loaded.', pgnError:'PGN error: {0}',
+      pvpNewGame:'In PvP mode please use "New Game".',
+      resignTitle:'Resign',
+      resignConfirm:'Do you really want to resign? The game will count as a loss.',
+      pgnCopied:'PGN copied to clipboard.',
+      skillToast:'Skill: {0}',
+      noHintNow:'No hint right now.', noHint:'No hint available.', hintFail:'Hint failed.',
+      modePvpToast:'Mode: Two players – White starts.', modePveToast:'Mode: vs. Engine.',
+      modeSwitchTitle:'Switch Mode',
+      modeSwitchConfirm:'Switching starts a new game. Continue?',
+      clockToast:'Clock: {0}', clockOffToast:'Chess clock off.',
+      clockChangeTitle:'Change Clock',
+      clockChangeConfirm:'The change starts a new game. Continue?',
+      soundOnToast:'Sound on.', soundOffToast:'Sound off.',
+      whiteNoTime:'White is out of time.', blackNoTime:'Black is out of time.',
+      playerName:'Player', player1:'Player 1', player2:'Player 2', engineName:'Engine',
+      pgnEvent:'Chess Web App',
+      reasonEngine:'Engine error', reasonIllegal:'Illegal engine move',
+      reasonWorker:'Worker crash', reasonTimeout:'Timeout', reasonPost:'postMessage',
+      langSetToast:'Language: English.'
+    }
+  };
+  var lang = 'de';
+  try {
+    var savedLang = localStorage.getItem('schach_lang');
+    if (savedLang === 'de' || savedLang === 'en') lang = savedLang;
+  } catch (eLang) {}
+  function T(key) {
+    var d = I18N[lang] || I18N.de;
+    var s = d[key];
+    if (s == null) s = I18N.de[key];
+    return (s == null) ? key : s;
+  }
+  function TF(key) {
+    var s = T(key);
+    for (var i = 1; i < arguments.length; i++) {
+      s = s.split('{' + (i - 1) + '}').join(String(arguments[i]));
+    }
+    return s;
+  }
+  function applyI18n() {
+    document.documentElement.lang = lang;
+    document.title = T('title');
+    var els = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < els.length; i++) {
+      els[i].textContent = T(els[i].getAttribute('data-i18n'));
+    }
+    var ars = document.querySelectorAll('[data-i18n-aria]');
+    for (var j = 0; j < ars.length; j++) {
+      ars[j].setAttribute('aria-label', T(ars[j].getAttribute('data-i18n-aria')));
+    }
+  }
+
   if (typeof Chess === 'undefined') {
-    document.body.innerHTML = '<p style="color:#fff;padding:40px;text-align:center">chess.js konnte nicht geladen werden. Bitte Netzwerkverbindung prüfen.</p>';
+    document.body.innerHTML = '<p style="color:#fff;padding:40px;text-align:center">' + T('chessFail') + '</p>';
     return;
   }
 
@@ -1873,6 +3347,17 @@ self.onmessage = function (e) {
   // FIX (Hard-Timeout-Leak): Timer global, damit cancelBot() ihn räumen kann.
   var hardTimeoutHandle = null;
 
+  /* Batch 6: PvP-Modus, Schachuhr, Sound, Tipp */
+  var pvpMode = false;
+  var tcBaseMs = 0, tcIncMs = 0;
+  var clockW = 0, clockB = 0;
+  var clockActive = false, clockLastTick = 0;
+  var clockHistory = [];    // Snapshots je Halbzug -> Undo/Redo stellt Zeiten zurück
+  var flagged = null;       // 'w' | 'b' bei Zeitüberschreitung
+  var soundOn = true;
+  var audioCtx = null;
+  var hintFrom = null, hintTo = null, hintTimer = null;
+
   /* ============================================================
      DOM-Referenzen
      ============================================================ */
@@ -1900,6 +3385,21 @@ self.onmessage = function (e) {
   var confirmTitleEl = document.getElementById('confirmTitle');
   var confirmTextEl = document.getElementById('confirmText');
   var toastEl = document.getElementById('toast');
+  var modeEl = document.getElementById('mode');
+  var tcSelectEl = document.getElementById('tcSelect');
+  var clockBarEl = document.getElementById('clockBar');
+  var clockWEl = document.getElementById('clockW');
+  var clockBEl = document.getElementById('clockB');
+  var clockTimeWEl = document.getElementById('clockTimeW');
+  var clockTimeBEl = document.getElementById('clockTimeB');
+  var hintBtn = document.getElementById('hint');
+  var soundBtn = document.getElementById('soundBtn');
+  var themeSelectEl = document.getElementById('themeSelect');
+  var boardSelectEl = document.getElementById('boardSelect');
+  var langSelectEl = document.getElementById('langSelect');
+  var resignBtn = document.getElementById('resign');
+  var levelSectionEl = levelEl.closest('.panel-section');
+  var colorSectionEl = colorPickerEl.closest('.panel-section');
 
   /* ============================================================
      Worker-Setup (Blob-URL)
@@ -1908,7 +3408,7 @@ self.onmessage = function (e) {
     var engineSrc = document.getElementById('engineSrc').textContent;
     workerUrl = URL.createObjectURL(new Blob([engineSrc], { type:'application/javascript' }));
   } catch (e) {
-    showToast('Engine konnte nicht initialisiert werden.');
+    showToast(T('engineInitFail'));
   }
 
   /* ============================================================
@@ -1953,7 +3453,14 @@ self.onmessage = function (e) {
 
   function isHumanTurn() {
     // FIX (Aufgeben): resigned sperrt das Brett explizit.
-    return !resigned && !game.game_over() && game.turn() === humanColor && !thinking;
+    // Batch 6: flagged (Zeitüberschreitung) + PvP (beide Seiten menschlich).
+    return !resigned && !flagged && !game.game_over() && game.turn() === (pvpMode ? game.turn() : humanColor) && !thinking;
+  }
+
+  /* Batch 6: Wer darf aktuell Figuren dieser Farbe bewegen?
+     PvE: nur die Mensch-Farbe. PvP: immer die Seite am Zug. */
+  function moveColor() {
+    return pvpMode ? game.turn() : humanColor;
   }
 
   function setInfo(data) {
@@ -2031,6 +3538,7 @@ self.onmessage = function (e) {
         if (lastMove && (sq === lastMove.from || sq === lastMove.to)) el.classList.add('last');
         if (sq === selected) el.classList.add('sel');
         if (sq === checkSquare) el.classList.add('check');
+        if (hintFrom && (sq === hintFrom || sq === hintTo)) el.classList.add('hint-move');
 
         if (ci === 0) {
           var rl = document.createElement('span');
@@ -2075,33 +3583,52 @@ self.onmessage = function (e) {
      ============================================================ */
   function updateStatus() {
     var text, cls = '';
-    if (resigned) {
+    if (game.game_over() || resigned || flagged) clockStop();   // Batch 6: Uhr anhalten
+    if (flagged) {
+      // Batch 6: Zeitüberschreitung
+      if (pvpMode) {
+        text = TF('flagPvp', T(flagged === 'w' ? 'black' : 'white'));
+        cls = 'draw';
+      } else if (flagged === humanColor) {
+        text = T('flagEngine');
+        cls = 'lose';
+      } else {
+        text = T('flagYou');
+        cls = 'win';
+      }
+    } else if (resigned) {
       // FIX (Aufgeben): Status bleibt stabil, auch wenn später updateAll() läuft.
-      text = 'Du hast aufgegeben – die Engine gewinnt.';
+      text = pvpMode ? T('resignPvp') : T('resignYou');
       cls = 'lose';
     } else if (game.game_over()) {
       if (game.in_checkmate()) {
-        if (game.turn() === humanColor) { text = 'Schachmatt – die Engine gewinnt.'; cls = 'lose'; }
-        else { text = 'Schachmatt – du gewinnst!'; cls = 'win'; }
+        if (pvpMode) {
+          text = TF('matePvp', T(game.turn() === 'w' ? 'black' : 'white'));
+          cls = 'win';
+        } else if (game.turn() === humanColor) { text = T('mateEngine'); cls = 'lose'; }
+        else { text = T('mateYou'); cls = 'win'; }
       } else if (game.in_stalemate()) {
-        text = 'Patt – Remis.'; cls = 'draw';
+        text = T('stalemate'); cls = 'draw';
       } else if (game.in_threefold_repetition()) {
-        text = 'Remis – dreifache Stellungswiederholung.'; cls = 'draw';
+        text = T('repDraw'); cls = 'draw';
       } else if (game.insufficient_material()) {
-        text = 'Remis – ungenügend Material.'; cls = 'draw';
+        text = T('materialDraw'); cls = 'draw';
       } else {
         // 50-Züge-Regel oder sonstiges Remis — chess.js game_over() deckt das ab
         var fenParts = game.fen().split(' ');
         var halfmove = parseInt(fenParts[4], 10) || 0;
-        if (halfmove >= 100) { text = 'Remis – 50-Züge-Regel.'; cls = 'draw'; }
-        else { text = 'Partie beendet.'; cls = 'draw'; }
+        if (halfmove >= 100) { text = T('fiftyDraw'); cls = 'draw'; }
+        else { text = T('over'); cls = 'draw'; }
       }
     } else if (thinking) {
-      text = 'Engine denkt nach …';
-    } else if (game.turn() === humanColor) {
-      text = game.in_check() ? 'Schach! Du bist am Zug.' : 'Du bist am Zug.';
+      text = T('thinking');
+    } else if (!pvpMode && game.turn() === humanColor) {
+      text = game.in_check() ? T('yourTurnCheck') : T('yourTurn');
     } else {
-      text = 'Engine ist am Zug.';
+      text = pvpMode
+        ? (game.in_check() ? TF('colorTurnCheck', T(game.turn() === 'w' ? 'white' : 'black'))
+                           : TF('colorTurn', T(game.turn() === 'w' ? 'white' : 'black')))
+        : T('engineTurn');
     }
     statusTextEl.textContent = text;
     statusEl.className = 'status ' + cls + (thinking ? ' thinking' : '');
@@ -2238,19 +3765,24 @@ self.onmessage = function (e) {
       lastMove = null;
       redoStack = [];
       setInfo(null);
+      // Batch 6: Tipp-Markierung + Uhr zurücksetzen
+      clearHint();
+      clockReset();
       // FIX (Zufallsfarbe): Auslosen basiert auf colorChoice; humanColor ist
       // danach IMMER 'w' oder 'b' (nie 'r').
       resolveColor();
       flipped = (humanColor === 'b');
       setActiveColorButton(colorChoice);
       updateAll();
+      // Batch 6: Uhr läuft ab Partiestart (Weiß am Zug)
+      clockStart();
       // Wenn die Engine anzieht (Mensch spielt Schwarz), Engine starten
-      if (game.turn() !== humanColor && !game.game_over()) {
+      if (!pvpMode && game.turn() !== humanColor && !game.game_over()) {
         botTurn();
       }
     };
     if (!force && game.history().length > 0 && !game.game_over() && !resigned) {
-      confirmDialog('Neue Partie', 'Die aktuelle Partie ist noch nicht beendet. Wirklich neu starten?', startNew);
+      confirmDialog(T('newGameTitle'), T('newGameConfirm'), startNew);
     } else {
       startNew();
     }
@@ -2270,7 +3802,7 @@ self.onmessage = function (e) {
     // zeigte der Button "Zufällig" an, aber Brett/Farbe änderten sich erst bei
     // der nächsten Partie (oder schlimmer: 'r' blockierte das Spiel komplett).
     var inProgress = game.history().length > 0 && !game.game_over() && !resigned;
-    var label = (c === 'r') ? 'mit zufälliger Farbe' : ('als ' + (c === 'w' ? 'Weiß' : 'Schwarz'));
+    var label = (c === 'r') ? T('randColor') : TF('asColor', T(c === 'w' ? 'white' : 'black'));
     var apply = function () {
       colorChoice = c;
       setActiveColorButton(c);
@@ -2283,10 +3815,10 @@ self.onmessage = function (e) {
         updateAll();
         if (!game.game_over() && game.turn() !== humanColor) botTurn();
       }
-      showToast('Du spielst ' + (humanColor === 'w' ? 'Weiß' : 'Schwarz') + (c === 'r' ? ' (ausgelost).' : '.'));
+      showToast(TF('youPlay' + (c === 'r' ? 'Rand' : ''), T(humanColor === 'w' ? 'white' : 'black')));
     };
     if (inProgress) {
-      confirmDialog('Farbwechsel', 'Neue Partie ' + label + ' starten? Die laufende Partie wird dabei beendet.', apply);
+      confirmDialog(T('colorSwitchTitle'), TF('colorSwitchConfirm', label), apply);
     } else {
       apply();
     }
@@ -2340,11 +3872,19 @@ self.onmessage = function (e) {
     legalTargets = [];
     redoStack = []; // neuer Zug → Redo-Historie verwerfen
     updateAll();
+    // Batch 6: Uhr (Zöger-Zeitverbuchung) + Sound
+    clockOnMove(made.color);
+    moveFeedback(made);
     if (game.game_over()) return;
     botTurn();
   }
 
   function botTurn() {
+    // Batch 6: Im PvP-Modus nie Engine anwerfen
+    if (pvpMode) return;
+    // Batch 6: laufende Tipp-Anfrage optisch zurücksetzen (späte Antworten
+    // werden über requestId verworfen)
+    hintPendingClear();
     var myGameId = gameId;
     var myRequestId = gameId + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
     // FIX (Undo/Redo-Race): erwartete Stellung merken — eine Engine-Antwort wird nur
@@ -2365,7 +3905,7 @@ self.onmessage = function (e) {
     if (!workerUrl) {
       thinking = false;
       updateStatus();
-      showToast('Engine nicht verfügbar.');
+      showToast(T('engineUnavailable'));
       return;
     }
 
@@ -2373,7 +3913,7 @@ self.onmessage = function (e) {
     if (!w) {
       thinking = false;
       updateStatus();
-      showToast('Worker konnte nicht gestartet werden.');
+      showToast(T('workerFail'));
       return;
     }
 
@@ -2402,14 +3942,14 @@ self.onmessage = function (e) {
       if (data.fatal) {
         setInfo(null);
         updateStatus();
-        showToast('Engine-Fehler: ' + data.fatal);
+        showToast(TF('engineError', data.fatal));
         // Versuche Fallback
-        if (!game.game_over() && !resigned) playFallbackMove('Engine-Fehler');
+        if (!game.game_over() && !resigned) playFallbackMove(T('reasonEngine'));
         return;
       }
       if (data.gameOver || !data.move) {
         updateStatus();
-        if (!data.move) showToast('Engine lieferte keinen Zug.');
+        if (!data.move) showToast(T('noEngineMove'));
         return;
       }
       // Legalität prüfen, bevor der Zug ausgeführt wird
@@ -2420,8 +3960,8 @@ self.onmessage = function (e) {
       });
       if (!verifyMove) {
         updateStatus();
-        showToast('Engine lieferte illegalen Zug –Fallback.');
-        if (!game.game_over() && !resigned) playFallbackMove('Illegaler Engine-Zug');
+        showToast(T('illegalEngineMove'));
+        if (!game.game_over() && !resigned) playFallbackMove(T('reasonIllegal'));
         return;
       }
       // Zug ausführen
@@ -2431,6 +3971,8 @@ self.onmessage = function (e) {
       });
       if (made) {
         lastMove = { from: made.from, to: made.to };
+        clockOnMove(made.color);   // Batch 6: Uhr-Verbuchung für den Engine-Zug
+        moveFeedback(made);
       }
       setInfo(data);
       updateAll();
@@ -2441,9 +3983,9 @@ self.onmessage = function (e) {
       cancelBot();
       updateStatus();
       if (!game.game_over() && !resigned) {
-        playFallbackMove('Worker-Absturz');
+        playFallbackMove(T('reasonWorker'));
       } else {
-        showToast('Worker-Fehler.');
+        showToast(T('workerError'));
       }
       if (err && err.preventDefault) err.preventDefault();
     };
@@ -2475,7 +4017,7 @@ self.onmessage = function (e) {
     } catch (err) {
       cancelBot();
       updateStatus();
-      if (!game.game_over() && !resigned) playFallbackMove('postMessage fehlgeschlagen');
+      if (!game.game_over() && !resigned) playFallbackMove(T('reasonPost'));
       return;
     }
     clearHardTimeout();
@@ -2485,7 +4027,7 @@ self.onmessage = function (e) {
       if (!thinking) return;             // Antwort wurde längst verarbeitet
       cancelBot();                        // Worker hängt → terminieren (TT-Verlust ok)
       updateStatus();
-      if (!game.game_over() && !resigned) playFallbackMove('Timeout');
+      if (!game.game_over() && !resigned) playFallbackMove(T('reasonTimeout'));
     }, 14000);
   }
 
@@ -2504,8 +4046,12 @@ self.onmessage = function (e) {
     var pool = captures.length > 0 ? captures : ms;
     var m = pool[Math.floor(Math.random() * pool.length)];
     var made = game.move({ from:m.from, to:m.to, promotion:m.promotion || 'q' });
-    if (made) lastMove = { from: made.from, to: made.to };
-    showToast('Ersatzzug gespielt (' + reason + ').');
+    if (made) {
+      lastMove = { from: made.from, to: made.to };
+      clockOnMove(made.color);   // Batch 6: auch Ersatzzüge verbrauchen Zeit
+      moveFeedback(made);
+    }
+    showToast(TF('fallbackMove', reason));
     updateAll();
   }
 
@@ -2530,6 +4076,8 @@ self.onmessage = function (e) {
       game.undo();
       redoStack.push(last);
       undone++;
+      // Batch 6: PvP nimmt immer nur EINEN Halbzug zurück
+      if (pvpMode) break;
       if (game.turn() === humanColor && !game.game_over()) break;
     }
 
@@ -2539,8 +4087,11 @@ self.onmessage = function (e) {
     var h = game.history({ verbose:true });
     if (h.length) { var m = h[h.length-1]; lastMove = { from:m.from, to:m.to }; }
     setInfo(null);
+    clearHint();          // Batch 6: laufenden Tipp verwerfen
+    clockUndo();          // Batch 6: Uhrzeiten der zurückgenommenen Züge wiederherstellen
     updateAll();
-    if (revived) showToast('Partie fortgesetzt – Zug zurückgenommen.');
+    if (tcBaseMs > 0 && !game.game_over() && !resigned && !flagged) clockStart();
+    if (revived) showToast(T('resumed'));
   }
 
   function redoMove() {
@@ -2549,13 +4100,18 @@ self.onmessage = function (e) {
     closePromo();
     var m = redoStack.pop();
     var made = game.move({ from:m.from, to:m.to, promotion:m.promotion || 'q' });
-    if (made) lastMove = { from: made.from, to: made.to };
+    if (made) {
+      lastMove = { from: made.from, to: made.to };
+      clockOnMove(made.color);   // Batch 6: Redo verbraucht wieder Zeit (neuer Snapshot)
+    }
     selected = null;
     legalTargets = [];
+    clearHint();
     setInfo(null);
     updateAll();
+    if (tcBaseMs > 0 && !game.game_over() && !resigned && !flagged) clockStart();
     // Falls nach Redo die Engine am Zug ist, Engine starten
-    if (!game.game_over() && game.turn() !== humanColor) {
+    if (!pvpMode && !game.game_over() && game.turn() !== humanColor) {
       botTurn();
     }
   }
@@ -2568,16 +4124,24 @@ self.onmessage = function (e) {
     var lines = [];
     var result = '*';
     // FIX (Aufgeben): Aufgabe geht als reguläres Ergebnis in den PGN-Export ein.
-    if (resigned) result = (humanColor === 'w') ? '0-1' : '1-0';
+    // Batch 6: Zeitüberschreitung ebenso.
+    if (flagged) result = (flagged === 'w') ? '0-1' : '1-0';
+    else if (resigned) result = (humanColor === 'w') ? '0-1' : '1-0';
     else if (game.in_checkmate()) result = (game.turn() === 'w') ? '0-1' : '1-0';
     else if (game.game_over()) result = '1/2-1/2';
 
+    var whiteName, blackName;
+    if (pvpMode) { whiteName = T('player1'); blackName = T('player2'); }
+    else {
+      whiteName = (humanColor === 'w') ? T('playerName') : T('engineName');
+      blackName = (humanColor === 'b' ? T('playerName') : T('engineName'));
+    }
     var header = [
-      '[Event "Schach-Web-App"]',
+      '[Event "' + T('pgnEvent') + '"]',
       '[Site "Local"]',
       '[Date "' + new Date().toISOString().slice(0,10).replace(/-/g,'.') + '"]',
-      '[White "' + (humanColor === 'w' ? 'Spieler' : 'Engine') + '"]',
-      '[Black "' + (humanColor === 'b' ? 'Spieler' : 'Engine') + '"]',
+      '[White "' + whiteName + '"]',
+      '[Black "' + blackName + '"]',
       '[Result "' + result + '"]'
     ];
     var moves = [];
@@ -2593,8 +4157,8 @@ self.onmessage = function (e) {
   }
 
   function openPgnExport() {
-    pgnTitleEl.textContent = 'Partie exportieren (PGN)';
-    pgnHintEl.textContent = 'Kopiere den PGN-Text oder schließe das Fenster.';
+    pgnTitleEl.textContent = T('pgnExportTitle');
+    pgnHintEl.textContent = T('pgnExportHint');
     pgnTextEl.value = buildPgn();
     pgnTextEl.readOnly = true;
     pgnModalEl.classList.add('show');
@@ -2603,9 +4167,9 @@ self.onmessage = function (e) {
   }
 
   function openPgnImport() {
-    if (thinking) { showToast('Bitte warte, bis die Engine fertig ist.'); return; }
-    pgnTitleEl.textContent = 'Partie laden (PGN)';
-    pgnHintEl.textContent = 'Füge hier eine Partie im PGN-Format ein und klicke „Übernehmen“.';
+    if (thinking) { showToast(T('waitEngine')); return; }
+    pgnTitleEl.textContent = T('pgnImportTitle');
+    pgnHintEl.textContent = T('pgnImportHint');
     pgnTextEl.value = '';
     pgnTextEl.readOnly = false;
     pgnModalEl.classList.add('show');
@@ -2652,11 +4216,11 @@ self.onmessage = function (e) {
 
   function applyPgnImport() {
     var text = pgnTextEl.value.trim();
-    if (!text) { showToast('Leere Eingabe.'); return; }
+    if (!text) { showToast(T('emptyInput')); return; }
     try {
       var g = importPgnText(text);
       if (!g) {
-        showToast('PGN konnte nicht gelesen werden (auch nicht ohne Header).');
+        showToast(T('pgnUnreadable'));
         return;
       }
       gameId++;
@@ -2668,18 +4232,21 @@ self.onmessage = function (e) {
       selected = null;
       legalTargets = [];
       redoStack = [];
+      clearHint();
+      clockReset();       // Batch 6: importierte Partie startet mit frischer Uhr
       var h = game.history({ verbose:true });
       lastMove = h.length ? { from:h[h.length-1].from, to:h[h.length-1].to } : null;
       // Falls die Seite am Zug ist, die nicht der Mensch ist → Engine starten
       pgnModalEl.classList.remove('show');
       setInfo(null);
       updateAll();
-      if (!game.game_over() && game.turn() !== humanColor) {
+      clockStart();       // Batch 6: Uhr läuft (außer Partie bereits vorbei)
+      if (!pvpMode && !game.game_over() && game.turn() !== humanColor) {
         botTurn();
       }
-      showToast('Partie geladen.');
+      showToast(T('pgnLoaded'));
     } catch (err) {
-      showToast('PGN-Fehler: ' + (err.message || err));
+      showToast(TF('pgnError', (err.message || err)));
     }
   }
 
@@ -2699,7 +4266,7 @@ self.onmessage = function (e) {
 
   function selectSquare(sq) {
     var piece = game.get(sq);
-    if (piece && piece.color === humanColor && isHumanTurn()) {
+    if (piece && piece.color === moveColor() && isHumanTurn()) {
       selected = sq;
       legalTargets = game.moves({ square: sq, verbose: true }).map(function(m){ return m.to; });
     } else {
@@ -2801,7 +4368,7 @@ self.onmessage = function (e) {
     var sq = squareFromPoint(pos.x, pos.y);
     if (!sq) return;
     var piece = game.get(sq);
-    var own = !!(piece && piece.color === humanColor);
+    var own = !!(piece && piece.color === moveColor());
     if (!own && !selected) return;        // nichts zu tun (leeres Feld ohne Auswahl)
     input = {
       from: sq,
@@ -2830,6 +4397,7 @@ self.onmessage = function (e) {
 
   function inputUp(pos, e) {
     if (!input || !samePointer(e, input)) return;
+    ensureAudio();   // Batch 6: Audio-Kontext beim ersten Brett-Kontakt freischalten
     var st = input;
     input = null;
     clearDragVisual(st);
@@ -2848,7 +4416,7 @@ self.onmessage = function (e) {
     // --- DRAG-ZUG ---
     if (!tryMove(st.from, toSq)) {
       var pc = game.get(toSq);
-      if (pc && pc.color === humanColor) selectSquare(toSq); // eigene Figur → neu wählen
+      if (pc && pc.color === moveColor()) selectSquare(toSq); // eigene Figur → neu wählen
       else { selected = null; legalTargets = []; render(); } // ungültig → abwählen
     }
   }
@@ -2884,7 +4452,10 @@ self.onmessage = function (e) {
   /* ============================================================
      Buttons & Steuerung
      ============================================================ */
-  document.getElementById('newGame').addEventListener('click', function(){ newGame(false); });
+  document.getElementById('newGame').addEventListener('click', function(){
+    ensureAudio();   // Audio-Kontext bei Nutzer-Geste freischalten
+    newGame(false);
+  });
   document.getElementById('undo').addEventListener('click', undoMove);
   document.getElementById('redo').addEventListener('click', redoMove);
   document.getElementById('flip').addEventListener('click', function(){
@@ -2892,8 +4463,9 @@ self.onmessage = function (e) {
     updateAll();
   });
   document.getElementById('resign').addEventListener('click', function(){
+    if (pvpMode) { showToast(T('pvpNewGame')); return; }
     if (resigned || game.game_over()) return;
-    confirmDialog('Aufgeben', 'Möchtest du wirklich aufgeben? Die Partie wird als Niederlage gewertet.', function(){
+    confirmDialog(T('resignTitle'), T('resignConfirm'), function(){
       // FIX (Aufgeben wirkungslos): resigned ist jetzt ein ECHTER Spielzustand:
       // isHumanTurn() sperrt das Brett (vorher: Klicks auf eigene Figuren
       // funktionierten einfach weiter), cancelBot() stoppt die Engine hart und
@@ -2907,13 +4479,14 @@ self.onmessage = function (e) {
       selected = null;
       legalTargets = [];
       updateAll();
+      playSound('end');   // Batch 7: kurze End-Melodie auch beim Aufgeben
     });
   });
   document.getElementById('copyPgn').addEventListener('click', function(){
     var pgn = buildPgn();
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(pgn).then(function(){
-        showToast('PGN in die Zwischenablage kopiert.');
+        showToast(T('pgnCopied'));
       }).catch(function(){
         openPgnExport();
       });
@@ -2939,7 +4512,7 @@ self.onmessage = function (e) {
   // Schwierigkeit
   levelEl.addEventListener('change', function(){
     levelIndex = parseInt(levelEl.value, 10) || 0;
-    showToast('Schwierigkeit: ' + levelEl.options[levelEl.selectedIndex].text);
+    showToast(TF('skillToast', levelEl.options[levelEl.selectedIndex].text));
   });
 
   // Farbauswahl
@@ -2949,6 +4522,472 @@ self.onmessage = function (e) {
     // FIX (Zufallsfarbe + Konsistenz): Wahl wird sofort aufgelöst — nie 'r' speichern.
     chooseColor(btn.dataset.color);
   });
+
+  /* ============================================================
+     Batch 8: Sound-Engine v2 (WebAudio-Synth, keine externen Dateien
+     -> offline). Fix "kein Sound hörbar":
+       a) FREQENZLAGE/PEGEL: Der alte Klangkörper lag bei 195 Hz — kleine
+          Laptop-/Phone-Lautsprecher geben so tiefe Frequenzen praktisch
+          nicht wieder (der Klang war da, aber hörbar fast nicht vorhanden).
+          Neu: Körper 400-560 Hz + Holz-Oberton (~2.76x) + Aufprall-Klick
+          2.1-2.6 kHz; ein Limiter erlaubt heißere Pegel ohne Clipping.
+       b) AUTOPLAY-POLICY: Der AudioContext muss nach einer Nutzer-Geste
+          laufen. Vorher wurde nur in inputUp entsperrt — spielte man
+          Schwarz, erzeugte die Engine-Antwort (Worker-Callback, KEINE
+          Geste) den Kontext im Zustand "suspended". Jetzt: globaler
+          Unlock bei pointerdown/touchend/keydown + iOS-Muster (stiller
+          Buffer) direkt nach der Kontext-Erzeugung.
+     Klang-Design weiterhin an chess.com/lichess orientiert: trockene,
+     hölzerne "Klack"-Sounds (Klick + Klangkörper + Oberton).
+     ============================================================ */
+  var masterGain = null;
+  var _noiseBuf = null;
+  function ensureAudio() {
+    if (!soundOn) return null;
+    try {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 1.0;
+        // Batch 8b: SANFTER Sicherheits-Limiter — die 12:1-Variante drückte
+        // effektive Spitzen messbar nach unten (Report-Punkt "Limiter zu
+        // aggressiv"). Jetzt: nur die obersten ~dB kappen, Transienten fast
+        // unangetastet, Gesamtwirkungspegel deutlich höher.
+        var limiter = audioCtx.createDynamicsCompressor();
+        limiter.threshold.value = -6; limiter.knee.value = 6;
+        limiter.ratio.value = 3; limiter.attack.value = 0.002;
+        limiter.release.value = 0.12;
+        masterGain.connect(limiter);
+        limiter.connect(audioCtx.destination);
+        // iOS-Unlock-Muster: ein stiller Sample direkt nach der Erzeugung
+        try {
+          var sb = audioCtx.createBuffer(1, 1, 22050);
+          var ss = audioCtx.createBufferSource();
+          ss.buffer = sb; ss.connect(audioCtx.destination); ss.start(0);
+        } catch (eSilent) {}
+      }
+      if (audioCtx.state === 'suspended') {
+        try {
+          var rp = audioCtx.resume();
+          if (rp && rp.catch) rp.catch(function(){});   // kein unhandled rejection
+        } catch (e2) {}
+      }
+    } catch (e) { audioCtx = null; masterGain = null; return null; }
+    return audioCtx;
+  }
+  // Batch 8: globaler Audio-Unlock bei der ERSTEN Nutzer-Geste — egal, wo der
+  // erste Klang später entsteht (auch wenn die Engine als Schwarzer den ersten
+  // Zug spielt, bevor der Nutzer je einen Klang ausgelöst hat). Idempotent.
+  (function(){
+    function unlock(){ ensureAudio(); }
+    document.addEventListener('pointerdown', unlock, true);
+    document.addEventListener('touchend', unlock, true);
+    document.addEventListener('keydown', unlock, true);
+    document.addEventListener('click', unlock, true);   // a11y: synthetische Klicks
+  })();
+  // iOS/Chrome frieren den Kontext im Hintergrund ein -> beim Zurückkehren
+  // sofort wieder wecken, nicht erst beim nächsten Tap.
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden) ensureAudio();
+  });
+  // Batch 8b: Diagnose-Hook für die Browser-Konsole (F12) — die Variablen im
+  // IIFE-Closure (soundOn, audioCtx, ensureAudio) sind von außen NICHT
+  // erreichbar; dieser Hook macht den Audio-Zustand dennoch prüfbar:
+  //   __schachAudio.state()  -> { soundOn, ctxState, ctxTime, master }
+  //   __schachAudio.test()   -> Sound an + Test-Klack (auch bei Stumm)
+  window.__schachAudio = {
+    state: function(){
+      return {
+        soundOn: soundOn,
+        ctxState: audioCtx ? audioCtx.state : null,
+        ctxTime: audioCtx ? audioCtx.currentTime : null,
+        master: masterGain ? masterGain.gain.value : null
+      };
+    },
+    test: function(){
+      soundOn = true;
+      try { localStorage.setItem('schach_sound', '1'); } catch (eDbg) {}
+      refreshSoundBtn();
+      playSound('move');
+      return this.state();
+    }
+  };
+  function noiseBuffer() {
+    var ctx = audioCtx;
+    if (!_noiseBuf) {
+      var len = Math.max(1, Math.floor(ctx.sampleRate * 0.15));
+      _noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+      var ch = _noiseBuf.getChannelData(0);
+      for (var i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1;
+    }
+    return _noiseBuf;
+  }
+  /* Ein hölzerner "Klack" — drei Bausteine:
+     1) Aufprall-Klick: kurzer Rausch-Burst durch Bandpass
+     2) Klangkörper: Sinus mit Pitch-Drop 1.5x -> 1x (marimba-artig)
+     3) Holz-Oberton (2.76x): macht den Klang auf kleinen Lautsprechern
+        überhaupt hörbar — genau das fehlte der v1 (nur 195 Hz).
+     Optionaler Tieftöner-Thump für Wiedergabe mit Bässen. */
+  function tok(delay, vol, bodyHz, clickHz, bodyDur, opts) {
+    var ctx = audioCtx, t0 = ctx.currentTime + (delay || 0);
+    opts = opts || {};
+    // 1) Aufprall-Klick
+    var src = ctx.createBufferSource();
+    src.buffer = noiseBuffer();
+    var bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = clickHz; bp.Q.value = 1.2;
+    var ng = ctx.createGain();
+    ng.gain.setValueAtTime(vol * (opts.clickVol || 0.85), t0);
+    ng.gain.exponentialRampToValueAtTime(0.0001, t0 + (opts.clickDur || 0.04));
+    src.connect(bp); bp.connect(ng); ng.connect(masterGain);
+    src.start(t0); src.stop(t0 + (opts.clickDur || 0.04) + 0.03);
+    // 2) Holz-Klangkörper
+    var o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(bodyHz * 1.5, t0);
+    o.frequency.exponentialRampToValueAtTime(bodyHz, t0 + 0.045);
+    var og = ctx.createGain();
+    og.gain.setValueAtTime(0.0001, t0);
+    og.gain.exponentialRampToValueAtTime(vol, t0 + 0.005);
+    og.gain.exponentialRampToValueAtTime(0.0001, t0 + bodyDur);
+    o.connect(og); og.connect(masterGain);
+    o.start(t0); o.stop(t0 + bodyDur + 0.03);
+    // 3) Holz-Oberton
+    var o2 = ctx.createOscillator();
+    o2.type = 'sine'; o2.frequency.value = bodyHz * 2.76;
+    var og2 = ctx.createGain();
+    og2.gain.setValueAtTime(0.0001, t0);
+    og2.gain.exponentialRampToValueAtTime(vol * 0.22, t0 + 0.004);
+    og2.gain.exponentialRampToValueAtTime(0.0001, t0 + bodyDur * 0.55);
+    o2.connect(og2); og2.connect(masterGain);
+    o2.start(t0); o2.stop(t0 + bodyDur * 0.55 + 0.03);
+    // 4) Tiefer Thump (nur Schlag/Ende)
+    if (opts.thumpHz) {
+      var o3 = ctx.createOscillator();
+      o3.type = 'sine';
+      o3.frequency.setValueAtTime(opts.thumpHz * 1.4, t0);
+      o3.frequency.exponentialRampToValueAtTime(opts.thumpHz, t0 + 0.06);
+      var og3 = ctx.createGain();
+      og3.gain.setValueAtTime(0.0001, t0);
+      og3.gain.exponentialRampToValueAtTime(vol * 0.4, t0 + 0.008);
+      og3.gain.exponentialRampToValueAtTime(0.0001, t0 + (opts.thumpDur || 0.12));
+      o3.connect(og3); og3.connect(masterGain);
+      o3.start(t0); o3.stop(t0 + (opts.thumpDur || 0.12) + 0.03);
+    }
+  }
+  function ting(delay, vol, hz, dur) {
+    var ctx = audioCtx, t0 = ctx.currentTime + (delay || 0);
+    var o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = hz;
+    var o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.value = hz * 2.76;
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    var g2 = ctx.createGain(); g2.gain.value = 0.22;
+    o.connect(g); o2.connect(g2); g2.connect(g); g.connect(masterGain);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+    o2.start(t0); o2.stop(t0 + dur + 0.05);
+  }
+  function endChime() {
+    // Warmes, kurzes Dreiklang-Arpeggio (ergebnisneutral) + tiefer Klack
+    var notes = [523.25, 659.26, 783.99];
+    for (var i = 0; i < notes.length; i++) {
+      var ctx = audioCtx, t0 = ctx.currentTime + i * 0.09;
+      var o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = notes[i];
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.14, t0 + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.55);
+      o.connect(g); g.connect(masterGain);
+      o.start(t0); o.stop(t0 + 0.6);
+    }
+    tok(0, 0.45, 300, 1500, 0.12, { thumpHz: 130, thumpDur: 0.16 });
+  }
+  function playSound(kind) {
+    if (!soundOn) return;
+    if (!ensureAudio()) return;
+    try {
+      if (kind === 'move') { tok(0, 0.6, 540, 2600, 0.12); }
+      else if (kind === 'capture') {
+        tok(0, 0.72, 400, 2100, 0.17, { clickVol: 1.0, thumpHz: 165, thumpDur: 0.14 });
+        tok(0.03, 0.24, 300, 1200, 0.06);
+      }
+      else if (kind === 'castle') { tok(0, 0.6, 540, 2600, 0.12); tok(0.09, 0.55, 470, 2300, 0.12); }
+      else if (kind === 'check') { tok(0, 0.6, 520, 2500, 0.13); ting(0.05, 0.2, 1568, 0.3); }
+      else if (kind === 'promote') {
+        tok(0, 0.58, 560, 2600, 0.1);
+        ting(0.06, 0.16, 1568, 0.24); ting(0.17, 0.12, 2093, 0.22);
+      }
+      else if (kind === 'end') { endChime(); }
+    } catch (e) { /* Audio-Randfälle niemals zum Spielabbruch werden lassen */ }
+  }
+  function moveFeedback(made) {
+    if (!made) return;
+    if (game.game_over()) { playSound('end'); return; }
+    var f = made.flags || '';
+    if (f.indexOf('k') >= 0 || f.indexOf('q') >= 0) { playSound('castle'); return; }  // Rochade: zwei Klacks
+    if (game.in_check()) { playSound('check'); return; }
+    if (made.promotion) { playSound('promote'); return; }
+    if (made.captured) { playSound('capture'); return; }
+    playSound('move');
+  }
+
+  /* ============================================================
+     Batch 6: Schachuhr
+     ============================================================ */
+  function fmtClock(ms) {
+    if (ms < 0) ms = 0;
+    if (ms < 20000) return (ms / 1000).toFixed(1);
+    var s = Math.floor(ms / 1000);
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return m + ':' + (r < 10 ? '0' : '') + r;
+  }
+  function updateClockUI() {
+    if (tcBaseMs === 0) return;
+    clockTimeWEl.textContent = fmtClock(clockW);
+    clockTimeBEl.textContent = fmtClock(clockB);
+    var t = game.turn();
+    clockWEl.classList.toggle('active', clockActive && t === 'w');
+    clockBEl.classList.toggle('active', clockActive && t === 'b');
+    clockWEl.classList.toggle('low', clockW < 20000);
+    clockBEl.classList.toggle('low', clockB < 20000);
+  }
+  function clockTick() {
+    if (!clockActive || tcBaseMs === 0) return;
+    var nowMs = performance.now();
+    var dt = nowMs - clockLastTick;
+    clockLastTick = nowMs;
+    var t = game.turn();
+    if (t === 'w') clockW -= dt; else clockB -= dt;
+    if (clockW <= 0 || clockB <= 0) {
+      if (clockW <= 0) { clockW = 0; flagged = 'w'; } else { clockB = 0; flagged = 'b'; }
+      clockActive = false;
+      onFlag();
+    }
+    updateClockUI();
+  }
+  function clockStart() {
+    if (tcBaseMs === 0 || game.game_over() || resigned || flagged) return;
+    clockActive = true;
+    clockLastTick = performance.now();
+    updateClockUI();
+  }
+  function clockStop() {
+    if (!clockActive) return;
+    clockActive = false;
+    updateClockUI();
+  }
+  function clockReset() {
+    clockW = tcBaseMs; clockB = tcBaseMs;
+    clockHistory = [];
+    flagged = null;
+    clockActive = false;
+    updateClockUI();
+  }
+  function clockOnMove(moverColor) {
+    if (tcBaseMs === 0) return;
+    clockHistory.push({ w: clockW, b: clockB });
+    if (moverColor === 'w') clockW += tcIncMs; else clockB += tcIncMs;
+    clockLastTick = performance.now();
+    updateClockUI();
+  }
+  function clockUndo() {
+    if (tcBaseMs === 0) return;
+    var snap = clockHistory.pop();
+    if (snap) { clockW = snap.w; clockB = snap.b; }
+    flagged = null;
+    updateClockUI();
+  }
+  function onFlag() {
+    gameId++;
+    cancelBot();
+    closePromo();
+    thinking = false;
+    selected = null;
+    legalTargets = [];
+    clearHint();
+    updateAll();
+    playSound('end');
+    showToast(flagged === 'w' ? T('whiteNoTime') : T('blackNoTime'));
+  }
+
+  /* ============================================================
+     Batch 6: Tipp (Engine antwortet mit hint statt Zug)
+     ============================================================ */
+  function clearHint() {
+    hintFrom = null; hintTo = null;
+    if (hintTimer) { clearTimeout(hintTimer); hintTimer = null; }
+  }
+  function hintPendingClear() {
+    hintBtn.disabled = false;
+  }
+  function buildPosKeys() {
+    // Stellungshistorie für Wiederholungserkennung (per Replay, zustandslos)
+    var posKeys = [];
+    try {
+      var tmpGame = new Chess();
+      function pk(f) { var p = f.split(' '); return p[0] + ' ' + p[1] + ' ' + p[2] + ' ' + p[3]; }
+      posKeys.push(pk(tmpGame.fen()));
+      var histSans = game.history();
+      for (var hi = 0; hi < histSans.length; hi++) {
+        tmpGame.move(histSans[hi]);
+        posKeys.push(pk(tmpGame.fen()));
+      }
+    } catch (eHist) { return []; }
+    return posKeys;
+  }
+  hintBtn.addEventListener('click', function(){
+    if (game.game_over() || resigned || flagged || thinking) {
+      showToast(T('noHintNow'));
+      return;
+    }
+    if (!workerUrl) return;
+    var w = getWorker();
+    if (!w) return;
+    var myGameId = gameId;
+    var myReq = gameId + '_hint_' + Date.now();
+    hintBtn.disabled = true;
+    var prevHandler = w.onmessage;
+    w.onmessage = function(e) {
+      var d = e.data || {};
+      if (myGameId !== gameId || d.requestId !== myReq) return; // veraltet/überholt
+      w.onmessage = prevHandler;
+      hintBtn.disabled = false;
+      if (d.hint && d.hint.from) {
+        hintFrom = d.hint.from; hintTo = d.hint.to;
+        render();
+        if (hintTimer) clearTimeout(hintTimer);
+        hintTimer = setTimeout(function(){ hintFrom = null; hintTo = null; render(); }, 3000);
+        setInfo({ depth: d.depth, nodes: 0, elapsed: d.elapsed, score: pvpMode ? null : d.score });
+      } else {
+        showToast(T('noHint'));
+      }
+    };
+    try {
+      w.postMessage({ fen: game.fen(), level: 4, requestId: myReq, histKeys: buildPosKeys(), hint: true });
+    } catch (err) {
+      w.onmessage = prevHandler;
+      hintBtn.disabled = false;
+      showToast(T('hintFail'));
+    }
+  });
+
+  /* ============================================================
+     Batch 6: Modus (PvE / PvP), Uhr-Auswahl, Darstellung
+     ============================================================ */
+  function applyModeUI() {
+    levelSectionEl.classList.toggle('disabled', pvpMode);
+    colorSectionEl.classList.toggle('disabled', pvpMode);
+    resignBtn.disabled = pvpMode;
+  }
+  modeEl.addEventListener('change', function(){
+    var wantPvP = modeEl.value === 'pvp';
+    if (wantPvP === pvpMode) return;
+    var inProgress = game.history().length > 0 && !game.game_over() && !resigned && !flagged;
+    var apply = function () {
+      pvpMode = wantPvP;
+      applyModeUI();
+      newGame(true);
+      showToast(pvpMode ? T('modePvpToast') : T('modePveToast'));
+    };
+    if (inProgress) {
+      confirmDialog(T('modeSwitchTitle'), T('modeSwitchConfirm'), apply);
+    } else {
+      apply();
+    }
+  });
+  tcSelectEl.addEventListener('change', function(){
+    var parts = tcSelectEl.value.split('|');
+    var base = parseInt(parts[0], 10) || 0;
+    var inc = parseInt(parts[1], 10) || 0;
+    var inProgress = game.history().length > 0 && !game.game_over() && !resigned && !flagged;
+    var apply = function () {
+      tcBaseMs = base; tcIncMs = inc;
+      try { localStorage.setItem('schach_tc', tcSelectEl.value); } catch (e) {}
+      clockBarEl.hidden = tcBaseMs === 0;
+      newGame(true);
+      showToast(tcBaseMs ? TF('clockToast', tcSelectEl.options[tcSelectEl.selectedIndex].text)
+                         : T('clockOffToast'));
+    };
+    if (inProgress) {
+      confirmDialog(T('clockChangeTitle'), T('clockChangeConfirm'), apply);
+    } else {
+      apply();
+    }
+  });
+  soundBtn.addEventListener('click', function(){
+    soundOn = !soundOn;
+    try { localStorage.setItem('schach_sound', soundOn ? '1' : '0'); } catch (e) {}
+    refreshSoundBtn();
+    if (soundOn) {
+      // Batch 8b: Bestätigungsklang GARANTIERT hören — läuft der Kontext noch
+      // nicht (resume pending), erst nach dem resume() spielen. Ereignisse im
+      // suspended-Kontext gehen zwar nicht verloren, aber so erklingt die
+      // Bestätigung sofort und nicht beim nächsten Resume-Batch.
+      var actx = ensureAudio();
+      if (actx && actx.state === 'suspended' && actx.resume) {
+        try {
+          actx.resume().then(function(){ playSound('promote'); },
+                             function(){ playSound('promote'); });
+        } catch (eR) { playSound('promote'); }
+      } else {
+        playSound('promote');
+      }
+    }
+    showToast(soundOn ? T('soundOnToast') : T('soundOffToast'));
+  });
+  // FIX (Theme-Bug): Das Theme wird JETZT immer direkt aus den Select-Werten
+  // angewandt — NICHT mehr durch erneutes Lesen aus localStorage. Vorher wurde
+  // bei gesperrtem Speicher (privater Modus, blockiertes file://-Storage) die
+  // Auswahl beim Anwenden sofort wieder verworfen: Man wählt "Hell", das Theme
+  // springt zurück auf "Dunkel" ("Hell wird nicht angewandt"). Speichern passiert
+  // nur noch best-effort; die Sitzung funktioniert auch ohne Storage korrekt.
+  function applyTheme(persist) {
+    var t = themeSelectEl.value, b = boardSelectEl.value;
+    if (t !== 'light' && t !== 'dark') t = 'dark';
+    if (['walnut','green','blue'].indexOf(b) < 0) b = 'walnut';
+    document.body.classList.toggle('theme-light', t === 'light');
+    document.body.classList.remove('board-walnut', 'board-green', 'board-blue');
+    document.body.classList.add('board-' + b);
+    themeSelectEl.value = t;
+    boardSelectEl.value = b;
+    if (persist) {
+      try {
+        localStorage.setItem('schach_theme', t);
+        localStorage.setItem('schach_board', b);
+      } catch (e) {}
+    }
+  }
+  function loadThemePrefs() {
+    var t = 'dark', b = 'walnut';
+    try {
+      t = localStorage.getItem('schach_theme') || 'dark';
+      b = localStorage.getItem('schach_board') || 'walnut';
+    } catch (e) {}
+    themeSelectEl.value = (t === 'light') ? 'light' : 'dark';
+    boardSelectEl.value = (['walnut','green','blue'].indexOf(b) >= 0) ? b : 'walnut';
+  }
+  themeSelectEl.addEventListener('change', function(){ applyTheme(true); });
+  boardSelectEl.addEventListener('change', function(){ applyTheme(true); });
+
+  // Batch 7: Sound-Button-Label (zustandsabhängig, daher nicht via data-i18n)
+  function refreshSoundBtn() {
+    soundBtn.textContent = soundOn ? T('soundOnLbl') : T('soundOffLbl');
+  }
+
+  // Batch 7: Sprachauswahl (Deutsch/English)
+  langSelectEl.addEventListener('change', function(){
+    lang = (langSelectEl.value === 'en') ? 'en' : 'de';
+    try { localStorage.setItem('schach_lang', lang); } catch (e) {}
+    applyI18n();
+    refreshSoundBtn();
+    updateStatus();   // Statuszeile sofort in der neuen Sprache
+    showToast(T('langSetToast'));
+  });
+
+  // Uhr-Tick (ein Interval für die Laufzeit der App)
+  setInterval(clockTick, 100);
 
   // Tastatur
   document.addEventListener('keydown', function(e){
@@ -2982,10 +5021,30 @@ self.onmessage = function (e) {
   humanColor = 'w';
   setActiveColorButton('w');
   game = new Chess();
+
+  // Batch 6/7: gespeicherte Einstellungen (Sound, Uhr, Theme, Sprache)
+  try { soundOn = localStorage.getItem('schach_sound') !== '0'; } catch (e) {}
+  refreshSoundBtn();
+  try {
+    var tcSaved = localStorage.getItem('schach_tc');
+    if (tcSaved && tcSelectEl.querySelector('option[value="' + tcSaved + '"]')) {
+      tcSelectEl.value = tcSaved;
+      var tcParts = tcSaved.split('|');
+      tcBaseMs = parseInt(tcParts[0], 10) || 0;
+      tcIncMs = parseInt(tcParts[1], 10) || 0;
+    }
+  } catch (e) {}
+  clockBarEl.hidden = tcBaseMs === 0;
+  clockReset();
+  // Batch 7: Sprache + Theme in gespeicherter Auswahl anwenden (best-effort persistiert)
+  applyI18n();
+  langSelectEl.value = lang;
+  loadThemePrefs();
+  applyTheme(false);
+  applyModeUI();
   updateAll();
 
 })();
 </script>
 </body>
 </html>
-
